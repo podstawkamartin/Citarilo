@@ -1,0 +1,2013 @@
+{
+  "schema_version": 1,
+  "kind": "probes",
+  "created_at": "2026-11-06T23:29:35.657456Z",
+  "git": {
+    "commit": "fd02ee0f68a01db1befc037fdc2650e704587449",
+    "dirty": false
+  },
+  "corpus_hash": "76897e92621b174f54fb24e8d52235933d1c91e815b22a3c730789f6144e3241",
+  "prompt_version": "3",
+  "config": {
+    "generation_model": "gpt-6-luna",
+    "verification_model": "gpt-6-luna",
+    "embedding_model": "text-embedding-3-large",
+    "generation_reasoning_effort": "none",
+    "verification_reasoning_effort": "low",
+    "top_k": 5,
+    "call_timeout_seconds": 30.0,
+    "max_output_tokens": 2048,
+    "budget_cap_usd": "3.0",
+    "price_table_version": "2026-11-06"
+  },
+  "mode": "live",
+  "group_id": "probes-7aa89edcec814b1cbd28be8e79f46bb7",
+  "max_usd": "0.05",
+  "complete": true,
+  "error": null,
+  "metrics": {
+    "false_accepts": 0,
+    "false_rejects": 0,
+    "exact_verdict_accuracy": 0.9166666666666666,
+    "latency_p50_ms": 1577.2233085008338,
+    "latency_max_ms": 6804.7240280011465,
+    "input_tokens": 15382,
+    "output_tokens": 1470,
+    "total_tokens": 16852,
+    "cost_usd": "0.00227320"
+  },
+  "cost_usd": "0.002285",
+  "cases": [
+    {
+      "probe": {
+        "id": "shipping-price-destination-supported",
+        "claim": "Standard-parcel delivery to an address costs CZK 79, while collection-point delivery costs CZK 59.",
+        "cited_sentence_ids": [
+          "shipping.standard-prices.1",
+          "shipping.standard-prices.2"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "shipping-price-destination",
+        "note": "Both amounts occur in the citations; the near-miss swaps their destinations."
+      },
+      "run_id": "5e0a19fc41624e0eab3f88b2800458e8",
+      "claim": {
+        "text": "Standard-parcel delivery to an address costs CZK 79, while collection-point delivery costs CZK 59.",
+        "citations": [
+          "shipping.standard-prices.1",
+          "shipping.standard-prices.2"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "shipping.standard-prices",
+          "doc_id": "shipping",
+          "doc_title": "Doprava a doručení zakoupeného zboží",
+          "heading": "Ceny běžných zásilek",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "shipping.standard-prices.1",
+              "text": "Doručení běžné zásilky na adresu stojí 79 Kč.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.2",
+              "text": "Doručení běžné zásilky na výdejní místo stojí 59 Kč.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.3",
+              "text": "U objednávky s hodnotou zboží alespoň 1 299 Kč po všech slevách je doprava běžné zásilky zdarma.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.4",
+              "text": "Hranice pro bezplatnou dopravu se posuzuje bez případného poplatku za dobírku.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentences state that standard-parcel delivery costs CZK 79 to an address and CZK 59 to a collection point."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 621,
+          "output_tokens": 55,
+          "cost_usd": "0.00008960",
+          "reservation_id": "f88788a611c845e0a59dc44663307649",
+          "duration_ms": 6795.78225700061
+        }
+      ],
+      "latency_ms": 6804.7240280011465,
+      "cost_usd": "0.00008960",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "shipping-price-destination-near-miss",
+        "claim": "Standard-parcel delivery to an address costs CZK 59, while collection-point delivery costs CZK 79.",
+        "cited_sentence_ids": [
+          "shipping.standard-prices.1",
+          "shipping.standard-prices.2"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "shipping-price-destination",
+        "note": "Both amounts occur in the citations; the near-miss swaps their destinations."
+      },
+      "run_id": "c288949ac9834b498d98fb66ea683932",
+      "claim": {
+        "text": "Standard-parcel delivery to an address costs CZK 59, while collection-point delivery costs CZK 79.",
+        "citations": [
+          "shipping.standard-prices.1",
+          "shipping.standard-prices.2"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "shipping.standard-prices",
+          "doc_id": "shipping",
+          "doc_title": "Doprava a doručení zakoupeného zboží",
+          "heading": "Ceny běžných zásilek",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "shipping.standard-prices.1",
+              "text": "Doručení běžné zásilky na adresu stojí 79 Kč.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.2",
+              "text": "Doručení běžné zásilky na výdejní místo stojí 59 Kč.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.3",
+              "text": "U objednávky s hodnotou zboží alespoň 1 299 Kč po všech slevách je doprava běžné zásilky zdarma.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            },
+            {
+              "sentence_id": "shipping.standard-prices.4",
+              "text": "Hranice pro bezplatnou dopravu se posuzuje bez případného poplatku za dobírku.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Ceny běžných zásilek"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentences state that address delivery costs CZK 79 and collection-point delivery costs CZK 59—the claim reverses the prices."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 621,
+          "output_tokens": 58,
+          "cost_usd": "0.00009110",
+          "reservation_id": "2f0be8cf97b04f32b28934fc4e6c88bb",
+          "duration_ms": 1631.678407000436
+        }
+      ],
+      "latency_ms": 1639.4766560006246,
+      "cost_usd": "0.00009110",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "shipping-price-effective-date-supported",
+        "claim": "The purchased-goods shipping price list takes effect on 1 March 2026.",
+        "cited_sentence_ids": [
+          "shipping.delivery-area.4"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "shipping-price-effective-date",
+        "note": "Czech day-month order must be translated correctly; the date components are swapped."
+      },
+      "run_id": "06ab923916c24a22ba348f1061a7ce69",
+      "claim": {
+        "text": "The purchased-goods shipping price list takes effect on 1 March 2026.",
+        "citations": [
+          "shipping.delivery-area.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "shipping.delivery-area",
+          "doc_id": "shipping",
+          "doc_title": "Doprava a doručení zakoupeného zboží",
+          "heading": "Oblast doručení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "shipping.delivery-area.1",
+              "text": "Zakoupené zboží doručujeme pouze na adresy a výdejní místa v České republice.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.2",
+              "text": "Objednávky zboží do zahraničí nepřijímáme.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.3",
+              "text": "Vybavení z půjčovny se neposílá a přebírá se osobně v půjčovně.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.4",
+              "text": "Ceník dopravy zakoupeného zboží v tomto dokumentu platí od 1. 3. 2026.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that the shipping price list for purchased goods in this document is valid from 1 March 2026."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 591,
+          "output_tokens": 53,
+          "cost_usd": "0.00008560",
+          "reservation_id": "522fe2fd6c644e5f98f4afbb61729973",
+          "duration_ms": 1336.138201000722
+        }
+      ],
+      "latency_ms": 1343.5008020005625,
+      "cost_usd": "0.00008560",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "shipping-price-effective-date-near-miss",
+        "claim": "The purchased-goods shipping price list takes effect on 3 January 2026.",
+        "cited_sentence_ids": [
+          "shipping.delivery-area.4"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "shipping-price-effective-date",
+        "note": "Czech day-month order must be translated correctly; the date components are swapped."
+      },
+      "run_id": "bf611ad26bbb4350b5ae8e088beaabde",
+      "claim": {
+        "text": "The purchased-goods shipping price list takes effect on 3 January 2026.",
+        "citations": [
+          "shipping.delivery-area.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "shipping.delivery-area",
+          "doc_id": "shipping",
+          "doc_title": "Doprava a doručení zakoupeného zboží",
+          "heading": "Oblast doručení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "shipping.delivery-area.1",
+              "text": "Zakoupené zboží doručujeme pouze na adresy a výdejní místa v České republice.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.2",
+              "text": "Objednávky zboží do zahraničí nepřijímáme.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.3",
+              "text": "Vybavení z půjčovny se neposílá a přebírá se osobně v půjčovně.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            },
+            {
+              "sentence_id": "shipping.delivery-area.4",
+              "text": "Ceník dopravy zakoupeného zboží v tomto dokumentu platí od 1. 3. 2026.",
+              "doc_id": "shipping",
+              "doc_title": "Doprava a doručení zakoupeného zboží",
+              "heading": "Oblast doručení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence states that the price list takes effect on 1 March 2026, not 3 January 2026."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 591,
+          "output_tokens": 56,
+          "cost_usd": "0.00008710",
+          "reservation_id": "1cbb6526a634463faebe216b76262ccc",
+          "duration_ms": 1498.819710999669
+        }
+      ],
+      "latency_ms": 1507.318611998926,
+      "cost_usd": "0.00008710",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "clearance-versus-regular-supported",
+        "claim": "Goods labelled Clearance at purchase have a 14-calendar-day return window from receipt.",
+        "cited_sentence_ids": [
+          "returns.return-window.1",
+          "returns.return-window.2"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "clearance-versus-regular",
+        "note": "The regular-price window must not be transferred to Clearance goods."
+      },
+      "run_id": "f18f12fb8898465ea2fd581be3991890",
+      "claim": {
+        "text": "Goods labelled Clearance at purchase have a 14-calendar-day return window from receipt.",
+        "citations": [
+          "returns.return-window.1",
+          "returns.return-window.2"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "returns.return-window",
+          "doc_id": "returns",
+          "doc_title": "Vrácení zakoupeného zboží",
+          "heading": "Lhůty pro vrácení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "returns.return-window.1",
+              "text": "Nepoužité zboží zakoupené za běžnou cenu lze vrátit do 30 kalendářních dnů od převzetí.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.2",
+              "text": "U zboží označeného při nákupu štítkem Výprodej je lhůta pro vrácení pouze 14 kalendářních dnů od převzetí.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.3",
+              "text": "Prvním dnem obou lhůt pro vrácení je den následující po převzetí zásilky.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.4",
+              "text": "Oznámení o vrácení musí být odesláno nejpozději poslední den příslušné lhůty a zboží musí být podáno k přepravě do dalších sedmi kalendářních dnů.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that goods labelled Výprodej at purchase have a 14-calendar-day return period from receipt; “Clearance” conveys that label."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 698,
+          "output_tokens": 59,
+          "cost_usd": "0.00009930",
+          "reservation_id": "44f104fd7b7d445dac880b5f24585c5d",
+          "duration_ms": 2073.928652998802
+        }
+      ],
+      "latency_ms": 2081.3558859990735,
+      "cost_usd": "0.00009930",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "clearance-versus-regular-near-miss",
+        "claim": "Goods labelled Clearance at purchase have a 30-calendar-day return window from receipt.",
+        "cited_sentence_ids": [
+          "returns.return-window.1",
+          "returns.return-window.2"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "clearance-versus-regular",
+        "note": "The regular-price window must not be transferred to Clearance goods."
+      },
+      "run_id": "ee66ab1b3c014800b0b97b28aa944df0",
+      "claim": {
+        "text": "Goods labelled Clearance at purchase have a 30-calendar-day return window from receipt.",
+        "citations": [
+          "returns.return-window.1",
+          "returns.return-window.2"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "returns.return-window",
+          "doc_id": "returns",
+          "doc_title": "Vrácení zakoupeného zboží",
+          "heading": "Lhůty pro vrácení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "returns.return-window.1",
+              "text": "Nepoužité zboží zakoupené za běžnou cenu lze vrátit do 30 kalendářních dnů od převzetí.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.2",
+              "text": "U zboží označeného při nákupu štítkem Výprodej je lhůta pro vrácení pouze 14 kalendářních dnů od převzetí.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.3",
+              "text": "Prvním dnem obou lhůt pro vrácení je den následující po převzetí zásilky.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            },
+            {
+              "sentence_id": "returns.return-window.4",
+              "text": "Oznámení o vrácení musí být odesláno nejpozději poslední den příslušné lhůty a zboží musí být podáno k přepravě do dalších sedmi kalendářních dnů.",
+              "doc_id": "returns",
+              "doc_title": "Vrácení zakoupeného zboží",
+              "heading": "Lhůty pro vrácení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited evidence says goods labelled Výprodej at purchase have a 14-calendar-day return window from receipt, not 30 days."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 698,
+          "output_tokens": 57,
+          "cost_usd": "0.00009830",
+          "reservation_id": "950c90aa67ee497f9d1b3bce57a7f873",
+          "duration_ms": 1545.6421309991129
+        }
+      ],
+      "latency_ms": 1553.3144940000057,
+      "cost_usd": "0.00009830",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "packing-address-exception-supported",
+        "claim": "A delivery-address change can be requested within 30 minutes of order creation only if packing has not started.",
+        "cited_sentence_ids": [
+          "orders.order-changes.1",
+          "orders.order-changes.3"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "packing-address-exception",
+        "note": "The same 30-minute value does not override the explicit packing exception."
+      },
+      "run_id": "ca13e7900d774df6b0e59f504144b67a",
+      "claim": {
+        "text": "A delivery-address change can be requested within 30 minutes of order creation only if packing has not started.",
+        "citations": [
+          "orders.order-changes.1",
+          "orders.order-changes.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "orders.order-changes",
+          "doc_id": "orders",
+          "doc_title": "Objednávky, změny a storno",
+          "heading": "Změny před balením",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "orders.order-changes.1",
+              "text": "O změnu doručovací adresy lze požádat do 30 minut od vytvoření objednávky, pokud ještě nezačalo balení.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.2",
+              "text": "Požadavek na změnu adresy se posílá na objednavky@trailsupply.example s číslem objednávky.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.3",
+              "text": "Po zahájení balení nelze doručovací adresu změnit ani v prvních 30 minutách od vytvoření objednávky.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.4",
+              "text": "Přidávání položek do odeslané objednávky ani změnu platební metody neprovádíme.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited evidence says an address change may be requested within 30 minutes if packing has not started, and cannot be changed after packing starts—even within the first 30 minutes."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 662,
+          "output_tokens": 63,
+          "cost_usd": "0.00009770",
+          "reservation_id": "0e0103af34614008ad20c21d2e0a7aa6",
+          "duration_ms": 1776.135924999835
+        }
+      ],
+      "latency_ms": 1784.0595679990656,
+      "cost_usd": "0.00009770",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "packing-address-exception-near-miss",
+        "claim": "A delivery-address change can be requested within 30 minutes of order creation even if packing has started.",
+        "cited_sentence_ids": [
+          "orders.order-changes.1",
+          "orders.order-changes.3"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "packing-address-exception",
+        "note": "The same 30-minute value does not override the explicit packing exception."
+      },
+      "run_id": "eea17c9e322c43df968fea1d32560e62",
+      "claim": {
+        "text": "A delivery-address change can be requested within 30 minutes of order creation even if packing has started.",
+        "citations": [
+          "orders.order-changes.1",
+          "orders.order-changes.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "orders.order-changes",
+          "doc_id": "orders",
+          "doc_title": "Objednávky, změny a storno",
+          "heading": "Změny před balením",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "orders.order-changes.1",
+              "text": "O změnu doručovací adresy lze požádat do 30 minut od vytvoření objednávky, pokud ještě nezačalo balení.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.2",
+              "text": "Požadavek na změnu adresy se posílá na objednavky@trailsupply.example s číslem objednávky.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.3",
+              "text": "Po zahájení balení nelze doručovací adresu změnit ani v prvních 30 minutách od vytvoření objednávky.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            },
+            {
+              "sentence_id": "orders.order-changes.4",
+              "text": "Přidávání položek do odeslané objednávky ani změnu platební metody neprovádíme.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Změny před balením"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited evidence says an address change can be requested within 30 minutes only if packing has not started, and explicitly rules out changing it after packing begins—even within those 30 minutes."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 661,
+          "output_tokens": 67,
+          "cost_usd": "0.00009960",
+          "reservation_id": "785e494524824a2588123ae79be5e24f",
+          "duration_ms": 1479.8157469995203
+        }
+      ],
+      "latency_ms": 1487.5023269996746,
+      "cost_usd": "0.00009960",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "purchase-warranty-scope-supported",
+        "claim": "New purchased equipment has a contractual warranty lasting 24 months from receipt.",
+        "cited_sentence_ids": [
+          "warranty.coverage.1",
+          "warranty.coverage.4"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "purchase-warranty-scope",
+        "note": "The 24-month purchased-equipment warranty expressly excludes rental-only equipment."
+      },
+      "run_id": "fc8d60a931f44856bccd7e0e49eaafab",
+      "claim": {
+        "text": "New purchased equipment has a contractual warranty lasting 24 months from receipt.",
+        "citations": [
+          "warranty.coverage.1",
+          "warranty.coverage.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "warranty.coverage",
+          "doc_id": "warranty",
+          "doc_title": "Reklamace a záruka na zakoupené vybavení",
+          "heading": "Rozsah záruky",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "warranty.coverage.1",
+              "text": "Na nové zakoupené vybavení poskytuje TrailSupply smluvní záruku v délce 24 měsíců od převzetí.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.2",
+              "text": "Na použité vybavení prodané se štítkem Bazar poskytuje TrailSupply smluvní záruku v délce 12 měsíců od převzetí.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.3",
+              "text": "Sleva se štítkem Výprodej sama o sobě nezkracuje záruku na nové vybavení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.4",
+              "text": "Záruka na zakoupené vybavení se nevztahuje na vybavení pouze vypůjčené z půjčovny.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that newly purchased equipment has a 24-month contractual warranty from receipt."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 659,
+          "output_tokens": 46,
+          "cost_usd": "0.00008890",
+          "reservation_id": "0376312fd1324d51a4bc4f806461e7d5",
+          "duration_ms": 1440.0627270006225
+        }
+      ],
+      "latency_ms": 1450.1091570000426,
+      "cost_usd": "0.00008890",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "purchase-warranty-scope-near-miss",
+        "claim": "Equipment only rented from the rental service has a contractual warranty lasting 24 months from receipt.",
+        "cited_sentence_ids": [
+          "warranty.coverage.1",
+          "warranty.coverage.4"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "purchase-warranty-scope",
+        "note": "The 24-month purchased-equipment warranty expressly excludes rental-only equipment."
+      },
+      "run_id": "49e92d38b1054013aacc061c6f70dd29",
+      "claim": {
+        "text": "Equipment only rented from the rental service has a contractual warranty lasting 24 months from receipt.",
+        "citations": [
+          "warranty.coverage.1",
+          "warranty.coverage.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "warranty.coverage",
+          "doc_id": "warranty",
+          "doc_title": "Reklamace a záruka na zakoupené vybavení",
+          "heading": "Rozsah záruky",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "warranty.coverage.1",
+              "text": "Na nové zakoupené vybavení poskytuje TrailSupply smluvní záruku v délce 24 měsíců od převzetí.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.2",
+              "text": "Na použité vybavení prodané se štítkem Bazar poskytuje TrailSupply smluvní záruku v délce 12 měsíců od převzetí.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.3",
+              "text": "Sleva se štítkem Výprodej sama o sobě nezkracuje záruku na nové vybavení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            },
+            {
+              "sentence_id": "warranty.coverage.4",
+              "text": "Záruka na zakoupené vybavení se nevztahuje na vybavení pouze vypůjčené z půjčovny.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Rozsah záruky"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited evidence states that the 24-month warranty applies to newly purchased equipment and that the warranty on purchased equipment does not cover equipment only rented from the rental service."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 663,
+          "output_tokens": 63,
+          "cost_usd": "0.00009780",
+          "reservation_id": "3934a75dc4de4714a78cf9a728103e9b",
+          "duration_ms": 1677.4080340001092
+        }
+      ],
+      "latency_ms": 1684.9765019996994,
+      "cost_usd": "0.00009780",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "rental-discount-scope-supported",
+        "claim": "A rental lasting at least seven calendar days receives a 10% discount on the rental fee for the whole rental.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-prices.4"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "rental-discount-scope",
+        "note": "The duration threshold changes eligibility, not which days receive the discount."
+      },
+      "run_id": "492d0c8155e24bdda8dad6f97acc9891",
+      "claim": {
+        "text": "A rental lasting at least seven calendar days receives a 10% discount on the rental fee for the whole rental.",
+        "citations": [
+          "gear-rental.rental-prices.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-prices",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Ceník půjčovného",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-prices.1",
+              "text": "Ceník půjčovného v tomto dokumentu platí od 1. 3. 2026.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.2",
+              "text": "Zapůjčení dvoumístného stanu stojí 240 Kč za kalendářní den.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.3",
+              "text": "Zapůjčení batohu o objemu 60 litrů stojí 120 Kč za kalendářní den.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.4",
+              "text": "Pro výpůjčku v délce alespoň sedmi kalendářních dnů poskytujeme slevu 10 % z půjčovného za celou výpůjčku.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that rentals lasting at least seven calendar days receive a 10% discount on the rental fee for the entire rental."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 638,
+          "output_tokens": 55,
+          "cost_usd": "0.00009130",
+          "reservation_id": "47abe56e9b38421d8eb5729e50ebec5a",
+          "duration_ms": 1636.794212001405
+        }
+      ],
+      "latency_ms": 1645.1892179993592,
+      "cost_usd": "0.00009130",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "rental-discount-scope-near-miss",
+        "claim": "A rental lasting at least seven calendar days receives a 10% discount only on days after the seventh day.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-prices.4"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "rental-discount-scope",
+        "note": "The duration threshold changes eligibility, not which days receive the discount."
+      },
+      "run_id": "abc7ed19ba6840be8d49ef9f85665d21",
+      "claim": {
+        "text": "A rental lasting at least seven calendar days receives a 10% discount only on days after the seventh day.",
+        "citations": [
+          "gear-rental.rental-prices.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-prices",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Ceník půjčovného",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-prices.1",
+              "text": "Ceník půjčovného v tomto dokumentu platí od 1. 3. 2026.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.2",
+              "text": "Zapůjčení dvoumístného stanu stojí 240 Kč za kalendářní den.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.3",
+              "text": "Zapůjčení batohu o objemu 60 litrů stojí 120 Kč za kalendářní den.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            },
+            {
+              "sentence_id": "gear-rental.rental-prices.4",
+              "text": "Pro výpůjčku v délce alespoň sedmi kalendářních dnů poskytujeme slevu 10 % z půjčovného za celou výpůjčku.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Ceník půjčovného"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence says the 10% discount applies to the rental fee for the entire rental, not only to days after the seventh."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 637,
+          "output_tokens": 57,
+          "cost_usd": "0.00009220",
+          "reservation_id": "556f4661a98d4af18436555d53d4160b",
+          "duration_ms": 1459.0553030011506
+        }
+      ],
+      "latency_ms": 1467.383064000387,
+      "cost_usd": "0.00009220",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "cancellation-refund-trigger-supported",
+        "claim": "Money for a paid, successfully cancelled order is sent within five working days of cancellation confirmation.",
+        "cited_sentence_ids": [
+          "orders.cancellation-refund.1"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "cancellation-refund-trigger",
+        "note": "The citation starts the clock at confirmation; it gives no deadline measured from the request."
+      },
+      "run_id": "595edf0e0d4a4215b830151f5c7d1600",
+      "claim": {
+        "text": "Money for a paid, successfully cancelled order is sent within five working days of cancellation confirmation.",
+        "citations": [
+          "orders.cancellation-refund.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "orders.cancellation-refund",
+          "doc_id": "orders",
+          "doc_title": "Objednávky, změny a storno",
+          "heading": "Peníze po stornu",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "orders.cancellation-refund.1",
+              "text": "Peníze za zaplacenou a úspěšně stornovanou objednávku odesíláme do pěti pracovních dnů od potvrzení storna.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.2",
+              "text": "Při stornu celé objednávky před předáním dopravci vracíme celou uhrazenou částku včetně dopravy.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.3",
+              "text": "Při stornu neuhrazené objednávky nevzniká nárok na výplatu peněz.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.4",
+              "text": "Případná doba připsání vratky kartou začíná až po odeslání peněz ze strany TrailSupply.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence says funds for a paid, successfully cancelled order are sent within five working days after cancellation is confirmed."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 634,
+          "output_tokens": 51,
+          "cost_usd": "0.00008890",
+          "reservation_id": "e5815cfff10e4a8ea5f820681fb7180e",
+          "duration_ms": 1737.6318290007475
+        }
+      ],
+      "latency_ms": 1746.8724390000716,
+      "cost_usd": "0.00008890",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "cancellation-refund-trigger-near-miss",
+        "claim": "Money for a paid, successfully cancelled order is sent within five working days of the cancellation request.",
+        "cited_sentence_ids": [
+          "orders.cancellation-refund.1"
+        ],
+        "expected_verdict": "unsupported",
+        "pair_id": "cancellation-refund-trigger",
+        "note": "The citation starts the clock at confirmation; it gives no deadline measured from the request."
+      },
+      "run_id": "3d25414891c34fe5af8b4b51bd00d809",
+      "claim": {
+        "text": "Money for a paid, successfully cancelled order is sent within five working days of the cancellation request.",
+        "citations": [
+          "orders.cancellation-refund.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "orders.cancellation-refund",
+          "doc_id": "orders",
+          "doc_title": "Objednávky, změny a storno",
+          "heading": "Peníze po stornu",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "orders.cancellation-refund.1",
+              "text": "Peníze za zaplacenou a úspěšně stornovanou objednávku odesíláme do pěti pracovních dnů od potvrzení storna.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.2",
+              "text": "Při stornu celé objednávky před předáním dopravci vracíme celou uhrazenou částku včetně dopravy.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.3",
+              "text": "Při stornu neuhrazené objednávky nevzniká nárok na výplatu peněz.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            },
+            {
+              "sentence_id": "orders.cancellation-refund.4",
+              "text": "Případná doba připsání vratky kartou začíná až po odeslání peněz ze strany TrailSupply.",
+              "doc_id": "orders",
+              "doc_title": "Objednávky, změny a storno",
+              "heading": "Peníze po stornu"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence says the five working days run from confirmation of the cancellation, not from the cancellation request."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 635,
+          "output_tokens": 96,
+          "cost_usd": "0.00011150",
+          "reservation_id": "2adf24e9395647d78f6b4156d5c90f9d",
+          "duration_ms": 2018.16742399933
+        }
+      ],
+      "latency_ms": 2031.0122959999717,
+      "cost_usd": "0.00011150",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "card-refund-certainty-supported",
+        "claim": "After a card refund is sent, it usually appears in the customer account within three working days.",
+        "cited_sentence_ids": [
+          "payments.refund-method.4"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "card-refund-certainty",
+        "note": "An ordinary processing time does not establish an unconditional guarantee."
+      },
+      "run_id": "a6fafc1a72764f118abdd7a075e1aa77",
+      "claim": {
+        "text": "After a card refund is sent, it usually appears in the customer account within three working days.",
+        "citations": [
+          "payments.refund-method.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "payments.refund-method",
+          "doc_id": "payments",
+          "doc_title": "Platby a fakturace objednávek",
+          "heading": "Platební cesta vratek",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "payments.refund-method.1",
+              "text": "Peníze za objednávku zaplacenou kartou vracíme na stejnou kartu, ze které byla objednávka uhrazena.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.2",
+              "text": "Peníze za objednávku zaplacenou převodem vracíme na účet, ze kterého platba přišla.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.3",
+              "text": "U objednávky zaplacené dobírkou si pro vrácení peněz vyžádáme číslo bankovního účtu zákazníka.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.4",
+              "text": "Po odeslání vratky kartou se částka obvykle zobrazí na účtu zákazníka do tří pracovních dnů.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence says that after a card refund is sent, the amount usually appears in the customer’s account within three working days."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 625,
+          "output_tokens": 54,
+          "cost_usd": "0.00008950",
+          "reservation_id": "fe2f8f3f4bbf429d911367a71533ada0",
+          "duration_ms": 1591.3082290007878
+        }
+      ],
+      "latency_ms": 1601.132123001662,
+      "cost_usd": "0.00008950",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "card-refund-certainty-near-miss",
+        "claim": "After a card refund is sent, it is guaranteed to appear in the customer account within three working days.",
+        "cited_sentence_ids": [
+          "payments.refund-method.4"
+        ],
+        "expected_verdict": "unsupported",
+        "pair_id": "card-refund-certainty",
+        "note": "An ordinary processing time does not establish an unconditional guarantee."
+      },
+      "run_id": "1afaa1c17c894e048020cdafb841bb16",
+      "claim": {
+        "text": "After a card refund is sent, it is guaranteed to appear in the customer account within three working days.",
+        "citations": [
+          "payments.refund-method.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "payments.refund-method",
+          "doc_id": "payments",
+          "doc_title": "Platby a fakturace objednávek",
+          "heading": "Platební cesta vratek",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "payments.refund-method.1",
+              "text": "Peníze za objednávku zaplacenou kartou vracíme na stejnou kartu, ze které byla objednávka uhrazena.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.2",
+              "text": "Peníze za objednávku zaplacenou převodem vracíme na účet, ze kterého platba přišla.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.3",
+              "text": "U objednávky zaplacené dobírkou si pro vrácení peněz vyžádáme číslo bankovního účtu zákazníka.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            },
+            {
+              "sentence_id": "payments.refund-method.4",
+              "text": "Po odeslání vratky kartou se částka obvykle zobrazí na účtu zákazníka do tří pracovních dnů.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Platební cesta vratek"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence says the refund usually appears within three working days, not that this timing is guaranteed."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 627,
+          "output_tokens": 50,
+          "cost_usd": "0.00008770",
+          "reservation_id": "f43ec5da37f744d4b36c2a5f199acf89",
+          "duration_ms": 1361.5125230007834
+        }
+      ],
+      "latency_ms": 1369.2499580010917,
+      "cost_usd": "0.00008770",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "rental-cleaning-amount-supported",
+        "claim": "A tent returned wet or muddy incurs a one-off cleaning fee of CZK 149.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-fees.2",
+          "gear-rental.rental-fees.3"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "rental-cleaning-amount",
+        "note": "The backpack cleaning fee is CZK 79; CZK 149 belongs to a tent."
+      },
+      "run_id": "4940c1988c5545f5bafd99166ec7c88a",
+      "claim": {
+        "text": "A tent returned wet or muddy incurs a one-off cleaning fee of CZK 149.",
+        "citations": [
+          "gear-rental.rental-fees.2",
+          "gear-rental.rental-fees.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-fees",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Prodlení a čištění",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-fees.1",
+              "text": "Za každý započatý kalendářní den po sjednaném dni vrácení účtujeme 300 Kč za každý nevrácený kus vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.2",
+              "text": "Za stan vrácený mokrý nebo zablácený účtujeme jednorázový poplatek za čištění 149 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.3",
+              "text": "Za batoh vrácený zablácený účtujeme jednorázový poplatek za čištění 79 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.4",
+              "text": "Běžné závěrečné čištění suchého vybavení bez bláta je zahrnuto v půjčovném.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that a tent returned wet or muddy incurs a one-off cleaning fee of CZK 149."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 680,
+          "output_tokens": 51,
+          "cost_usd": "0.00009350",
+          "reservation_id": "ac28690429564573852c56a3d14bfbb1",
+          "duration_ms": 1336.4265790005447
+        }
+      ],
+      "latency_ms": 1344.2074460017466,
+      "cost_usd": "0.00009350",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "rental-cleaning-amount-near-miss",
+        "claim": "A backpack returned muddy incurs a one-off cleaning fee of CZK 149.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-fees.2",
+          "gear-rental.rental-fees.3"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "rental-cleaning-amount",
+        "note": "The backpack cleaning fee is CZK 79; CZK 149 belongs to a tent."
+      },
+      "run_id": "9c6e38c5227049b091295778f45873a0",
+      "claim": {
+        "text": "A backpack returned muddy incurs a one-off cleaning fee of CZK 149.",
+        "citations": [
+          "gear-rental.rental-fees.2",
+          "gear-rental.rental-fees.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-fees",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Prodlení a čištění",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-fees.1",
+              "text": "Za každý započatý kalendářní den po sjednaném dni vrácení účtujeme 300 Kč za každý nevrácený kus vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.2",
+              "text": "Za stan vrácený mokrý nebo zablácený účtujeme jednorázový poplatek za čištění 149 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.3",
+              "text": "Za batoh vrácený zablácený účtujeme jednorázový poplatek za čištění 79 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            },
+            {
+              "sentence_id": "gear-rental.rental-fees.4",
+              "text": "Běžné závěrečné čištění suchého vybavení bez bláta je zahrnuto v půjčovném.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Prodlení a čištění"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence specifies a one-off CZK 79 cleaning fee for a muddy backpack, not CZK 149; CZK 149 applies to a wet or muddy tent."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 678,
+          "output_tokens": 66,
+          "cost_usd": "0.00010080",
+          "reservation_id": "bdb97d69e601444285a58c329064cfe7",
+          "duration_ms": 1471.0166549994028
+        }
+      ],
+      "latency_ms": 1479.0612159995362,
+      "cost_usd": "0.00010080",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "claim-deadline-exception-supported",
+        "claim": "A warranty claim is resolved within 30 calendar days of receipt for assessment unless the customer agrees to a longer period in writing.",
+        "cited_sentence_ids": [
+          "warranty.resolution-time.1",
+          "warranty.resolution-time.3"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "claim-deadline-exception",
+        "note": "The written extension replaces the default deadline rather than leaving it unchanged."
+      },
+      "run_id": "55afb170f7d241e583e0564d23e4db2c",
+      "claim": {
+        "text": "A warranty claim is resolved within 30 calendar days of receipt for assessment unless the customer agrees to a longer period in writing.",
+        "citations": [
+          "warranty.resolution-time.1",
+          "warranty.resolution-time.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "warranty.resolution-time",
+          "doc_id": "warranty",
+          "doc_title": "Reklamace a záruka na zakoupené vybavení",
+          "heading": "Lhůta vyřízení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "warranty.resolution-time.1",
+              "text": "Reklamaci vyřídíme nejpozději do 30 kalendářních dnů od převzetí vybavení k posouzení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.2",
+              "text": "Prvním dnem lhůty pro vyřízení reklamace je den následující po převzetí vybavení k posouzení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.3",
+              "text": "Pokud si zákazník písemně sjedná delší lhůtu, platí sjednaný termín místo lhůty 30 kalendářních dnů.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.4",
+              "text": "O výsledku reklamace informujeme e-mailem na adresu uvedenou při jejím založení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentences say the claim is handled within 30 calendar days from receipt for assessment, unless a longer period is agreed in writing, in which case that agreed deadline applies."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 686,
+          "output_tokens": 63,
+          "cost_usd": "0.00010010",
+          "reservation_id": "bef7dc484a7645f389080fe4ab8c9e14",
+          "duration_ms": 1631.839432999186
+        }
+      ],
+      "latency_ms": 1641.3239999983489,
+      "cost_usd": "0.00010010",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "claim-deadline-exception-near-miss",
+        "claim": "A warranty claim is resolved within 30 calendar days of receipt for assessment even when the customer agrees to a longer period in writing.",
+        "cited_sentence_ids": [
+          "warranty.resolution-time.1",
+          "warranty.resolution-time.3"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "claim-deadline-exception",
+        "note": "The written extension replaces the default deadline rather than leaving it unchanged."
+      },
+      "run_id": "94c8416002a445e09d7656e0cf9cf44a",
+      "claim": {
+        "text": "A warranty claim is resolved within 30 calendar days of receipt for assessment even when the customer agrees to a longer period in writing.",
+        "citations": [
+          "warranty.resolution-time.1",
+          "warranty.resolution-time.3"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "warranty.resolution-time",
+          "doc_id": "warranty",
+          "doc_title": "Reklamace a záruka na zakoupené vybavení",
+          "heading": "Lhůta vyřízení",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "warranty.resolution-time.1",
+              "text": "Reklamaci vyřídíme nejpozději do 30 kalendářních dnů od převzetí vybavení k posouzení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.2",
+              "text": "Prvním dnem lhůty pro vyřízení reklamace je den následující po převzetí vybavení k posouzení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.3",
+              "text": "Pokud si zákazník písemně sjedná delší lhůtu, platí sjednaný termín místo lhůty 30 kalendářních dnů.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            },
+            {
+              "sentence_id": "warranty.resolution-time.4",
+              "text": "O výsledku reklamace informujeme e-mailem na adresu uvedenou při jejím založení.",
+              "doc_id": "warranty",
+              "doc_title": "Reklamace a záruka na zakoupené vybavení",
+              "heading": "Lhůta vyřízení"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited evidence says that when a longer period is agreed in writing, the agreed deadline applies instead of the 30-calendar-day limit."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 687,
+          "output_tokens": 99,
+          "cost_usd": "0.00011820",
+          "reservation_id": "6f64b8373d244f27af54c3628823485e",
+          "duration_ms": 2220.2669990001596
+        }
+      ],
+      "latency_ms": 2227.9190130011557,
+      "cost_usd": "0.00011820",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "payment-method-scope-supported",
+        "claim": "Purchased goods can be paid for by online card, bank transfer or cash on delivery.",
+        "cited_sentence_ids": [
+          "payments.payment-methods.1"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "payment-method-scope",
+        "note": "A statement about purchased goods provides no evidence for the rental payment methods."
+      },
+      "run_id": "107f17da7e7a4097a226da6ad6e8020b",
+      "claim": {
+        "text": "Purchased goods can be paid for by online card, bank transfer or cash on delivery.",
+        "citations": [
+          "payments.payment-methods.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "payments.payment-methods",
+          "doc_id": "payments",
+          "doc_title": "Platby a fakturace objednávek",
+          "heading": "Způsoby úhrady",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "payments.payment-methods.1",
+              "text": "Zakoupené zboží lze zaplatit online kartou, bankovním převodem nebo dobírkou.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.2",
+              "text": "Platba online kartou je bez poplatku TrailSupply.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.3",
+              "text": "Bankovní převod je bez poplatku TrailSupply.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.4",
+              "text": "Dobírka stojí 39 Kč navíc k případné ceně dopravy.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence explicitly lists online card, bank transfer, and cash on delivery as ways to pay for purchased goods."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 562,
+          "output_tokens": 51,
+          "cost_usd": "0.00008170",
+          "reservation_id": "c6666d5143e64610a1c25a3649840689",
+          "duration_ms": 1418.9854840005864
+        }
+      ],
+      "latency_ms": 1427.7538579990505,
+      "cost_usd": "0.00008170",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "payment-method-scope-near-miss",
+        "claim": "Rental bookings can be paid for by online card, bank transfer or cash on delivery.",
+        "cited_sentence_ids": [
+          "payments.payment-methods.1"
+        ],
+        "expected_verdict": "unsupported",
+        "pair_id": "payment-method-scope",
+        "note": "A statement about purchased goods provides no evidence for the rental payment methods."
+      },
+      "run_id": "ea7c9748c14643aca425c5268b5f3739",
+      "claim": {
+        "text": "Rental bookings can be paid for by online card, bank transfer or cash on delivery.",
+        "citations": [
+          "payments.payment-methods.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "payments.payment-methods",
+          "doc_id": "payments",
+          "doc_title": "Platby a fakturace objednávek",
+          "heading": "Způsoby úhrady",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "payments.payment-methods.1",
+              "text": "Zakoupené zboží lze zaplatit online kartou, bankovním převodem nebo dobírkou.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.2",
+              "text": "Platba online kartou je bez poplatku TrailSupply.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.3",
+              "text": "Bankovní převod je bez poplatku TrailSupply.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            },
+            {
+              "sentence_id": "payments.payment-methods.4",
+              "text": "Dobírka stojí 39 Kč navíc k případné ceně dopravy.",
+              "doc_id": "payments",
+              "doc_title": "Platby a fakturace objednávek",
+              "heading": "Způsoby úhrady"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "unsupported",
+        "reason": "The cited sentence says purchased goods can be paid for by these methods; it does not establish that rental bookings can."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 562,
+          "output_tokens": 51,
+          "cost_usd": "0.00008170",
+          "reservation_id": "e97c2289c5cd47c090dfdafddbf58585",
+          "duration_ms": 1458.1604989998596
+        }
+      ],
+      "latency_ms": 1467.7307969996036,
+      "cost_usd": "0.00008170",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "deposit-item-ownership-supported",
+        "claim": "The refundable rental deposit is CZK 5,000 per tent and CZK 2,000 per backpack.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-deposit.1"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "deposit-item-ownership",
+        "note": "Both amounts occur in the same sentence; the near-miss swaps the associated items."
+      },
+      "run_id": "3211c28bc9db4cca902bf8ba90805ac6",
+      "claim": {
+        "text": "The refundable rental deposit is CZK 5,000 per tent and CZK 2,000 per backpack.",
+        "citations": [
+          "gear-rental.rental-deposit.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-deposit",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Vratná kauce",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-deposit.1",
+              "text": "Vratná kauce za každý stan činí 5 000 Kč a za každý batoh 2 000 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.2",
+              "text": "Kauce se hradí kartou při osobním převzetí a není součástí ceny půjčovného.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.3",
+              "text": "Při řádném vrácení vybavení odesíláme celou kauci na stejnou kartu do pěti pracovních dnů od kontroly vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.4",
+              "text": "Z kauce můžeme po doložení odečíst poplatky za prodlení, čištění nebo zjištěné poškození vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states a refundable deposit of CZK 5,000 for each tent and CZK 2,000 for each backpack."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 633,
+          "output_tokens": 56,
+          "cost_usd": "0.00009130",
+          "reservation_id": "f906eaab098847edaaf046fcafa11bcd",
+          "duration_ms": 1495.7399260001694
+        }
+      ],
+      "latency_ms": 1504.0016420007305,
+      "cost_usd": "0.00009130",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "deposit-item-ownership-near-miss",
+        "claim": "The refundable rental deposit is CZK 2,000 per tent and CZK 5,000 per backpack.",
+        "cited_sentence_ids": [
+          "gear-rental.rental-deposit.1"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "deposit-item-ownership",
+        "note": "Both amounts occur in the same sentence; the near-miss swaps the associated items."
+      },
+      "run_id": "e3d6a566dd5847f79634ad1933715ba3",
+      "claim": {
+        "text": "The refundable rental deposit is CZK 2,000 per tent and CZK 5,000 per backpack.",
+        "citations": [
+          "gear-rental.rental-deposit.1"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "gear-rental.rental-deposit",
+          "doc_id": "gear-rental",
+          "doc_title": "Půjčovna outdoorového vybavení",
+          "heading": "Vratná kauce",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "gear-rental.rental-deposit.1",
+              "text": "Vratná kauce za každý stan činí 5 000 Kč a za každý batoh 2 000 Kč.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.2",
+              "text": "Kauce se hradí kartou při osobním převzetí a není součástí ceny půjčovného.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.3",
+              "text": "Při řádném vrácení vybavení odesíláme celou kauci na stejnou kartu do pěti pracovních dnů od kontroly vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            },
+            {
+              "sentence_id": "gear-rental.rental-deposit.4",
+              "text": "Z kauce můžeme po doložení odečíst poplatky za prodlení, čištění nebo zjištěné poškození vybavení.",
+              "doc_id": "gear-rental",
+              "doc_title": "Půjčovna outdoorového vybavení",
+              "heading": "Vratná kauce"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence states the deposit is CZK 5,000 per tent and CZK 2,000 per backpack, the reverse of the claim."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 633,
+          "output_tokens": 93,
+          "cost_usd": "0.00010980",
+          "reservation_id": "db05d165dbed47f186038fe005630653",
+          "duration_ms": 2085.231732999091
+        }
+      ],
+      "latency_ms": 2094.2609069988976,
+      "cost_usd": "0.00010980",
+      "error": null
+    }
+  ],
+  "pairs": {
+    "cancellation-refund-trigger": {
+      "probe_ids": [
+        "cancellation-refund-trigger-supported",
+        "cancellation-refund-trigger-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": false
+    },
+    "card-refund-certainty": {
+      "probe_ids": [
+        "card-refund-certainty-supported",
+        "card-refund-certainty-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": false
+    },
+    "claim-deadline-exception": {
+      "probe_ids": [
+        "claim-deadline-exception-supported",
+        "claim-deadline-exception-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "clearance-versus-regular": {
+      "probe_ids": [
+        "clearance-versus-regular-supported",
+        "clearance-versus-regular-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "deposit-item-ownership": {
+      "probe_ids": [
+        "deposit-item-ownership-supported",
+        "deposit-item-ownership-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "packing-address-exception": {
+      "probe_ids": [
+        "packing-address-exception-supported",
+        "packing-address-exception-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "payment-method-scope": {
+      "probe_ids": [
+        "payment-method-scope-supported",
+        "payment-method-scope-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "purchase-warranty-scope": {
+      "probe_ids": [
+        "purchase-warranty-scope-supported",
+        "purchase-warranty-scope-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "rental-cleaning-amount": {
+      "probe_ids": [
+        "rental-cleaning-amount-supported",
+        "rental-cleaning-amount-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "rental-discount-scope": {
+      "probe_ids": [
+        "rental-discount-scope-supported",
+        "rental-discount-scope-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "shipping-price-destination": {
+      "probe_ids": [
+        "shipping-price-destination-supported",
+        "shipping-price-destination-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "shipping-price-effective-date": {
+      "probe_ids": [
+        "shipping-price-effective-date-supported",
+        "shipping-price-effective-date-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    }
+  },
+  "gate": "PASS"
+}
