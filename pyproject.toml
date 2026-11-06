@@ -1,0 +1,41 @@
+[project]
+name = "citarilo"
+version = "0.1.0"
+description = "Evidence-backed customer support for the fictional TrailSupply shop."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.162.0",
+    "langchain-core>=1.7.6",
+    "langchain-openai>=1.7.4",
+    "langgraph>=1.2.20",
+    "openai>=3.46.0",
+    "pydantic>=2.14.3",
+    "pydantic-settings>=2.16.2",
+    "uvicorn>=0.54.0",
+]
+
+[project.scripts]
+citarilo = "citarilo.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.7,<0.14"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "pytest-socket>=0.8.1",
+    "ruff>=0.17.4",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["drafts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--disable-socket --allow-unix-socket"
