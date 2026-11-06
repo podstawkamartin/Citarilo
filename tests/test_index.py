@@ -25,6 +25,7 @@ from citarilo.index import (
     estimate_ingest,
     load_index,
     retrieve,
+    search,
 )
 
 
@@ -489,3 +490,44 @@ def test_estimate_needs_no_key_or_ledger(settings: Settings, corpus: Corpus) -> 
         for start in range(0, 6, 2)
     )
     assert not settings.runtime_dir.exists()
+
+
+def test_loaded_search_reuses_store_and_exposes_query_usage(
+    settings: Settings, corpus: Corpus, ledger: BudgetLedger, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = FakeClient()
+    build_index(corpus, settings, ledger, client=fake)
+    fake.calls.clear()
+    adapter = UsageTrackingEmbeddings(settings, ledger, client=fake, group_id="eval")
+    store = load_index(corpus, settings, adapter)
+    settings.index_path.unlink()
+    settings.index_manifest_path.unlink()
+    ticks = iter([1.0, 1.125, 2.0, 2.25])
+    monkeypatch.setattr(index_module, "perf_counter", lambda: next(ticks))
+    documents = section_documents(corpus)
+    for i in (0, 2):
+        result = search(store, documents[i].page_content, 3)
+        assert result[0][0] == documents[i].metadata["section_key"]
+        assert result[0][1] == pytest.approx(1.0)
+        assert len(result) == 3
+    assert len(fake.calls) == len(adapter.usage) == 2
+    assert [usage.duration_ms for usage in adapter.usage] == [125, 250]
+    assert len({usage.reservation_id for usage in adapter.usage}) == 2
+    for usage in adapter.usage:
+        assert usage.total_tokens == usage.prompt_tokens > 0
+        from citarilo.budget import actual_cost
+
+        assert usage.cost_usd == actual_cost(
+            settings.embedding_model, usage.prompt_tokens, 0, price_table=settings.price_table
+        )
+
+
+@pytest.mark.parametrize("k", [0, -1, True, 1.5])
+def test_search_invalid_k_never_dispatches(settings: Settings, ledger: BudgetLedger, k) -> None:
+    from langchain_core.vectorstores import InMemoryVectorStore
+
+    fake = FakeClient()
+    adapter = UsageTrackingEmbeddings(settings, ledger, client=fake)
+    with pytest.raises(ValueError, match="k must"):
+        search(InMemoryVectorStore(adapter), "question", k)
+    assert fake.calls == []

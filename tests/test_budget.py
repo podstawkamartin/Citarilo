@@ -579,6 +579,82 @@ def test_group_started_without_cap_cannot_gain_one_later(ledger: BudgetLedger) -
         ledger.reserve("eval", MODEL, Decimal("0.1"), group_id="a", group_cap_usd=Decimal("1"))
 
 
+def test_open_group_fixes_persisted_cap_without_a_reservation(ledger: BudgetLedger) -> None:
+    ledger.open_group("eval", Decimal("0.2"))
+    assert ledger.spent_usd() == 0
+    assert ledger.summary()["reserved"] == 0
+    ledger.open_group("eval", Decimal("0.2"))
+    reopened = _ledger(ledger.db_path)
+    reopened.reserve("eval", MODEL, Decimal("0.2"), group_id="eval")
+    with pytest.raises(BudgetExceeded) as error:
+        ledger.reserve("eval", MODEL, Decimal("0.000001"), group_id="eval")
+    assert error.value.group_id == "eval"
+    assert error.value.remaining_usd == 0
+    # Even an exhausted group can be reopened idempotently.
+    ledger.open_group("eval", Decimal("0.2"))
+
+
+def test_open_group_conflicts_with_existing_fixed_cap(ledger: BudgetLedger) -> None:
+    ledger.open_group("a", Decimal("0.2"))
+    with pytest.raises(ValueError, match="different fixed cap"):
+        ledger.open_group("a", Decimal("0.3"))
+    ledger.reserve("eval", MODEL, Decimal("0"), group_id="b", group_cap_usd=Decimal("0.1"))
+    ledger.open_group("b", Decimal("0.1"))
+    with pytest.raises(ValueError, match="different fixed cap"):
+        ledger.open_group("b", Decimal("0.2"))
+
+
+@pytest.mark.parametrize("cancel", [True, False])
+def test_open_group_rejects_preexisting_uncapped_reservations(
+    ledger: BudgetLedger, cancel: bool
+) -> None:
+    reservation = ledger.reserve("eval", MODEL, Decimal("0"), group_id="a")
+    if cancel:
+        reservation.cancel()
+    with pytest.raises(ValueError, match="started without a cap"):
+        ledger.open_group("a", Decimal("0.1"))
+
+
+@pytest.mark.parametrize("group_id", [None, "", 123])
+def test_open_group_rejects_invalid_id(ledger: BudgetLedger, group_id) -> None:
+    with pytest.raises(ValueError, match="nonempty group ID"):
+        ledger.open_group(group_id, Decimal("0.1"))
+
+
+@pytest.mark.parametrize("cap", [Decimal("-1"), Decimal("NaN"), Decimal("Infinity"), 0.1])
+def test_open_group_rejects_invalid_money(ledger: BudgetLedger, cap) -> None:
+    with pytest.raises((TypeError, ValueError)):
+        ledger.open_group("eval", cap)
+
+
+def test_open_group_rounds_cap_down(ledger: BudgetLedger) -> None:
+    ledger.open_group("eval", Decimal("0.0000019"))
+    ledger.open_group("eval", Decimal("0.0000011"))
+    with pytest.raises(BudgetExceeded):
+        ledger.reserve("eval", MODEL, Decimal("0.000002"), group_id="eval")
+    ledger.reserve("eval", MODEL, Decimal("0.000001"), group_id="eval")
+
+
+def test_concurrent_open_group_never_changes_winning_cap(ledger: BudgetLedger) -> None:
+    start = threading.Barrier(2)
+
+    def open_cap(cap: str) -> Decimal | None:
+        start.wait()
+        try:
+            ledger.open_group("eval", Decimal(cap))
+            return Decimal(cap)
+        except ValueError:
+            return None
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        results = list(executor.map(open_cap, ["0.1", "0.2"]))
+    winners = [cap for cap in results if cap is not None]
+    assert len(winners) == 1
+    ledger.reserve("eval", MODEL, winners[0], group_id="eval")
+    with pytest.raises(BudgetExceeded):
+        ledger.reserve("eval", MODEL, Decimal("0.000001"), group_id="eval")
+
+
 def test_sent_call_cannot_be_cancelled_and_stays_counted(ledger: BudgetLedger) -> None:
     reservation = ledger.reserve("ask", MODEL, Decimal("1"))
     reservation.mark_sent()

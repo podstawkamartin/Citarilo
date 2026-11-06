@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from time import perf_counter
 from typing import Literal, Protocol
 
 from langchain_core.documents import Document
@@ -21,7 +22,7 @@ from openai import OpenAI
 from openai.types import CreateEmbeddingResponse
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from citarilo.budget import BudgetLedger, max_cost
+from citarilo.budget import BudgetLedger, actual_cost, max_cost
 from citarilo.config import Settings
 from citarilo.corpus import CHUNKING_VERSION, Corpus, section_documents
 
@@ -72,6 +73,8 @@ class EmbeddingUsage(BaseModel):
     reservation_id: str
     prompt_tokens: int = Field(ge=0, strict=True)
     total_tokens: int = Field(ge=0, strict=True)
+    cost_usd: Decimal = Field(default=Decimal(0), ge=0, allow_inf_nan=False)
+    duration_ms: float = Field(default=0, ge=0, allow_inf_nan=False)
 
 
 class IndexManifest(BaseModel):
@@ -159,6 +162,7 @@ class UsageTrackingEmbeddings(Embeddings):
                     reservation.cancel()  # Client setup failed before dispatch.
                     raise
                 reservation.mark_sent()
+                started = perf_counter()
                 response = endpoint.create(
                     input=batch,
                     model=self.settings.embedding_model,
@@ -171,6 +175,13 @@ class UsageTrackingEmbeddings(Embeddings):
                         reservation_id=reservation.id,
                         prompt_tokens=response.usage.prompt_tokens,
                         total_tokens=response.usage.total_tokens,
+                        cost_usd=actual_cost(
+                            self.settings.embedding_model,
+                            response.usage.prompt_tokens,
+                            0,
+                            price_table=self.settings.price_table,
+                        ),
+                        duration_ms=(perf_counter() - started) * 1000,
                     )
                     if usage.total_tokens < usage.prompt_tokens:
                         raise ValueError("Inconsistent token usage")
@@ -314,6 +325,16 @@ def load_index(corpus: Corpus, settings: Settings, embeddings: Embeddings) -> In
     return store
 
 
+def search(store: InMemoryVectorStore, question: str, k: int) -> list[tuple[str, float, Document]]:
+    """Search a loaded store; usage remains on its caller-owned embedding adapter."""
+    if isinstance(k, bool) or not isinstance(k, int) or k <= 0:
+        raise ValueError("k must be a positive integer")
+    return [
+        (document.metadata["section_key"], float(score), document)
+        for document, score in store.similarity_search_with_score(question, k=k)
+    ]
+
+
 def retrieve(
     question: str,
     corpus: Corpus,
@@ -332,7 +353,4 @@ def retrieve(
         settings, ledger, group_id=group_id, client=client, operation="retrieve"
     )
     store = load_index(corpus, settings, embeddings)
-    return [
-        (document.metadata["section_key"], score, document)
-        for document, score in store.similarity_search_with_score(question, k=limit)
-    ]
+    return search(store, question, limit)

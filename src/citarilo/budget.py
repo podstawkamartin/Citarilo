@@ -120,7 +120,7 @@ class BudgetLedger:
     """A file-backed ledger shared by threads/processes using the same database.
 
     The first opener fixes the global cap (at most HARD_CAP_USD); conflicting later
-    caps are rejected. The first reservation of a group fixes that group's cap.
+    caps are rejected. open_group or the first capped reservation fixes a group cap.
     Call Reservation.mark_sent() immediately before dispatching the request.
     Pass the same Settings.price_table used to estimate calls when overriding prices.
     Charges round up and caps round down to micro-USD. Actual usage above a
@@ -267,6 +267,14 @@ class BudgetLedger:
         if group_id is not None:
             query += " WHERE group_id = ?"
         return sum(row[0] for row in connection.execute(query, parameters))
+
+    def open_group(self, group_id: str, cap_usd: Decimal) -> None:
+        """Atomically fix a cap before reserving; reopening the same cap is a no-op."""
+        if not isinstance(group_id, str) or not group_id:
+            raise ValueError("A nonempty group ID is required")
+        cap = _micros(cap_usd, round_up=False)
+        with self._transaction() as connection:
+            self._group_cap(connection, group_id, cap)
 
     def reserve(
         self,

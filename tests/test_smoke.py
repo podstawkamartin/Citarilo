@@ -31,6 +31,12 @@ def test_settings_without_key(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
     assert Settings().openai_api_key is None
 
 
+def test_settings_ignore_local_credentials_by_default() -> None:
+    # Runs in the real checkout, where .env may contain a live credential.
+    assert Settings.model_config["env_file"] is None
+    assert Settings().openai_api_key is None
+
+
 def test_settings_load_env_file_and_environment(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -41,7 +47,7 @@ def test_settings_load_env_file_and_environment(
     )
     monkeypatch.setenv("API_PORT", "5176")
 
-    settings = Settings()
+    settings = Settings(_env_file=tmp_path / ".env")
 
     assert settings.openai_api_key is not None
     assert settings.openai_api_key.get_secret_value() == "scaffold-test-key"
