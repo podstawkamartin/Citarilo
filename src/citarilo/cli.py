@@ -12,7 +12,17 @@ from citarilo import __version__
 from citarilo.budget import BudgetExceeded, BudgetLedger, actual_cost
 from citarilo.config import Settings
 from citarilo.corpus import CorpusError, load_corpus
-from citarilo.evals import estimate_retrieval, evaluate_retrieval, load_cases
+from citarilo.evals import (
+    estimate_answers,
+    estimate_probes,
+    estimate_retrieval,
+    evaluate_answers,
+    evaluate_probes,
+    evaluate_retrieval,
+    load_cases,
+    load_probes,
+)
+from citarilo.grading import summarize, write_grading_template
 from citarilo.index import (
     EmbeddingsClient,
     IndexMismatchError,
@@ -51,8 +61,13 @@ def main(
     )
     ask = commands.add_parser("ask", help="Answer a question with verified sentence citations.")
     ask.add_argument("question", help="A question in English or Czech (3–500 characters).")
-    evaluate = commands.add_parser("eval", help="Evaluate section retrieval with a run budget.")
-    evaluate.add_argument("--retrieval", action="store_true", required=True)
+    evaluate = commands.add_parser("eval", help="Evaluate retrieval, answers or verifier probes.")
+    modes = evaluate.add_mutually_exclusive_group(required=True)
+    modes.add_argument("--retrieval", action="store_true")
+    modes.add_argument("--live", action="store_true")
+    modes.add_argument("--probes", action="store_true")
+    modes.add_argument("--grading-template", type=Path, metavar="REPORT")
+    modes.add_argument("--summarize", nargs=2, type=Path, metavar=("REPORT", "GRADES"))
     evaluate.add_argument("--max-usd", help="Maximum USD spend for this evaluation run.")
     evaluate.add_argument("--split", choices=("dev", "heldout"), default="dev")
     evaluate.add_argument("--dry-run", action="store_true", help="Estimate without network access.")
@@ -61,9 +76,40 @@ def main(
         parser.print_help()
         return
     max_usd = None
+    if args.command == "eval" and (args.grading_template or args.summarize):
+        if args.dry_run or args.max_usd is not None or args.split != "dev":
+            parser.exit(1, "citarilo: error: Grading commands do not accept run options.\n")
+        try:
+            if args.grading_template:
+                print(f"Grading template: {write_grading_template(args.grading_template)}")
+            else:
+                summary, path = summarize(*args.summarize)
+                print(f"{'Metric / gate':<38} Result")
+                for name in (
+                    "answered_correct_rate",
+                    "answered_unanswerables",
+                    "successful_injections",
+                ):
+                    print(f"{name:<38} {summary[name]}")
+                for name, value in summary["verifier_benefit"].items():
+                    print(f"{'verifier_' + name:<38} {value}")
+                for name, value in summary["gates"].items():
+                    print(f"{name:<38} {value}")
+                print(f"Overall: {summary['gate']}\nSummary: {path}")
+                if summary["gate"] != "PASS":
+                    parser.exit(2)
+        except FileExistsError:
+            parser.exit(1, "citarilo: error: Output already exists; it was not overwritten.\n")
+        except (ValueError, OSError):
+            parser.exit(
+                1,
+                "citarilo: error: Invalid/incomplete grades or report; "
+                "check IDs, evidence, judgments and metadata.\n",
+            )
+        return
     if args.command == "eval":
         if args.max_usd is None and not args.dry_run:
-            parser.exit(1, "citarilo: error: --max-usd is required for a retrieval evaluation.\n")
+            parser.exit(1, "citarilo: error: --max-usd is required for an evaluation.\n")
         if args.max_usd is not None:
             try:
                 max_usd = Decimal(args.max_usd)
@@ -73,7 +119,7 @@ def main(
                 parser.exit(1, "citarilo: error: --max-usd must be a finite positive amount.\n")
     try:
         # A dry run never needs credentials, including the contents of a local .env.
-        if settings is None and context is not None and args.command == "ask":
+        if settings is None and context is not None and args.command in ("ask", "eval"):
             settings = context.settings
         if settings is None:
             settings = (
@@ -89,12 +135,16 @@ def main(
         elif args.command == "ask":
             validate_question(args.question)
             _ask(args.question, context=context or create_live_context(settings))
-        else:
+        elif args.retrieval:
             passed = _eval(
                 settings, dry_run=args.dry_run, max_usd=max_usd, split=args.split, client=client
             )
             if not passed:
                 parser.exit(2)
+        else:
+            exit_code = _eval_answers_or_probes(settings, args, max_usd, context=context)
+            if exit_code:
+                parser.exit(exit_code)
     except MissingAPIKeyError:
         parser.exit(1, "citarilo: error: Set OPENAI_API_KEY in the environment or .env file.\n")
     except BudgetExceeded:
@@ -113,9 +163,13 @@ def main(
         parser.exit(1, f"citarilo: error: {exc.code}: {exc.message}\n")
     except Exception:
         # Provider errors can contain request details or credentials. Do not echo them.
-        operation = {"ingest": "Ingest", "ask": "Answer", "eval": "Retrieval evaluation"}[
-            args.command
-        ]
+        operation = {
+            "ingest": "Ingest",
+            "ask": "Answer",
+            "eval": "Retrieval evaluation"
+            if args.command == "eval" and args.retrieval
+            else "Evaluation",
+        }[args.command]
         parser.exit(
             1, f"citarilo: error: {operation} failed; check configuration and the spend ledger.\n"
         )
@@ -221,3 +275,61 @@ def _ingest(settings: Settings, *, dry_run: bool, client: EmbeddingsClient | Non
         f"cost ${ledger.group_spent_usd(group_id):.6f}; "
         f"remaining budget ${ledger.remaining_usd():.6f}."
     )
+
+
+def _eval_answers_or_probes(
+    settings: Settings,
+    args: argparse.Namespace,
+    max_usd: Decimal | None,
+    *,
+    context: AnswerContext | None,
+) -> int:
+    if args.live:
+        if args.split == "heldout":
+            print(
+                "Warning: heldout is reserved for the final one-off run; do not use it for tuning."
+            )
+        cases = [c for c in load_cases(Path("evals/cases.jsonl")) if c.split == args.split]
+        if args.dry_run:
+            print(
+                f"Dry run: {len(cases)} answer cases; split {args.split}; top_k {settings.top_k}."
+            )
+            print(f"Worst-case cost: ${estimate_answers(cases, settings):.6f}.")
+            return 0
+        report, path = evaluate_answers(cases, settings, max_usd, split=args.split, context=context)
+        print(f"{'Case':<36} {'Status':<10} Error")
+        for case in report.cases:
+            print(
+                f"{case.id:<36} {case.status or 'not_run':<10} "
+                f"{case.error.code if case.error else '-'}"
+            )
+        print("Semantic grading required: create a template with --grading-template REPORT.")
+        failed = not report.complete or any(c.error for c in report.cases)
+    else:
+        probes = load_probes(Path("evals/verifier_cases.jsonl"))
+        if args.dry_run:
+            print(f"Dry run: {len(probes)} verifier probes; verification only.")
+            print(f"Worst-case cost: ${estimate_probes(probes, settings):.6f}.")
+            return 0
+        report, path = evaluate_probes(probes, settings, max_usd)
+        print(f"{'Probe':<48} {'Expected':<14} Actual")
+        for case in report.cases:
+            actual = (
+                case.verdict.verdict
+                if case.verdict
+                else case.error.code
+                if case.error
+                else "not_run"
+            )
+            print(f"{case.probe.id:<48} {case.probe.expected_verdict:<14} {actual}")
+        print(
+            f"False accepts: {report.metrics['false_accepts']}; "
+            f"false rejects: {report.metrics['false_rejects']}."
+        )
+        print(f"Gate zero false accepts: {report.gate}.")
+        failed = report.gate != "PASS"
+    print(f"Complete: {report.complete}; cost ${report.cost_usd:.6f}.")
+    print(f"Report: {path}")
+    if not report.complete or any(c.error for c in report.cases):
+        return 1
+    return 2 if failed else 0

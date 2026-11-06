@@ -30,7 +30,7 @@ from citarilo.checks import check_claims
 from citarilo.config import Settings
 from citarilo.corpus import Corpus, load_corpus
 from citarilo.index import MissingAPIKeyError, UsageTrackingEmbeddings, load_index, search
-from citarilo.prompts import PROMPT_VERSION, generation_messages, verification_messages
+from citarilo.prompts import PROMPT_VERSION, data_value, generation_messages, verification_messages
 from citarilo.records import (
     AnswerLanguage,
     CallRecord,
@@ -185,6 +185,101 @@ class AnswerContext:
             raise ValueError("Context must share its store adapter, settings, ledger and group")
 
 
+@dataclass(frozen=True)
+class VerificationContext:
+    """Verification-only dependencies; probes need neither an index nor embeddings."""
+
+    settings: Settings
+    ledger: BudgetLedger
+    verifier: StructuredRunnable
+    mode: Literal["live", "fake"] = "fake"
+    group_id: str | None = None
+    recorder: Recorder = field(default_factory=Recorder)
+
+
+def evidence_sections(
+    corpus: Corpus, keys: list[str] | None = None
+) -> tuple[RetrievedSection, ...]:
+    """Materialize original full sections for offline estimates and verifier probes."""
+    selected = None if keys is None else set(keys)
+    return tuple(
+        RetrievedSection(
+            section_key=section.key,
+            doc_id=doc.doc_id,
+            doc_title=doc.title,
+            heading=section.heading,
+            score=0,
+            sentences=tuple(
+                Source(
+                    sentence_id=s.id,
+                    text=s.text,
+                    doc_id=doc.doc_id,
+                    doc_title=doc.title,
+                    heading=section.heading,
+                )
+                for s in section.sentences
+            ),
+        )
+        for doc in corpus.documents
+        for section in doc.sections
+        if selected is None or section.key in selected
+    )
+
+
+def reservation_cost(
+    settings: Settings, model: str, messages: list[BaseMessage], schema: type[BaseModel]
+) -> Decimal:
+    """Use exactly the same conservative reservation calculation as dispatch."""
+    return max_cost(
+        model,
+        input_token_bound(messages, schema),
+        settings.max_output_tokens,
+        price_table=settings.price_table,
+    )
+
+
+def estimate_answer(question: str, corpus: Corpus, settings: Settings) -> Decimal:
+    """Bound retrieve/generate/verify without models, index or ledger.
+
+    All corpus sections conservatively cover every possible top-k retrieval.
+    Four maximal JSON-escaped 1000-character claims and three largest rendered cited sentences
+    bound every candidate that can reach verification after deterministic checks.
+    """
+    question = validate_question(question)
+    sections = evidence_sections(corpus)
+    ids = [
+        s.id
+        for s in sorted(
+            corpus.sentences(),
+            key=lambda s: len(
+                json.dumps(f"{s.id}: {data_value(s.text)}", ensure_ascii=False).encode("utf-8")
+            ),
+            reverse=True,
+        )[:3]
+    ]
+    claims = tuple(CandidateClaim(text="\x00" * 1000, citations=tuple(ids)) for _ in range(4))
+    return (
+        max_cost(
+            settings.embedding_model,
+            len(question.encode("utf-8")),
+            0,
+            price_table=settings.price_table,
+        )
+        + reservation_cost(
+            settings,
+            settings.generation_model,
+            generation_messages(question, sections),
+            GenerationOutput,
+        )
+        + reservation_cost(
+            settings,
+            settings.verification_model,
+            verification_messages(question, claims, sections),
+            VerificationOutput,
+        )
+    )
+
+
 def input_token_bound(messages: list[BaseMessage], schema: type[BaseModel]) -> int:
     """Conservative bound, independent of tokenizers and provider model aliases."""
     rendered = json.dumps(
@@ -196,7 +291,7 @@ def input_token_bound(messages: list[BaseMessage], schema: type[BaseModel]) -> i
 
 
 def _invoke[Output: BaseModel](
-    context: AnswerContext,
+    context: AnswerContext | VerificationContext,
     node: str,
     runnable: StructuredRunnable,
     messages: list[BaseMessage],
@@ -204,8 +299,7 @@ def _invoke[Output: BaseModel](
     model: str,
 ) -> Output:
     settings = context.settings
-    bound = input_token_bound(messages, schema)
-    cost = max_cost(model, bound, settings.max_output_tokens, price_table=settings.price_table)
+    cost = reservation_cost(settings, model, messages, schema)
     with context.ledger.reserve(node, model, cost, group_id=context.group_id) as reservation:
         started = perf_counter()
         input_tokens = output_tokens = 0
@@ -368,24 +462,36 @@ def _check(state: AnswerState, context: AnswerContext) -> AnswerState:
     }
 
 
-def _verify(state: AnswerState, context: AnswerContext) -> AnswerState:
-    verified = _invoke(
-        context,
-        "verify",
-        context.verifier,
-        verification_messages(
-            state["question"], state["candidate_claims"], state["retrieved_sections"]
-        ),
-        VerificationOutput,
-        context.settings.verification_model,
-    )
+def verify_claims(
+    question: str,
+    claims: tuple[CandidateClaim, ...],
+    sections: tuple[RetrievedSection, ...],
+    *,
+    context: AnswerContext | VerificationContext,
+) -> tuple[ClaimVerdict, ...]:
+    """Shared verifier prompt, strict contract, reservation and settlement for probes/graph."""
+    with tracing_context(enabled=False):
+        verified = _invoke(
+            context,
+            "verify",
+            context.verifier,
+            verification_messages(question, claims, sections),
+            VerificationOutput,
+            context.settings.verification_model,
+        )
     verdicts = tuple(ClaimVerdict(**v.model_dump()) for v in verified.verdicts)
-    # Retain malformed index assignments for diagnostics, but never expose claims.
     context.recorder.state["verdicts"] = verdicts
-    if sorted(v.claim_index for v in verdicts) != list(range(len(state["candidate_claims"]))):
+    if sorted(v.claim_index for v in verdicts) != list(range(len(claims))):
         raise PipelineError(
             "model_contract_error", "The verifier must judge every claim exactly once."
         )
+    return verdicts
+
+
+def _verify(state: AnswerState, context: AnswerContext) -> AnswerState:
+    verdicts = verify_claims(
+        state["question"], state["candidate_claims"], state["retrieved_sections"], context=context
+    )
     refusal = (
         "contradicted"
         if any(v.verdict == "contradicted" for v in verdicts)
@@ -539,6 +645,7 @@ def answer(
             "record_write_error", "The run record could not be saved.", record=record
         ) from None
     if isinstance(error, BudgetExceeded):
+        error.record = record  # Retain partial usage for evaluation budget stops.
         raise error from None
     if error is not None:
         raise PipelineError(error.code, error.message, record=record) from None
@@ -560,41 +667,70 @@ def create_live_context(settings: Settings, *, group_id: str | None = None) -> A
     )
     embeddings = UsageTrackingEmbeddings(settings, ledger, group_id=group_id, operation="retrieve")
     store = load_index(corpus, settings, embeddings)
-    client = _UsageValidatedOpenAI(
-        api_key=key.get_secret_value(),
-        max_retries=0,
-        timeout=settings.call_timeout_seconds,
-    )
-
-    def model(name: str, effort: str, schema: type[BaseModel]) -> StructuredRunnable:
-        return ChatOpenAI(
-            model=name,
-            api_key=key,
-            client=client.chat.completions,
-            root_client=client,
-            use_responses_api=True,
-            service_tier="default",
-            reasoning_effort=effort,
-            store=False,
-            max_retries=0,
-            timeout=settings.call_timeout_seconds,
-            max_tokens=settings.max_output_tokens,
-        ).with_structured_output(
-            schema.model_json_schema(), method="json_schema", strict=True, include_raw=True
-        )
-
     return AnswerContext(
         settings=settings,
         corpus=corpus,
         store=store,
         embeddings=embeddings,
         ledger=ledger,
-        generator=model(
-            settings.generation_model, settings.generation_reasoning_effort, GenerationOutput
+        generator=_live_model(
+            settings,
+            settings.generation_model,
+            settings.generation_reasoning_effort,
+            GenerationOutput,
         ),
-        verifier=model(
-            settings.verification_model, settings.verification_reasoning_effort, VerificationOutput
+        verifier=_live_model(
+            settings,
+            settings.verification_model,
+            settings.verification_reasoning_effort,
+            VerificationOutput,
         ),
         mode="live",
         group_id=group_id,
+    )
+
+
+def _live_model(
+    settings: Settings, name: str, effort: str, schema: type[BaseModel]
+) -> StructuredRunnable:
+    key = settings.openai_api_key
+    if key is None or not key.get_secret_value().strip():
+        raise MissingAPIKeyError("Set OPENAI_API_KEY in the environment or .env file.")
+    client = _UsageValidatedOpenAI(
+        api_key=key.get_secret_value(),
+        max_retries=0,
+        timeout=settings.call_timeout_seconds,
+    )
+
+    return ChatOpenAI(
+        model=name,
+        api_key=key,
+        client=client.chat.completions,
+        root_client=client,
+        use_responses_api=True,
+        service_tier="default",
+        reasoning_effort=effort,
+        store=False,
+        max_retries=0,
+        timeout=settings.call_timeout_seconds,
+        max_tokens=settings.max_output_tokens,
+    ).with_structured_output(
+        schema.model_json_schema(), method="json_schema", strict=True, include_raw=True
+    )
+
+
+def create_verification_context(
+    settings: Settings, ledger: BudgetLedger, group_id: str
+) -> VerificationContext:
+    return VerificationContext(
+        settings=settings,
+        ledger=ledger,
+        group_id=group_id,
+        mode="live",
+        verifier=_live_model(
+            settings,
+            settings.verification_model,
+            settings.verification_reasoning_effort,
+            VerificationOutput,
+        ),
     )
