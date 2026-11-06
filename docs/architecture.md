@@ -67,7 +67,8 @@ tests/
 | Modul | Odpovědnost |
 |---|---|
 | `config.py` | Nastavení, klíče (`SecretStr`), modely, ceník, limity |
-| `corpus.py` | Markdown → sekce a věty se stabilními ID, index, vyhledávání |
+| `corpus.py` | Markdown → sekce a věty se stabilními ID, hash korpusu |
+| `index.py` | Embeddingy se spotřebou, index s manifestem, vyhledávání |
 | `pipeline.py` | LangGraph graf, prompty, schémata, kontroly |
 | `budget.py` | Rezervace a vyúčtování v SQLite, strop |
 | `records.py` | Schéma záznamu běhu (zároveň kontrakt pro replay) |
