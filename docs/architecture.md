@@ -61,7 +61,7 @@ Index, záznamy běhů i útrata leží v Gitem ignorované `.runtime/`.
 |---|---|
 | `config.py` | Nastavení, klíče (`SecretStr`), ID modelů, ceník, limity |
 | `corpus.py` | Markdown → sekce a věty se stabilními ID, index, vyhledávání |
-| `pipeline.py` | Uzly a zapojení LangGraph grafu, prompty, schémata, kontroly |
+| `pipeline.py` | LangGraph graf, prompty, schémata, kontroly |
 | `budget.py` | Cena z reálné spotřeby tokenů, atomické rezervace, strop |
 | `records.py` | Schéma záznamu běhu (zároveň kontrakt pro replay) |
 | `api.py` | FastAPI endpointy, chybová obálka |
@@ -69,6 +69,22 @@ Index, záznamy běhů i útrata leží v Gitem ignorované `.runtime/`.
 | `evals.py` | Spuštění živé evaluace a deterministické vyhodnocení |
 
 Soubory vznikají postupně s kódem, ne předem.
+
+## LangChain a LangGraph
+
+| Kde | API | Proč |
+|---|---|---|
+| Řízení toku | `StateGraph`, podmíněné hrany | Ověřovací brány jako explicitní a testovatelný graf |
+| Závislosti uzlů | `context_schema`, `Runtime` | Modely a záznamník běhu bez globálních proměnných, v testech snadno podvrženy |
+| Prompty | `ChatPromptTemplate` | Oddělené role a proměnné; dokumenty se vkládají jen jako hodnoty |
+| Modely | `ChatOpenAI.with_structured_output(..., include_raw=True)`, `OpenAIEmbeddings` | Strukturovaný výstup a spotřeba z `usage_metadata`; `max_retries=0` |
+| Vyhledávání | `Document`, `InMemoryVectorStore.similarity_search_with_score` | Standardní vyhledávání se skóre; ID a text vět v metadatech sekce |
+| Testy | `DeterministicFakeEmbedding`, `RunnableLambda` | Deterministické testy bez sítě a placených volání |
+
+- Časy uzlů měří malý obal s `perf_counter`, který zachytí i selhání.
+- Embeddingy spotřebu nevracejí, proto ji počítá malý měřicí adaptér.
+  Neznámá spotřeba se nikdy nepočítá jako nulová.
+- Neparsovatelný výstup modelu je chyba 502, ne odmítnutí.
 
 ## Modely a náklady
 
@@ -146,6 +162,12 @@ Streamování, hybridní vyhledávání a reranking, vektorová databáze, oprav
 přegenerování, konverzace, nahrávání dokumentů, checkpointy a přerušení
 v LangGraph, Docker, LangSmith, model v roli hodnotitele. Každá položka se
 přidá až s doloženou potřebou.
+
+Z LangChain a LangGraph vědomě nepoužíváme `as_retriever` (zahazuje skóre),
+`InMemoryRateLimiter` (nenahradí limit souběhu ani rozpočet),
+`UsageMetadataCallbackHandler` (neřeší embeddingy ani přiřazení ke krokům),
+paralelní ověřování přes `Send` (bez doloženého přínosu oproti jednomu
+volání) a diagram generovaný z grafu (nezachytí ochrany mimo graf).
 
 LangGraph dělá tok explicitním a rozšiřitelným (např. o dohledání
 objednávky nebo předání člověku). Škálování výkonu – více procesů, fronta,
