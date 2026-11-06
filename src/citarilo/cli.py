@@ -6,9 +6,11 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from uuid import uuid4
 
+import uvicorn
 from pydantic import ValidationError
 
 from citarilo import __version__
+from citarilo.api import create_app
 from citarilo.budget import BudgetExceeded, BudgetLedger, actual_cost
 from citarilo.config import Settings
 from citarilo.corpus import CorpusError, load_corpus
@@ -61,6 +63,7 @@ def main(
     )
     ask = commands.add_parser("ask", help="Answer a question with verified sentence citations.")
     ask.add_argument("question", help="A question in English or Czech (3–500 characters).")
+    commands.add_parser("serve", help="Serve the local HTTP API.")
     evaluate = commands.add_parser("eval", help="Evaluate retrieval, answers or verifier probes.")
     modes = evaluate.add_mutually_exclusive_group(required=True)
     modes.add_argument("--retrieval", action="store_true")
@@ -135,6 +138,16 @@ def main(
         elif args.command == "ask":
             validate_question(args.question)
             _ask(args.question, context=context or create_live_context(settings))
+        elif args.command == "serve":
+            uvicorn.run(
+                create_app(settings=settings),
+                host=settings.api_host,
+                port=settings.api_port,
+                reload=False,
+                workers=1,
+                proxy_headers=False,
+                access_log=False,
+            )
         elif args.retrieval:
             passed = _eval(
                 settings, dry_run=args.dry_run, max_usd=max_usd, split=args.split, client=client
@@ -166,6 +179,7 @@ def main(
         operation = {
             "ingest": "Ingest",
             "ask": "Answer",
+            "serve": "Server",
             "eval": "Retrieval evaluation"
             if args.command == "eval" and args.retrieval
             else "Evaluation",
