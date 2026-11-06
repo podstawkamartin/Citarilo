@@ -50,7 +50,7 @@ class Settings(BaseSettings):
             ),
         }
     )
-    budget_cap_usd: Decimal = Field(default=Decimal("3.0"), gt=0)
+    budget_cap_usd: Decimal = Field(default=Decimal("3.0"), gt=0, le=3)
 
     data_dir: Path = Path("data/trailsupply")
     runtime_dir: Path = Path(".runtime")
