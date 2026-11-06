@@ -132,16 +132,18 @@ Soubory vznikají postupně s kódem, ne předem.
 - Pouze vektorové vyhledávání, 5 nejbližších sekcí. Index se staví jen
   explicitním `citarilo ingest`; manifest obsahuje model, dimenze, verzi
   dělení textu a hash korpusu. Nesoulad → 503.
-- Otázky anglicky i česky (i bez diakritiky), odpovědi vždy anglicky,
-  zdroje v původní češtině.
+- Otázky anglicky i česky (i bez diakritiky). Odpověď je v jazyce otázky
+  (`answer_language`, pro atribut `lang` ve frontendu), zdroje v původní
+  češtině. Rozhraní, kód a důvody ověřovače jsou anglicky.
 
 ## Ověřování citací
 
-1. **generate** vrací nejvýše 4 atomická tvrzení, každé s 1–3 ID vět
-   z vyhledaných sekcí.
+1. **generate** vrací jazyk odpovědi a nejvýše 4 atomická tvrzení, každé
+   s 1–3 ID vět z vyhledaných sekcí.
 2. **check** (kód): ID musí patřit k vyhledaným větám; čísla, data a URL
    z tvrzení musí být po normalizaci (české a anglické formáty) v citovaných
-   větách. Jde o filtr, ne důkaz.
+   větách; anglická odpověď nesmí obsahovat českou prózu. Jde o filtr,
+   ne důkaz.
 3. **verify** (samostatné volání modelu): podporu musí nést samotné
    citované věty. Celé sekce slouží jen k odhalení podmínek, výjimek
    a rozporů. Každé tvrzení má právě jeden verdikt; chybějící nebo
