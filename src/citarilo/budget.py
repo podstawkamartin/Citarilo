@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+import time
 from collections.abc import Iterator, Mapping
 from contextlib import closing, contextmanager
 from datetime import UTC, datetime
@@ -17,6 +18,7 @@ SCHEMA_VERSION = 1
 HARD_CAP_USD = Decimal("3")
 _MICRO_USD = 1_000_000
 _MAX_SQLITE_INTEGER = 2**63 - 1
+_BUSY_TIMEOUT_SECONDS = 10
 _COMMITTED = """
     CASE WHEN status = 'settled' THEN actual_micro_usd
          WHEN status IN ('reserved', 'in_flight', 'abandoned') THEN reserved_micro_usd
@@ -146,10 +148,7 @@ class BudgetLedger:
         prices = Settings().price_table if price_table is None else price_table
         self._prices = {model: price.model_copy(deep=True) for model, price in prices.items()}
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        with closing(self._connect()) as connection:
-            mode = connection.execute("PRAGMA journal_mode = WAL").fetchone()[0]
-            if mode != "wal":
-                raise RuntimeError("The budget database requires WAL mode")
+        self._enable_wal()
         with self._transaction() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]
             if version not in (0, SCHEMA_VERSION):
@@ -226,10 +225,26 @@ class BudgetLedger:
             )
         return requested
 
+    def _enable_wal(self) -> None:
+        # Switching journal mode ignores busy_timeout, so concurrent first opens retry.
+        deadline = time.monotonic() + _BUSY_TIMEOUT_SECONDS
+        while True:
+            try:
+                with closing(self._connect()) as connection:
+                    mode = connection.execute("PRAGMA journal_mode = WAL").fetchone()[0]
+                break
+            except sqlite3.OperationalError as error:
+                if error.sqlite_errorcode != sqlite3.SQLITE_BUSY or time.monotonic() > deadline:
+                    raise
+                time.sleep(0.01)
+        if mode != "wal":
+            raise RuntimeError("The budget database requires WAL mode")
+
     def _connect(self) -> sqlite3.Connection:
-        connection = sqlite3.connect(self.db_path, timeout=10, isolation_level=None)
+        connection = sqlite3.connect(
+            self.db_path, timeout=_BUSY_TIMEOUT_SECONDS, isolation_level=None
+        )
         connection.row_factory = sqlite3.Row
-        connection.execute("PRAGMA busy_timeout = 10000")
         connection.execute("PRAGMA synchronous = FULL")
         return connection
 
