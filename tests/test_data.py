@@ -13,4 +13,4 @@ def test_shipped_corpus_loads() -> None:
 
     assert len(corpus.documents) == 6
     for document in corpus.documents:
-        assert document.preamble.startswith("> Fiktivní ukázková data")
+        assert document.preamble.strip().startswith("> Fiktivní ukázková data")
