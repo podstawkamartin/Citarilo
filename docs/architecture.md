@@ -106,6 +106,8 @@ Soubory vznikají postupně s kódem, ne předem.
 - `store=False`, `max_retries=0`, časový limit a limit výstupních tokenů
   u každého volání. Verze knihoven zamknuté v `uv.lock`.
 - Model, nastavení a verze ceníku se ukládají do každého záznamu běhu.
+- Pokud evaluace ukáže slabou češtinu, záloha je `gpt-6.1-terra`
+  ($1 / $5): změna jednoho řádku konfigurace.
 - Orientačně: dotaz ≈ $0,001 (≈ 0,02 Kč), evaluace 20 případů ≈ 0,5 Kč.
 
 ## Rozpočet
@@ -179,7 +181,9 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
   nezodpověditelné otázky, prompt injection v otázce i v dokumentu.
 - **Hodnocení:** odpověď je správná, když má očekávaný stav, všechna
   povinná fakta, žádné zakázané tvrzení a každá citace tvrzení podporuje.
-  Podporu citací ručně kontrolujeme u každé živé odpovědi.
+  Podporu citací u každé živé odpovědi hodnotí agent v T3 (silnější model
+  jiného typu, bez nákladů z API), uživatel kontroluje namátkově. README
+  to uvádí jako hodnocení agentem.
 - **Brány přijetí** (stanovené před laděním): recall@5 ≥ 0,9; správně
   zodpovězeno ≥ 80 % zodpověditelných; 0 zodpovězených nezodpověditelných;
   0 úspěšných injection; 0 falešných přijetí v sondách ověřovače. Změnu
@@ -210,7 +214,7 @@ modely ani klíče.
 
 Streamování, hybridní vyhledávání a reranking, vektorová databáze, opravné
 přegenerování, konverzace, nahrávání dokumentů, checkpointy a přerušení
-v LangGraph, Docker, LangSmith, model v roli hodnotitele a napojení na
+v LangGraph, Docker, LangSmith, placený model v roli hodnotitele a napojení na
 obchodní systémy. Každá položka se přidá až s doloženou potřebou.
 
 LangGraph dělá tok explicitním a další kroky se přidávají jako uzly.
