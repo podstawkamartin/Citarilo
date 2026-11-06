@@ -1,8 +1,10 @@
 """Isolate every test from local credentials and real provider clients."""
 
 import pytest
+from langchain_openai import ChatOpenAI
 
 import citarilo.index as index_module
+import citarilo.pipeline as pipeline_module
 from citarilo.config import Settings
 
 
@@ -15,3 +17,6 @@ def isolate_credentials(monkeypatch: pytest.MonkeyPatch) -> None:
         pytest.fail("Tests must inject a fake OpenAI client")
 
     monkeypatch.setattr(index_module, "OpenAI", forbidden)
+    monkeypatch.setattr(ChatOpenAI, "__init__", forbidden)
+    monkeypatch.setattr(pipeline_module, "ChatOpenAI", forbidden)
+    monkeypatch.setattr(pipeline_module, "_UsageValidatedOpenAI", forbidden)

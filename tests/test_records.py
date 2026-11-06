@@ -71,6 +71,7 @@ def record_data() -> dict:
         "check_results": (CheckResult(claim_index=0, ok=True),),
         "verdicts": (ClaimVerdict(claim_index=0, verdict="supported", reason="Explicit deadline"),),
         "status": "answered",
+        "answer_language": "en",
         "claims": (claim,),
         "sources": (source,),
         "calls": (
@@ -112,12 +113,14 @@ def test_answered_record_and_public_projection(record_data: dict) -> None:
     assert response.claims == record.claims
     assert response.sources == record.sources
     assert response.refusal_code is None
+    assert response.answer_language == record.answer_language == "en"
     assert record.schema_version == SCHEMA_VERSION == 1
     public = json.loads(response.model_dump_json())
     assert set(public) == {
         "run_id",
         "mode",
         "status",
+        "answer_language",
         "refusal_code",
         "claims",
         "sources",
@@ -144,17 +147,21 @@ def test_answered_record_and_public_projection(record_data: dict) -> None:
     "code", ["insufficient_evidence", "check_failed", "unsupported", "contradicted"]
 )
 def test_refused_records_keep_audit_but_expose_no_claims(record_data: dict, code: str) -> None:
-    record_data.update(status="refused", refusal_code=code, claims=(), sources=())
+    record_data.update(
+        status="refused", refusal_code=code, claims=(), sources=(), answer_language=None
+    )
     record = RunRecord(**record_data)
     assert record.candidate_claims
     assert record.to_response().status == "refused"
     assert record.to_response().refusal_code == code
     assert record.to_response().claims == record.to_response().sources == ()
+    assert record.answer_language is record.to_response().answer_language is None
 
 
 def test_error_record_preserves_partial_usage_and_failed_timing(record_data: dict) -> None:
     record_data.update(
         status="error",
+        answer_language=None,
         claims=(),
         sources=(),
         error=RunError(code="provider_failure", message="Provider request failed"),
@@ -187,7 +194,12 @@ def test_modes_and_replay_contract(record_data: dict, mode: str) -> None:
         ({"status": "refused", "refusal_code": "unsupported"}, "only answered"),
         ({"sources": ()}, "exactly the cited"),
         ({"error": {"code": "oops", "message": "Failure"}}, "only error"),
-        ({"status": "error", "claims": (), "sources": ()}, "error details"),
+        (
+            {"status": "error", "claims": (), "sources": (), "answer_language": None},
+            "error details",
+        ),
+        ({"answer_language": None}, "requires answer_language"),
+        ({"answer_language": "de"}, "answer_language"),
         ({"origin": "eval"}, "eval_case_id"),
         ({"eval_case_id": "case-1"}, "only eval"),
         ({"candidate_claims": ()}, "match all candidate"),
@@ -213,6 +225,29 @@ def test_modes_and_replay_contract(record_data: dict, mode: str) -> None:
 def test_invalid_run_fields(record_data: dict, changes: dict, match: str) -> None:
     with pytest.raises(ValidationError, match=match):
         RunRecord(**(record_data | changes))
+
+
+@pytest.mark.parametrize("language", ["en", "cs"])
+def test_answer_language_round_trip(record_data: dict, tmp_path: Path, language: str) -> None:
+    record = RunRecord(**(record_data | {"answer_language": language}))
+    assert read_record(write_record(record, tmp_path)).answer_language == language
+    response = AskResponse.model_validate_json(record.to_response().model_dump_json())
+    assert response.answer_language == language
+
+
+@pytest.mark.parametrize("status", ["refused", "error"])
+def test_non_answered_records_reject_answer_language(record_data: dict, status: str) -> None:
+    record_data.update(status=status, claims=(), sources=())
+    if status == "refused":
+        record_data["refusal_code"] = "unsupported"
+    else:
+        record_data["error"] = RunError(code="provider_error", message="Request failed.")
+    with pytest.raises(ValidationError, match="only answered may have one"):
+        RunRecord(**record_data)
+    if status == "refused":
+        public = RunRecord(**(record_data | {"answer_language": None})).to_response().model_dump()
+        with pytest.raises(ValidationError, match="only answered may have one"):
+            AskResponse(**(public | {"answer_language": "cs"}))
 
 
 @pytest.mark.parametrize("field", ["sources", "check_results", "verdicts"])
@@ -270,6 +305,8 @@ def test_eval_origin_timestamp_normalization_and_default_id(record_data: dict) -
         {"prompts": []},
         {"config": {}},
         {"verdicts": []},
+        {"answer_language": None},
+        {"answer_language": "de"},
     ],
 )
 def test_response_rejects_invalid_results_and_internal_fields(record_data: dict, changes: dict):

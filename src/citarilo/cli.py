@@ -21,6 +21,14 @@ from citarilo.index import (
     build_index,
     estimate_ingest,
 )
+from citarilo.pipeline import (
+    AnswerContext,
+    InvalidQuestionError,
+    PipelineError,
+    answer,
+    create_live_context,
+    validate_question,
+)
 
 
 def main(
@@ -28,8 +36,9 @@ def main(
     *,
     settings: Settings | None = None,
     client: EmbeddingsClient | None = None,
+    context: AnswerContext | None = None,
 ) -> None:
-    """Run a subcommand; settings and the embedding client are injectable for tests."""
+    """Run a subcommand; settings, embedding client and answer context are injectable."""
     parser = argparse.ArgumentParser(
         prog="citarilo",
         description="Evidence-backed customer support for TrailSupply.",
@@ -40,6 +49,8 @@ def main(
     ingest.add_argument(
         "--dry-run", action="store_true", help="Estimate tokens and cost without network access."
     )
+    ask = commands.add_parser("ask", help="Answer a question with verified sentence citations.")
+    ask.add_argument("question", help="A question in English or Czech (3–500 characters).")
     evaluate = commands.add_parser("eval", help="Evaluate section retrieval with a run budget.")
     evaluate.add_argument("--retrieval", action="store_true", required=True)
     evaluate.add_argument("--max-usd", help="Maximum USD spend for this evaluation run.")
@@ -62,16 +73,22 @@ def main(
                 parser.exit(1, "citarilo: error: --max-usd must be a finite positive amount.\n")
     try:
         # A dry run never needs credentials, including the contents of a local .env.
-        settings = (
-            settings
-            if settings is not None
-            else (Settings(_env_file=None, openai_api_key=None) if args.dry_run else Settings())
-        )
+        if settings is None and context is not None and args.command == "ask":
+            settings = context.settings
+        if settings is None:
+            settings = (
+                Settings(_env_file=None, openai_api_key=None)
+                if getattr(args, "dry_run", False)
+                else Settings()
+            )
     except ValidationError:
         parser.exit(1, "citarilo: error: Invalid settings; check the environment and .env file.\n")
     try:
         if args.command == "ingest":
             _ingest(settings, dry_run=args.dry_run, client=client)
+        elif args.command == "ask":
+            validate_question(args.question)
+            _ask(args.question, context=context or create_live_context(settings))
         else:
             passed = _eval(
                 settings, dry_run=args.dry_run, max_usd=max_usd, split=args.split, client=client
@@ -90,12 +107,35 @@ def main(
         parser.exit(
             1, "citarilo: error: Index mismatch or corruption; run citarilo ingest explicitly.\n"
         )
+    except InvalidQuestionError:
+        parser.exit(1, "citarilo: error: Question must contain 3–500 characters.\n")
+    except PipelineError as exc:
+        parser.exit(1, f"citarilo: error: {exc.code}: {exc.message}\n")
     except Exception:
         # Provider errors can contain request details or credentials. Do not echo them.
-        operation = "Ingest" if args.command == "ingest" else "Retrieval evaluation"
+        operation = {"ingest": "Ingest", "ask": "Answer", "eval": "Retrieval evaluation"}[
+            args.command
+        ]
         parser.exit(
             1, f"citarilo: error: {operation} failed; check configuration and the spend ledger.\n"
         )
+
+
+def _ask(question: str, *, context: AnswerContext) -> None:
+    record = answer(question, context=context, origin="api")
+    if record.status == "refused":
+        print(f"Refused: {record.refusal_code}.")
+    else:
+        for number, claim in enumerate(record.claims, start=1):
+            citations = ", ".join(claim.citations)
+            print(f"{number}. {claim.text} [{citations}]")
+        print("\nCited sentences (Czech):")
+        for source in record.sources:
+            print(f"[{source.sentence_id}] {source.text}")
+    print(
+        f"Cost ${record.metrics.cost_usd:.6f}; "
+        f"remaining budget ${context.ledger.remaining_usd():.6f}."
+    )
 
 
 def _eval(

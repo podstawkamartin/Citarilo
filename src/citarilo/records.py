@@ -30,6 +30,7 @@ type Status = Literal["answered", "refused", "error"]
 type RefusalCode = Literal["insufficient_evidence", "check_failed", "unsupported", "contradicted"]
 type Verdict = Literal["supported", "unsupported", "contradicted"]
 type Origin = Literal["api", "eval"]
+type AnswerLanguage = Literal["en", "cs"]
 type Text = Annotated[str, StringConstraints(min_length=1)]
 type TokenCount = Annotated[int, Field(ge=0, strict=True)]
 type Milliseconds = Annotated[float, Field(ge=0, allow_inf_nan=False)]
@@ -196,6 +197,7 @@ def _validate_final(
     refusal_code: RefusalCode | None,
     claims: tuple[Claim, ...],
     sources: tuple[Source, ...],
+    answer_language: AnswerLanguage | None,
 ) -> None:
     if (status == "refused") != (refusal_code is not None):
         raise ValueError("refused status requires a refusal_code, and only refused may have one")
@@ -203,6 +205,8 @@ def _validate_final(
         raise ValueError("answered status requires at least one claim")
     if status != "answered" and claims:
         raise ValueError("only answered status may expose claims")
+    if (status == "answered") != (answer_language is not None):
+        raise ValueError("answered status requires answer_language, and only answered may have one")
     cited = {citation for claim in claims for citation in claim.citations}
     source_ids = [source.sentence_id for source in sources]
     if len(set(source_ids)) != len(source_ids):
@@ -217,6 +221,7 @@ class AskResponse(RecordModel):
     run_id: Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")]
     mode: Mode
     status: Literal["answered", "refused"]
+    answer_language: AnswerLanguage | None = None
     refusal_code: RefusalCode | None = None
     claims: tuple[Claim, ...] = ()
     sources: tuple[Source, ...] = ()
@@ -224,7 +229,9 @@ class AskResponse(RecordModel):
 
     @model_validator(mode="after")
     def validate_final(self) -> Self:
-        _validate_final(self.status, self.refusal_code, self.claims, self.sources)
+        _validate_final(
+            self.status, self.refusal_code, self.claims, self.sources, self.answer_language
+        )
         return self
 
 
@@ -256,6 +263,7 @@ class RunRecord(RecordModel):
     check_results: tuple[CheckResult, ...] = ()
     verdicts: tuple[ClaimVerdict, ...] = ()
     status: Status
+    answer_language: AnswerLanguage | None = None
     refusal_code: RefusalCode | None = None
     claims: tuple[Claim, ...] = ()
     sources: tuple[Source, ...] = ()
@@ -273,7 +281,9 @@ class RunRecord(RecordModel):
 
     @model_validator(mode="after")
     def validate_run(self) -> Self:
-        _validate_final(self.status, self.refusal_code, self.claims, self.sources)
+        _validate_final(
+            self.status, self.refusal_code, self.claims, self.sources, self.answer_language
+        )
         if (self.origin == "eval") != (self.eval_case_id is not None):
             raise ValueError("eval origin requires an eval_case_id, and only eval may have one")
         if (self.status == "error") != (self.error is not None):
@@ -320,6 +330,7 @@ class RunRecord(RecordModel):
             run_id=self.run_id,
             mode=self.mode,
             status=self.status,
+            answer_language=self.answer_language,
             refusal_code=self.refusal_code,
             claims=self.claims,
             sources=self.sources,
