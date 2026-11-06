@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     generation_model: str = "gpt-6-luna"
     verification_model: str = "gpt-6-luna"
     embedding_model: str = "text-embedding-3-large"
+    embedding_dimensions: int = Field(default=3072, gt=0)
+    embedding_batch_size: int = Field(default=2048, gt=0, le=2048)
+    top_k: int = Field(default=5, gt=0)
     generation_reasoning_effort: ReasoningEffort = "none"
     verification_reasoning_effort: ReasoningEffort = "low"
     call_timeout_seconds: float = Field(default=30.0, gt=0)
@@ -60,6 +63,10 @@ class Settings(BaseSettings):
     @property
     def index_path(self) -> Path:
         return self.runtime_dir / "index.json"
+
+    @property
+    def index_manifest_path(self) -> Path:
+        return self.runtime_dir / "index.manifest.json"
 
     @property
     def runs_dir(self) -> Path:
