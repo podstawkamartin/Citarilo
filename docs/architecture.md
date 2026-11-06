@@ -23,10 +23,10 @@ flowchart TD
         VR --> A["assemble<br/>odpověď jen z ověřených tvrzení"]
     end
 
-    LG -.->|chyba poskytovatele| E502[["502"]]
     A --> REC["Záznam běhu a vyúčtování<br/>.runtime/runs/*.json"]
     X --> REC
     REC --> OUT(["200 JSON<br/>answered nebo refused"])
+    REC -.->|chyba poskytovatele| E502[["502"]]
 ```
 
 Zásady toku:
@@ -37,6 +37,7 @@ Zásady toku:
   vyčerpaný rozpočet je chyba (502/503), nikdy se nevydává za odmítnutí.
 - Validace, limity, rozpočet a uložení záznamu jsou mimo graf. Graf řídí
   pouze rozhodování o důkazech.
+- Záznam běhu a vyúčtování se uloží i při chybě poskytovatele.
 
 ## Data, příkazy a úložiště
 
