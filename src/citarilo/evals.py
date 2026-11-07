@@ -177,6 +177,87 @@ def load_probes(path: Path) -> list[VerifierProbe]:
     return _load_jsonl(path, VerifierProbe)
 
 
+class EvidenceMappingError(ValueError):
+    """Evaluation evidence cannot be identified exactly in the selected corpus."""
+
+
+_CANONICAL_DATA_DIR = Path(__file__).resolve().parents[2] / "data/trailsupply"
+
+
+class _EvidenceResolver:
+    def __init__(self, corpus: Corpus) -> None:
+        self.corpus = corpus
+        self.reference = load_corpus(_CANONICAL_DATA_DIR)
+        self.by_text: dict[str, list[str]] = {}
+        for sentence in corpus.sentences():
+            self.by_text.setdefault(sentence.text, []).append(sentence.id)
+
+    def sentence(self, sentence_id: str) -> str:
+        try:
+            text = self.reference.sentence(sentence_id).text
+        except (KeyError, ValueError) as exc:
+            raise EvidenceMappingError(
+                f"No canonical sentence for evaluation ID {sentence_id}"
+            ) from exc
+        if self.corpus.corpus_hash == self.reference.corpus_hash:
+            try:
+                actual = self.corpus.sentence(sentence_id).text
+            except KeyError as exc:
+                raise EvidenceMappingError(
+                    f"Missing canonical evaluation ID {sentence_id}"
+                ) from exc
+            if actual != text:
+                raise EvidenceMappingError(f"Canonical evaluation ID {sentence_id}: text mismatch")
+        matches = self.by_text.get(text, [])
+        if len(matches) != 1:
+            raise EvidenceMappingError(
+                f"Cannot map evaluation ID {sentence_id}: expected one exact sentence text match, "
+                f"found {len(matches)} in the active corpus"
+            )
+        return matches[0]
+
+    def section(self, key: str) -> str:
+        try:
+            section = self.reference.section(key)
+        except KeyError as exc:
+            raise EvidenceMappingError(f"No canonical section for evaluation key {key}") from exc
+        targets = {self.sentence(s.id).rsplit(".", 1)[0] for s in section.sentences}
+        if len(targets) != 1:
+            raise EvidenceMappingError(f"Evaluation section {key} maps to multiple sections")
+        return targets.pop()
+
+
+def resolve_cases(cases: list[EvalCase], corpus: Corpus) -> list[EvalCase]:
+    """Resolve every evidence reference through verified, unique canonical sentence text."""
+    resolver = _EvidenceResolver(corpus)
+    return [
+        EvalCase.model_validate(
+            case.model_dump()
+            | {
+                "supporting_sentence_ids": tuple(
+                    resolver.sentence(s) for s in case.supporting_sentence_ids
+                ),
+                "expected_section_keys": tuple(
+                    resolver.section(s) for s in case.expected_section_keys
+                ),
+            }
+        )
+        for case in cases
+    ]
+
+
+def resolve_probes(probes: list[VerifierProbe], corpus: Corpus) -> list[VerifierProbe]:
+    resolver = _EvidenceResolver(corpus)
+    return [
+        probe.model_copy(
+            update={
+                "cited_sentence_ids": tuple(resolver.sentence(s) for s in probe.cited_sentence_ids)
+            }
+        )
+        for probe in probes
+    ]
+
+
 class RetrievalHit(BaseModel):
     """A ranked section and its cosine similarity, without duplicating corpus text."""
 
@@ -273,6 +354,7 @@ def evaluate_retrieval(
         raise ValueError("Expected nonempty evaluation cases from the selected split")
     estimate_retrieval(cases, settings)  # Validate all inputs before any paid request.
     corpus = load_corpus(settings.data_dir)
+    cases = resolve_cases(cases, corpus)
     ledger = BudgetLedger(
         settings.spend_db_path,
         settings.budget_cap_usd,
@@ -473,6 +555,7 @@ def _validate_cap(max_usd: Decimal) -> None:
 
 def estimate_answers(cases: list[EvalCase], settings: Settings) -> Decimal:
     corpus = load_corpus(settings.data_dir)
+    cases = resolve_cases(cases, corpus)
     return sum(
         (pipeline.estimate_answer(case.question, corpus, settings) for case in cases), Decimal(0)
     )
@@ -564,6 +647,7 @@ def evaluate_answers(
         raise ValueError("Expected unique, nonempty cases from the selected split")
     for case in cases:
         pipeline.validate_question(case.question)
+    cases = resolve_cases(cases, context.corpus if context else load_corpus(settings.data_dir))
     group_id = f"answers-{uuid4().hex}"
     ledger = context.ledger if context else _ledger(settings)
     ledger.open_group(group_id, max_usd)
@@ -638,6 +722,7 @@ def _probe_input(
 
 def estimate_probes(probes: list[VerifierProbe], settings: Settings) -> Decimal:
     corpus = load_corpus(settings.data_dir)
+    probes = resolve_probes(probes, corpus)
     return sum(
         (
             pipeline.reservation_cost(
@@ -664,6 +749,7 @@ def evaluate_probes(
     if not probes or len({p.id for p in probes}) != len(probes):
         raise ValueError("Expected unique, nonempty probes")
     corpus = load_corpus(settings.data_dir)
+    probes = resolve_probes(probes, corpus)
     inputs = [_probe_input(p, corpus) for p in probes]
     group_id = f"probes-{uuid4().hex}"
     ledger = context.ledger if context else _ledger(settings)

@@ -66,6 +66,7 @@ tests/
 |---|---|
 | `config.py` | Nastavení, klíče (`SecretStr`), modely, ceník, limity |
 | `corpus.py` | Markdown → sekce a věty se stabilními ID, hash korpusu |
+| `importer.py` | Lokální PDF/DOCX/Markdown → normalizovaný korpus bez sítě |
 | `index.py` | Embeddingy se spotřebou, index s manifestem, vyhledávání |
 | `pipeline.py` | LangGraph graf, prompty, schémata, kontroly |
 | `budget.py` | Rezervace a vyúčtování v SQLite, strop |
@@ -132,6 +133,46 @@ tests/
 - Otázky anglicky i česky (i bez diakritiky). Odpověď je v jazyce otázky
   (`answer_language`, pro atribut `lang` ve frontendu), zdroje v původní
   češtině. Rozhraní, kód a důvody ověřovače jsou anglicky.
+
+## Import vlastních dokumentů
+
+`citarilo import SRC... --out DIR [--force]` převádí lokální PDF s textovou
+vrstvou, DOCX a UTF-8 Markdown. Nečte nastavení ani klíče, nevolá síť,
+pluginy, OCR ani modely.
+Import je určen pro soubory dodané správcem, nikoli pro nedůvěryhodné uploady.
+Skenované PDF bez textu odmítne; OCR musí správce zajistit předem.
+Text i rozvržení PDF čte pdfplumber (MIT), odstavce a styly DOCX čte
+python-docx (MIT), XML archivů chrání defusedxml (PSF). Markdown se čte
+přímo jako UTF-8 text.
+
+Výstup je standardní korpus: H1, volitelná citace v úvodu, H2 sekce a jedna
+věta na řádek. ID dokumentu vychází z názvu souboru; ID sekce z nadpisu bez
+diakritiky, kolize dostávají přípony `-2`, `-3`. Pořadí vět určuje jejich ID.
+Deterministická česká pravidla chrání data, časy, pořadová čísla, zkratky,
+částky, URL a e-maily. Import spojuje zalomené řádky; odstraní pouze měkké
+spojovníky, tvrdé zachová a jejich spojení vypíše ke kontrole. U PDF
+odstraňuje pouze opakované texty a číslování v okrajích a odhaduje nadpisy podle
+velikosti písma. Text před první sekcí zachová v `Introduction` s upozorněním.
+Nejednoznačné zkratky na konci vět a složité PDF sazby vyžadují kontrolu
+normalizovaného výstupu. PDF tabulky a více sloupců odmítá; v DOCX odmítá
+tabulky, sledované změny, ovládací prvky obsahu a textová pole. Správce musí
+změny přijmout či odmítnout a nepodporované struktury převést na prostý text
+nebo Markdown před importem.
+
+Limit vstupu je 20 MiB na soubor, PDF nejvýše 100 stran, DOCX nejvýše
+2 000 ZIP položek a 40 MiB rozbaleného obsahu. Makra, vložené objekty,
+externí DOCX vztahy a XML entity jsou odmítnuty. Platí také limity korpusu
+(256 KiB na výsledný dokument, 4 096 znaků na řádek). Nad 600 znaků na větu
+se vypíše upozornění. Celá dávka se validuje před publikací souborů; existující
+cíl vyžaduje `--force`. Původní zdroje nelze přepsat ani s tímto přepínačem.
+
+Správce nastaví `DATA_DIR` na výsledný adresář a explicitně spustí
+`citarilo ingest`. Změněná ID mění hash korpusu; starý index se odmítne
+standardní kontrolou manifestu. Testovací surové dokumenty v
+`examples/trailsupply-raw/` sestaví `uv run python scripts/build_sample_documents.py`
+ze stejných vět jako `data/trailsupply`. Písmo Liberation Sans je přiloženo
+s licencí SIL OFL 1.1 a v PDF vloženo. ReportLab (BSD) je závislost pouze
+pro vývoj.
 
 ## Ověřování citací
 

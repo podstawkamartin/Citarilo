@@ -91,6 +91,29 @@ uv run citarilo eval --live --max-usd 0.05
 uv run citarilo eval --probes --max-usd 0.05
 ```
 
+## Vlastní dokumenty
+
+`citarilo import` převede firemní dokumenty (PDF s textovou vrstvou, DOCX,
+Markdown) do formátu, ze kterého Citarilo cituje: sekce podle nadpisů a jedna
+věta na řádek se stabilním ID. Výstup je čitelný Markdown ke kontrole před
+indexací.
+
+```sh
+uv run citarilo import ~/dokumenty/*.pdf ~/dokumenty/*.docx --out data/firma
+# zkontrolovat data/firma/*.md, potom v .env nastavit DATA_DIR=data/firma
+uv run citarilo ingest
+```
+
+Import raději odmítne, než aby tiše ztratil nebo přeházel text: naskenovaná
+PDF bez textu, tabulky, vícesloupcovou sazbu, sledované změny a další
+nepodporované struktury hlásí s návodem na úpravu. Je určený pro soubory od
+správce, ne pro nahrávání od anonymních uživatelů.
+
+Stejné testovací dokumenty jsou i ve firemních formátech v
+[examples/trailsupply-raw](examples/trailsupply-raw) (PDF, DOCX, Markdown).
+Po importu dávají přesně stejné věty a evaluace nad nimi běží beze změny
+(vývojová sada 7. 11. 2026: recall@5 1,00; 20 z 21 očekávaných stavů).
+
 ## API
 
 | Endpoint | Popis |
@@ -129,6 +152,6 @@ Actions.
 ## Omezení
 
 Vědomě vynecháno: streamování, hybridní vyhledávání a reranking, vektorová
-databáze, konverzace, nahrávání dokumentů, Docker a napojení na obchodní
-systémy. Ověření kombinuje deterministické filtry a kontrolu modelem, takže
+databáze, konverzace, nahrávání dokumentů přes webové rozhraní, OCR, Docker
+a napojení na obchodní systémy. Ověření kombinuje deterministické filtry a kontrolu modelem, takže
 není důkazem pravdivosti; jeho chybovost se měří. Data jsou fiktivní.

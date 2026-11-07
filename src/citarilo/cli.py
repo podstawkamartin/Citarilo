@@ -16,6 +16,7 @@ from citarilo.budget import BudgetExceeded, BudgetLedger, actual_cost
 from citarilo.config import Settings
 from citarilo.corpus import CorpusError, load_corpus
 from citarilo.evals import (
+    EvidenceMappingError,
     estimate_answers,
     estimate_probes,
     estimate_retrieval,
@@ -58,6 +59,10 @@ def main(
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     commands = parser.add_subparsers(dest="command")
+    importing = commands.add_parser("import", help="Convert local PDF, DOCX and MD into a corpus.")
+    importing.add_argument("sources", nargs="+", type=Path, metavar="SRC")
+    importing.add_argument("--out", required=True, type=Path, metavar="DIR")
+    importing.add_argument("--force", action="store_true", help="Replace existing output files.")
     ingest = commands.add_parser("ingest", help="Build and persist the section vector index.")
     ingest.add_argument(
         "--dry-run", action="store_true", help="Estimate tokens and cost without network access."
@@ -78,6 +83,21 @@ def main(
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
+        return
+    if args.command == "import":
+        from citarilo.importer import DocumentImportError, import_documents
+
+        # Import is entirely offline and never loads settings or a local .env.
+        try:
+            report = import_documents(args.sources, args.out, force=args.force)
+        except (DocumentImportError, OSError) as exc:
+            parser.exit(1, f"citarilo: error: {exc}\n")
+        print(
+            f"Imported {report.documents} documents; {report.sections} sections; "
+            f"{report.sentences} sentences; {len(report.warnings)} warnings."
+        )
+        for warning in report.warnings:
+            print(f"Warning: {warning}")
         return
     max_usd = None
     if args.command == "eval" and (args.grading_template or args.summarize):
@@ -177,6 +197,8 @@ def main(
         )
     except InvalidQuestionError:
         parser.exit(1, "citarilo: error: Question must contain 3–500 characters.\n")
+    except EvidenceMappingError as exc:
+        parser.exit(1, f"citarilo: error: {exc}\n")
     except PipelineError as exc:
         parser.exit(1, f"citarilo: error: {exc.code}: {exc.message}\n")
     except Exception:

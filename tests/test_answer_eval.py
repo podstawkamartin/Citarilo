@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 from langchain_core.runnables import RunnableLambda
-from test_pipeline import rig as rig
+from test_pipeline import rig as pipeline_rig  # noqa: F401
 from test_pipeline import structured
 
 import citarilo.cli as cli
@@ -17,6 +17,13 @@ from citarilo.evals import EvalCase, VerifierProbe, evaluate_answers, evaluate_p
 from citarilo.grading import grading_template, summarize, write_grading_template
 from citarilo.pipeline import VerificationContext, estimate_answer
 from citarilo.records import read_record
+
+
+@pytest.fixture
+def rig(pipeline_rig, monkeypatch):  # noqa: F811
+    # These contracts use a separate, deliberately tiny canonical test corpus.
+    monkeypatch.setattr(ev, "_CANONICAL_DATA_DIR", pipeline_rig.context.settings.data_dir)
+    return pipeline_rig
 
 
 def case(case_id="returns", *, refused=False, injection=False):

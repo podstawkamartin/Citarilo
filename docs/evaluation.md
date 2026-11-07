@@ -40,6 +40,45 @@ cost. Top-level `cost_usd` is ledger-committed spend, rounded upward per call to
 micro-USD; per-case and `metrics.cost_usd` sum unrounded known costs or conservative
 reservations. These can differ slightly. All USD amounts serialize as strings.
 
+## Imported corpora
+
+The supplied raw policy documents contain the exact canonical TrailSupply sentences
+in PDF, DOCX and natural Markdown. Import and select the resulting corpus with the
+existing `DATA_DIR` environment setting:
+
+```sh
+uv run citarilo import examples/trailsupply-raw/* --out .runtime/imported
+DATA_DIR=.runtime/imported uv run citarilo ingest --dry-run
+# The following commands spend API credits and require explicit operator authorization:
+DATA_DIR=.runtime/imported uv run citarilo ingest
+DATA_DIR=.runtime/imported uv run citarilo eval --retrieval --max-usd 0.01
+DATA_DIR=.runtime/imported uv run citarilo eval --live --max-usd 0.05
+DATA_DIR=.runtime/imported uv run citarilo eval --probes --max-usd 0.05
+```
+
+Import itself is offline and never reads `.env`. Section IDs are derived from Czech
+headings, so they differ from the canonical English IDs. Before provider calls, the
+evaluation runners always resolve references through their **exact canonical
+sentence text** in `data/trailsupply`, even when an ID already exists in the active
+corpus. For the canonical corpus, each referenced ID must also have identical text.
+Each text must have exactly one match in the active corpus; missing or ambiguous
+matches raise `EvidenceMappingError` before any spending. Expected section keys are
+resolved through their canonical sentences, which must all identify one active
+section. Verifier probes use the same sentence resolver. Reports contain the active
+IDs and corpus hash, so citation overlap and subsequent grading use the actual
+imported evidence. No fuzzy matching, semantic model or manual duplicate label set
+is involved. Run these bundled evaluations from the repository checkout, where the
+canonical reference documents and JSONL cases are available. These bundled labels
+cannot evaluate unrelated company corpora that do not contain the canonical evidence.
+
+The offline round-trip test asserts the same document titles, section headings and
+ordered sentence texts for all 146 sentences. Thus section text sent for embedding
+and evidence text sent to generation are identical. Fake-provider regressions cover
+retrieval, answer citation mapping and rebuilding the index. These tests do not
+claim a new live-model result. The imported corpus has a different hash because its
+IDs change; switching `DATA_DIR` requires explicit ingest, and the existing manifest
+checks reject an index built for the previous corpus.
+
 ## Grading workflow
 
 ```sh
