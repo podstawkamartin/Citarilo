@@ -25,13 +25,18 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 - Strukturovaný výstup modelu má striktní JSON Schema; spotřeba se vyúčtuje
   z odpovědi poskytovatele dřív, než se výstup validuje.
 - Odpověď je v jazyce otázky, zdrojové věty zůstávají v původní češtině.
+- Tvrzení uvádějí jen hodnoty z dokumentů a nic nedopočítávají (součty,
+  ceny po slevě); dopočítané číslo kontrola zamítne.
+- Všechna tři volání poskytovatele sdílejí jedno HTTP spojení s keep-alive.
 - Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
   evaluace: [docs/evaluation.md](docs/evaluation.md).
 
-## Výsledky (6. 11. 2026)
+## Výsledky (7. 11. 2026)
 
 Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
-v každém reportu v [evals/results/2026-11-06](evals/results/2026-11-06).
+v každém reportu. Odpovědi (prompt v4) jsou v
+[evals/results/2026-11-07](evals/results/2026-11-07), vyhledávání a sondy
+ověřovače v [evals/results/2026-11-06](evals/results/2026-11-06).
 Brány přijetí byly stanovené před laděním.
 
 | Měření | Vývojové (15) | Odložené (5) | Brána |
@@ -40,26 +45,28 @@ Brány přijetí byly stanovené před laděním.
 | Správně zodpovězené zodpověditelné | 91,7 % (11/12) | 100 % (4/4) | ≥ 80 % |
 | Zodpovězené nezodpověditelné | 0 ze 3 | 0 z 1 | 0 |
 | Úspěšné prompt injection | 0 ze 2 | 0 z 1 | 0 |
-| Latence p50 / max | 14,6 s / 20,7 s | 14,5 s / 20,4 s | – |
-| Cena běhu | $0.0053 | $0.0018 | – |
+| Latence p50 / max | 4,0 s / 6,6 s | 4,2 s / 5,3 s | – |
+| Cena běhu | $0.0056 | $0.0018 | – |
 
 Ověřovač na 24 sondách (12 párů „podložené / téměř správné“): 0 falešných
-přijetí, 0 falešných odmítnutí. Celá fáze 1 včetně indexace a ladění stála
-$0.013.
+přijetí, 0 falešných odmítnutí. Celá fáze 1 včetně indexace, ladění a
+měření latence stála $0.031.
 
 **Jak se hodnotilo.** Stav odpovědi, recall a sondy jsou deterministické.
 Sémantickou správnost (povinná fakta, zakázaná tvrzení, podpora každé citace)
 hodnotil agent v T3 s jiným, silnějším modelem než aplikace (`gpt-6-astra`),
 bez nákladů z API. Jde o hodnocení agentem, ne o lidskou anotaci; ruční
-namátková kontrola hraničních případů zatím neproběhla. Odložené případy se při ladění nepoužily
-a spustily se jednou.
+namátková kontrola hraničních případů zatím neproběhla. Odložené případy se
+při ladění nepoužily; spouštějí se jednou pro každou finální verzi promptu.
 
-**Jediná chyba ve vývojové sadě:** u otázky na cenu zpětného štítku odpověď
-uvedla 79 Kč, ale vynechala, že se částka odečítá z vracené částky.
+**Jediná chyba ve vývojové sadě:** u pozdního storna půjčovny odpověď uvedla
+správný poplatek 30 %, ale necitovala větu se sedmidenní hranicí, ze které
+plyne; ověřovač to nezachytil.
 
 Vzorek je malý (16 zodpověditelných případů), takže čísla dokládají funkčnost
 a bezpečné chování, ne statisticky přesnou míru chybovosti. Latenci tvoří tři
-po sobě jdoucí volání poskytovatele (embedding, generování, ověření).
+po sobě jdoucí volání poskytovatele (embedding, generování, ověření); většinu
+času zabírá generování a ověření na straně modelu.
 
 ## Spuštění
 
