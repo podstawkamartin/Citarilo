@@ -211,7 +211,11 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.api = await run_in_threadpool(_load_state, settings, context_factory)
-        yield
+        try:
+            yield
+        finally:
+            if app.state.api.context is not None:
+                await run_in_threadpool(app.state.api.context.close)
 
     app = FastAPI(title="Citarilo", version=__version__, lifespan=lifespan)
     app.add_middleware(_APIGuards)

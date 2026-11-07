@@ -93,6 +93,7 @@ Soubory vznikají postupně s kódem, ne předem.
   `Embeddings` ji zahazuje. Tenký adaptér nad OpenAI SDK implementuje
   totéž rozhraní a spotřebu zachová.
 - Časy uzlů měří malý obal s `perf_counter`, který zachytí i selhání.
+- Živý kontext vlastní a zavírá sdíleného HTTP klienta pro embeddingy i oba modely s expirací nečinných spojení 60 s.
 - Neparsovatelný výstup modelu je chyba 502, ne odmítnutí.
 
 ## Modely a nastavení

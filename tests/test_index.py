@@ -204,6 +204,7 @@ def test_sdk_and_secret_are_lazy_and_retries_disabled(
             "api_key": "fake-test-key",
             "timeout": settings.call_timeout_seconds,
             "max_retries": 0,
+            "http_client": None,
         },
     ]
     assert "fake-test-key" not in repr(adapter)

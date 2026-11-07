@@ -15,6 +15,7 @@ from tempfile import TemporaryDirectory
 from time import perf_counter
 from typing import Literal, Protocol
 
+import httpx2
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -124,6 +125,7 @@ class UsageTrackingEmbeddings(Embeddings):
         *,
         group_id: str | None = None,
         client: EmbeddingsClient | None = None,
+        http_client: httpx2.Client | None = None,
         operation: str = "embedding",
     ) -> None:
         self.settings = settings
@@ -132,6 +134,7 @@ class UsageTrackingEmbeddings(Embeddings):
         self.operation = operation
         self.usage: list[EmbeddingUsage] = []
         self._client = client
+        self._http_client = http_client
 
     def _get_client(self) -> EmbeddingsClient:
         if self._client is None:
@@ -142,6 +145,7 @@ class UsageTrackingEmbeddings(Embeddings):
                 api_key=key,
                 timeout=self.settings.call_timeout_seconds,
                 max_retries=0,
+                http_client=self._http_client,
             )
         return self._client
 

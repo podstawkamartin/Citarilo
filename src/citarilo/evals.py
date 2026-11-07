@@ -10,6 +10,7 @@ Heldout cases are reserved for one final evaluation, not iterative tuning.
 import json
 import os
 import tempfile
+from contextlib import closing, nullcontext
 from copy import copy
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -566,6 +567,7 @@ def evaluate_answers(
     group_id = f"answers-{uuid4().hex}"
     ledger = context.ledger if context else _ledger(settings)
     ledger.open_group(group_id, max_usd)
+    owns_context = context is None
     if context is None:
         context = pipeline.create_live_context(settings, group_id=group_id)
     else:
@@ -577,43 +579,46 @@ def evaluate_answers(
         store = copy(context.store)
         store.embedding = embeddings
         context = replace(context, embeddings=embeddings, store=store, group_id=group_id)
-    created_at, git = datetime.now(UTC), get_git_info()
-    results = [_answer_result(c, None) for c in cases]
-    run_error = None
-    try:
-        for i, case in enumerate(cases):
-            try:
-                record = pipeline.answer(
-                    case.question, context=context, origin="eval", eval_case_id=case.id
-                )
-                results[i] = _answer_result(case, record)
-            except BudgetExceeded as exc:
-                results[i] = _answer_result(case, getattr(exc, "record", None), "budget_exceeded")
-                run_error = "budget_exceeded"
-                break
-            except pipeline.PipelineError as exc:
-                results[i] = _answer_result(case, exc.record, exc.code)
-    except BaseException:
-        run_error = "interrupted"
-        raise
-    finally:
-        report = AnswerReport(
-            created_at=created_at,
-            git=git,
-            corpus_hash=context.corpus.corpus_hash,
-            config=ConfigSnapshot.from_settings(settings, top_k=settings.top_k),
-            mode=context.mode,
-            group_id=group_id,
-            max_usd=max_usd,
-            split=split,
-            cases=tuple(results),
-            complete=run_error is None,
-            error=run_error,
-            metrics=answer_metrics(results),
-            cost_usd=ledger.group_spent_usd(group_id),
-        )
-        path = _save_evaluation(report, settings)
-    return report, path
+    with closing(context) if owns_context else nullcontext(context):
+        created_at, git = datetime.now(UTC), get_git_info()
+        results = [_answer_result(c, None) for c in cases]
+        run_error = None
+        try:
+            for i, case in enumerate(cases):
+                try:
+                    record = pipeline.answer(
+                        case.question, context=context, origin="eval", eval_case_id=case.id
+                    )
+                    results[i] = _answer_result(case, record)
+                except BudgetExceeded as exc:
+                    results[i] = _answer_result(
+                        case, getattr(exc, "record", None), "budget_exceeded"
+                    )
+                    run_error = "budget_exceeded"
+                    break
+                except pipeline.PipelineError as exc:
+                    results[i] = _answer_result(case, exc.record, exc.code)
+        except BaseException:
+            run_error = "interrupted"
+            raise
+        finally:
+            report = AnswerReport(
+                created_at=created_at,
+                git=git,
+                corpus_hash=context.corpus.corpus_hash,
+                config=ConfigSnapshot.from_settings(settings, top_k=settings.top_k),
+                mode=context.mode,
+                group_id=group_id,
+                max_usd=max_usd,
+                split=split,
+                cases=tuple(results),
+                complete=run_error is None,
+                error=run_error,
+                metrics=answer_metrics(results),
+                cost_usd=ledger.group_spent_usd(group_id),
+            )
+            path = _save_evaluation(report, settings)
+        return report, path
 
 
 PROBE_QUESTION = "Verify the candidate claim using only its cited evidence."
@@ -665,102 +670,104 @@ def evaluate_probes(
     ledger.open_group(group_id, max_usd)
     if context is not None and context.settings is not settings:
         raise ValueError("Evaluation settings must match the context")
+    owns_context = context is None
     context = (
         replace(context, group_id=group_id)
         if context
         else pipeline.create_verification_context(settings, ledger, group_id)
     )
-    created_at, git = datetime.now(UTC), get_git_info()
-    results = [
-        ProbeResult(probe=p, claim=claim, retrieved_sections=sections)
-        for p, (claim, sections) in zip(probes, inputs, strict=True)
-    ]
-    error = None
-    try:
-        for i, result in enumerate(results):
-            local = replace(context, recorder=pipeline.Recorder())
-            started = perf_counter()
-            verdict = problem = None
-            try:
-                verdict = pipeline.verify_claims(
-                    PROBE_QUESTION, (result.claim,), result.retrieved_sections, context=local
-                )[0]
-            except BudgetExceeded:
-                error = "budget_exceeded"
-                problem = RunError(
-                    code=error, message="The request cannot fit the remaining budget."
+    with closing(context) if owns_context else nullcontext(context):
+        created_at, git = datetime.now(UTC), get_git_info()
+        results = [
+            ProbeResult(probe=p, claim=claim, retrieved_sections=sections)
+            for p, (claim, sections) in zip(probes, inputs, strict=True)
+        ]
+        error = None
+        try:
+            for i, result in enumerate(results):
+                local = replace(context, recorder=pipeline.Recorder())
+                started = perf_counter()
+                verdict = problem = None
+                try:
+                    verdict = pipeline.verify_claims(
+                        PROBE_QUESTION, (result.claim,), result.retrieved_sections, context=local
+                    )[0]
+                except BudgetExceeded:
+                    error = "budget_exceeded"
+                    problem = RunError(
+                        code=error, message="The request cannot fit the remaining budget."
+                    )
+                except pipeline.PipelineError as exc:
+                    problem = RunError(code=exc.code, message=exc.message)
+                results[i] = result.model_copy(
+                    update={
+                        "run_id": uuid4().hex,
+                        "verdict": verdict,
+                        "error": problem,
+                        "calls": tuple(local.recorder.calls),
+                        "latency_ms": (perf_counter() - started) * 1000,
+                        "cost_usd": sum((c.cost_usd for c in local.recorder.calls), Decimal(0)),
+                    }
                 )
-            except pipeline.PipelineError as exc:
-                problem = RunError(code=exc.code, message=exc.message)
-            results[i] = result.model_copy(
-                update={
-                    "run_id": uuid4().hex,
-                    "verdict": verdict,
-                    "error": problem,
-                    "calls": tuple(local.recorder.calls),
-                    "latency_ms": (perf_counter() - started) * 1000,
-                    "cost_usd": sum((c.cost_usd for c in local.recorder.calls), Decimal(0)),
-                }
+                if error:
+                    break
+        except BaseException:
+            error = "interrupted"
+            raise
+        finally:
+            judged = [r for r in results if r.verdict is not None]
+            false_accepts = sum(
+                r.probe.expected_verdict != "supported" and r.verdict.verdict == "supported"
+                for r in judged
             )
-            if error:
-                break
-    except BaseException:
-        error = "interrupted"
-        raise
-    finally:
-        judged = [r for r in results if r.verdict is not None]
-        false_accepts = sum(
-            r.probe.expected_verdict != "supported" and r.verdict.verdict == "supported"
-            for r in judged
-        )
-        false_rejects = sum(
-            r.probe.expected_verdict == "supported" and r.verdict.verdict != "supported"
-            for r in judged
-        )
-        calls = [c for r in results for c in r.calls]
-        times = [r.latency_ms for r in results if r.latency_ms is not None]
-        metrics = {
-            "false_accepts": false_accepts,
-            "false_rejects": false_rejects,
-            "exact_verdict_accuracy": sum(
-                r.probe.expected_verdict == r.verdict.verdict for r in judged
+            false_rejects = sum(
+                r.probe.expected_verdict == "supported" and r.verdict.verdict != "supported"
+                for r in judged
             )
-            / len(results),
-            "latency_p50_ms": median(times) if times else None,
-            "latency_max_ms": max(times) if times else None,
-            "input_tokens": sum(c.input_tokens for c in calls),
-            "output_tokens": sum(c.output_tokens for c in calls),
-            "total_tokens": sum(c.input_tokens + c.output_tokens for c in calls),
-            "cost_usd": str(sum((r.cost_usd for r in results), Decimal(0))),
-        }
-        pairs = {}
-        for pair_id in sorted({p.pair_id for p in probes}):
-            members = [r for r in results if r.probe.pair_id == pair_id]
-            pairs[pair_id] = ProbePair(
-                probe_ids=tuple(r.probe.id for r in members),
-                complete=all(r.verdict is not None for r in members),
-                all_verdicts_correct=all(
-                    r.verdict is not None and r.verdict.verdict == r.probe.expected_verdict
-                    for r in members
-                ),
+            calls = [c for r in results for c in r.calls]
+            times = [r.latency_ms for r in results if r.latency_ms is not None]
+            metrics = {
+                "false_accepts": false_accepts,
+                "false_rejects": false_rejects,
+                "exact_verdict_accuracy": sum(
+                    r.probe.expected_verdict == r.verdict.verdict for r in judged
+                )
+                / len(results),
+                "latency_p50_ms": median(times) if times else None,
+                "latency_max_ms": max(times) if times else None,
+                "input_tokens": sum(c.input_tokens for c in calls),
+                "output_tokens": sum(c.output_tokens for c in calls),
+                "total_tokens": sum(c.input_tokens + c.output_tokens for c in calls),
+                "cost_usd": str(sum((r.cost_usd for r in results), Decimal(0))),
+            }
+            pairs = {}
+            for pair_id in sorted({p.pair_id for p in probes}):
+                members = [r for r in results if r.probe.pair_id == pair_id]
+                pairs[pair_id] = ProbePair(
+                    probe_ids=tuple(r.probe.id for r in members),
+                    complete=all(r.verdict is not None for r in members),
+                    all_verdicts_correct=all(
+                        r.verdict is not None and r.verdict.verdict == r.probe.expected_verdict
+                        for r in members
+                    ),
+                )
+            report = ProbeReport(
+                created_at=created_at,
+                git=git,
+                corpus_hash=corpus.corpus_hash,
+                config=ConfigSnapshot.from_settings(settings, top_k=settings.top_k),
+                mode=context.mode,
+                group_id=group_id,
+                max_usd=max_usd,
+                complete=error is None,
+                error=error,
+                cases=tuple(results),
+                pairs=pairs,
+                metrics=metrics,
+                cost_usd=ledger.group_spent_usd(group_id),
+                gate="PASS"
+                if not error and len(judged) == len(results) and false_accepts == 0
+                else "FAIL",
             )
-        report = ProbeReport(
-            created_at=created_at,
-            git=git,
-            corpus_hash=corpus.corpus_hash,
-            config=ConfigSnapshot.from_settings(settings, top_k=settings.top_k),
-            mode=context.mode,
-            group_id=group_id,
-            max_usd=max_usd,
-            complete=error is None,
-            error=error,
-            cases=tuple(results),
-            pairs=pairs,
-            metrics=metrics,
-            cost_usd=ledger.group_spent_usd(group_id),
-            gate="PASS"
-            if not error and len(judged) == len(results) and false_accepts == 0
-            else "FAIL",
-        )
-        path = _save_evaluation(report, settings)
-    return report, path
+            path = _save_evaluation(report, settings)
+        return report, path

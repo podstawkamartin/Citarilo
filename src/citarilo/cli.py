@@ -2,6 +2,7 @@
 
 import argparse
 from collections.abc import Sequence
+from contextlib import closing
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from uuid import uuid4
@@ -137,7 +138,11 @@ def main(
             _ingest(settings, dry_run=args.dry_run, client=client)
         elif args.command == "ask":
             validate_question(args.question)
-            _ask(args.question, context=context or create_live_context(settings))
+            if context is not None:
+                _ask(args.question, context=context)
+            else:
+                with closing(create_live_context(settings)) as live_context:
+                    _ask(args.question, context=live_context)
         elif args.command == "serve":
             uvicorn.run(
                 create_app(settings=settings),

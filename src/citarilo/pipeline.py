@@ -21,7 +21,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.runtime import Runtime
 from langsmith import tracing_context
-from openai import OpenAI
+from openai import DEFAULT_CONNECTION_LIMITS, DefaultHttpxClient, OpenAI
 from openai.types.responses import Response
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
@@ -174,6 +174,12 @@ class AnswerContext:
     mode: Literal["live", "fake"] = "fake"
     group_id: str | None = None
     recorder: Recorder = field(default_factory=Recorder)
+    http_client: httpx2.Client | None = field(default=None, repr=False, compare=False)
+
+    def close(self) -> None:
+        """Close the owned connection pool, including across request-local copies."""
+        if self.http_client is not None and not self.http_client.is_closed:
+            self.http_client.close()
 
     def __post_init__(self) -> None:
         if (
@@ -195,6 +201,12 @@ class VerificationContext:
     mode: Literal["live", "fake"] = "fake"
     group_id: str | None = None
     recorder: Recorder = field(default_factory=Recorder)
+    http_client: httpx2.Client | None = field(default=None, repr=False, compare=False)
+
+    def close(self) -> None:
+        """Close the owned connection pool, including across request-local copies."""
+        if self.http_client is not None and not self.http_client.is_closed:
+            self.http_client.close()
 
 
 def evidence_sections(
@@ -566,6 +578,9 @@ def build_graph() -> CompiledStateGraph[AnswerState, AnswerContext, AnswerState,
     return graph.compile()
 
 
+_ANSWER_GRAPH = build_graph()
+
+
 def validate_question(question: str) -> str:
     if not isinstance(question, str) or not 3 <= len(question) <= 500 or len(question.strip()) < 3:
         raise InvalidQuestionError("Question must contain 3–500 characters.")
@@ -597,7 +612,7 @@ def answer(
     try:
         # Suppress external LangSmith tracing even if the calling shell enables it.
         with tracing_context(enabled=False):
-            build_graph().invoke({"question": question}, context=context)
+            _ANSWER_GRAPH.invoke({"question": question}, context=context)
     except BudgetExceeded as exc:
         error = exc
     except PipelineError as exc:
@@ -665,33 +680,63 @@ def create_live_context(settings: Settings, *, group_id: str | None = None) -> A
         settings.price_table_version,
         price_table=settings.price_table,
     )
-    embeddings = UsageTrackingEmbeddings(settings, ledger, group_id=group_id, operation="retrieve")
-    store = load_index(corpus, settings, embeddings)
-    return AnswerContext(
-        settings=settings,
-        corpus=corpus,
-        store=store,
-        embeddings=embeddings,
-        ledger=ledger,
-        generator=_live_model(
+    http_client = _live_http_client(settings)
+    try:
+        embeddings = UsageTrackingEmbeddings(
             settings,
-            settings.generation_model,
-            settings.generation_reasoning_effort,
-            GenerationOutput,
+            ledger,
+            group_id=group_id,
+            operation="retrieve",
+            http_client=http_client,
+        )
+        store = load_index(corpus, settings, embeddings)
+        return AnswerContext(
+            settings=settings,
+            corpus=corpus,
+            store=store,
+            embeddings=embeddings,
+            ledger=ledger,
+            generator=_live_model(
+                settings,
+                settings.generation_model,
+                settings.generation_reasoning_effort,
+                GenerationOutput,
+                http_client=http_client,
+            ),
+            verifier=_live_model(
+                settings,
+                settings.verification_model,
+                settings.verification_reasoning_effort,
+                VerificationOutput,
+                http_client=http_client,
+            ),
+            mode="live",
+            group_id=group_id,
+            http_client=http_client,
+        )
+    except BaseException:
+        http_client.close()
+        raise
+
+
+def _live_http_client(settings: Settings) -> httpx2.Client:
+    return DefaultHttpxClient(
+        timeout=settings.call_timeout_seconds,
+        limits=httpx2.Limits(
+            max_connections=DEFAULT_CONNECTION_LIMITS.max_connections,
+            max_keepalive_connections=DEFAULT_CONNECTION_LIMITS.max_keepalive_connections,
+            keepalive_expiry=60,
         ),
-        verifier=_live_model(
-            settings,
-            settings.verification_model,
-            settings.verification_reasoning_effort,
-            VerificationOutput,
-        ),
-        mode="live",
-        group_id=group_id,
     )
 
 
 def _live_model(
-    settings: Settings, name: str, effort: str, schema: type[BaseModel]
+    settings: Settings,
+    name: str,
+    effort: str,
+    schema: type[BaseModel],
+    *,
+    http_client: httpx2.Client,
 ) -> StructuredRunnable:
     key = settings.openai_api_key
     if key is None or not key.get_secret_value().strip():
@@ -700,6 +745,7 @@ def _live_model(
         api_key=key.get_secret_value(),
         max_retries=0,
         timeout=settings.call_timeout_seconds,
+        http_client=http_client,
     )
 
     return ChatOpenAI(
@@ -722,15 +768,22 @@ def _live_model(
 def create_verification_context(
     settings: Settings, ledger: BudgetLedger, group_id: str
 ) -> VerificationContext:
-    return VerificationContext(
-        settings=settings,
-        ledger=ledger,
-        group_id=group_id,
-        mode="live",
-        verifier=_live_model(
-            settings,
-            settings.verification_model,
-            settings.verification_reasoning_effort,
-            VerificationOutput,
-        ),
-    )
+    http_client = _live_http_client(settings)
+    try:
+        return VerificationContext(
+            settings=settings,
+            ledger=ledger,
+            group_id=group_id,
+            mode="live",
+            http_client=http_client,
+            verifier=_live_model(
+                settings,
+                settings.verification_model,
+                settings.verification_reasoning_effort,
+                VerificationOutput,
+                http_client=http_client,
+            ),
+        )
+    except BaseException:
+        http_client.close()
+        raise

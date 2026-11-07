@@ -16,6 +16,7 @@ from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
+import citarilo.index as index_module
 import citarilo.pipeline as pipeline
 from citarilo.budget import BudgetExceeded, BudgetLedger, max_cost
 from citarilo.config import Settings
@@ -462,9 +463,21 @@ def test_context_rejects_a_different_embedding_adapter(rig):
         replace(rig.context, group_id="other")
 
 
-def test_factory_wires_responses_settings_using_only_a_fake_constructor(rig, monkeypatch):
+def test_factory_wires_responses_settings_using_only_a_fake_constructor(
+    rig, monkeypatch, tracked_http_client
+):
     configurations = []
     schemas = []
+    sdk_configurations = []
+    http_configurations = []
+
+    def make_http_client(**kwargs):
+        http_configurations.append(kwargs)
+        return tracked_http_client
+
+    def make_sdk_client(**kwargs):
+        sdk_configurations.append(kwargs)
+        return SimpleNamespace(chat=SimpleNamespace(completions=object()), embeddings=object())
 
     class FakeChat:
         def __init__(self, **kwargs):
@@ -476,11 +489,9 @@ def test_factory_wires_responses_settings_using_only_a_fake_constructor(rig, mon
 
     settings = rig.context.settings.model_copy(update={"openai_api_key": SecretStr("dummy")})
     monkeypatch.setattr(pipeline, "ChatOpenAI", FakeChat)
-    monkeypatch.setattr(
-        pipeline,
-        "_UsageValidatedOpenAI",
-        lambda **kwargs: SimpleNamespace(chat=SimpleNamespace(completions=object())),
-    )
+    monkeypatch.setattr(pipeline, "DefaultHttpxClient", make_http_client)
+    monkeypatch.setattr(index_module, "OpenAI", make_sdk_client)
+    monkeypatch.setattr(pipeline, "_UsageValidatedOpenAI", make_sdk_client)
     monkeypatch.setattr(
         pipeline, "load_index", lambda corpus, settings, embeddings: InMemoryVectorStore(embeddings)
     )
@@ -504,6 +515,81 @@ def test_factory_wires_responses_settings_using_only_a_fake_constructor(rig, mon
         pipeline.VerificationOutput.model_json_schema(),
     ]
     assert context.embeddings.usage == []
+    context.embeddings._get_client()
+    assert len(sdk_configurations) == 3
+    assert all(
+        config["http_client"] is context.http_client is tracked_http_client
+        and config["max_retries"] == 0
+        and config["timeout"] == settings.call_timeout_seconds
+        for config in sdk_configurations
+    )
+    assert len(http_configurations) == 1
+    http_config = http_configurations[0]
+    assert http_config["timeout"] == settings.call_timeout_seconds
+    assert http_config["limits"] == httpx2.Limits(
+        max_connections=pipeline.DEFAULT_CONNECTION_LIMITS.max_connections,
+        max_keepalive_connections=pipeline.DEFAULT_CONNECTION_LIMITS.max_keepalive_connections,
+        keepalive_expiry=60,
+    )
+    assert not tracked_http_client.is_closed
+    context.close()
+    context.close()
+    replace(context, recorder=pipeline.Recorder()).close()
+    assert tracked_http_client.is_closed
+    tracked_http_client.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("fails", [False, True], ids=["success", "setup-failure"])
+def test_verification_context_owns_and_closes_http_client(
+    rig, monkeypatch, tracked_http_client, fails
+):
+    monkeypatch.setattr(pipeline, "DefaultHttpxClient", lambda **_: tracked_http_client)
+
+    def model(*args, http_client):
+        assert http_client is tracked_http_client
+        if fails:
+            raise RuntimeError("Model setup failed")
+        return rig.context.verifier
+
+    monkeypatch.setattr(pipeline, "_live_model", model)
+    if fails:
+        with pytest.raises(RuntimeError, match="Model setup failed"):
+            pipeline.create_verification_context(rig.context.settings, rig.context.ledger, "probe")
+    else:
+        context = pipeline.create_verification_context(
+            rig.context.settings, rig.context.ledger, "probe"
+        )
+        assert context.http_client is tracked_http_client
+        assert not tracked_http_client.is_closed
+        context.close()
+        context.close()
+    assert tracked_http_client.is_closed
+    tracked_http_client.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("stage", ["index", "generate", "verify"])
+def test_live_context_closes_http_client_on_setup_failure(
+    rig, monkeypatch, tracked_http_client, stage
+):
+    settings = rig.context.settings.model_copy(update={"openai_api_key": SecretStr("dummy")})
+    monkeypatch.setattr(pipeline, "DefaultHttpxClient", lambda **_: tracked_http_client)
+
+    def load_store(corpus, settings, embeddings):
+        if stage == "index":
+            raise RuntimeError("Index setup failed")
+        return InMemoryVectorStore(embeddings)
+
+    def model(settings, name, effort, schema, **kwargs):
+        if (schema is GenerationOutput) == (stage == "generate"):
+            raise RuntimeError("Model setup failed")
+        return rig.context.generator
+
+    monkeypatch.setattr(pipeline, "load_index", load_store)
+    monkeypatch.setattr(pipeline, "_live_model", model)
+    with pytest.raises(RuntimeError, match="setup failed"):
+        create_live_context(settings)
+    assert tracked_http_client.is_closed
+    tracked_http_client.close.assert_called_once_with()
 
 
 def test_prompt_values_cannot_escape_delimiters_or_become_templates(rig):
@@ -610,6 +696,34 @@ def test_cli_refusal_and_safe_provider_error(rig, capsys):
     assert caught.value.code == 1 and "provider_error" in output.err
     assert "fake-secret-key" not in output.out + output.err
     assert "Traceback" not in output.err
+
+
+@pytest.mark.parametrize("injected", [False, True])
+@pytest.mark.parametrize("fails", [False, True])
+def test_cli_ask_closes_only_created_contexts(
+    rig, monkeypatch, tracked_http_client, injected, fails
+):
+    from citarilo import cli
+
+    context = replace(rig.context, http_client=tracked_http_client)
+    monkeypatch.setattr(cli, "create_live_context", lambda _: context)
+    if fails:
+        rig.results["generate"] = RuntimeError("Provider failed")
+        with pytest.raises(SystemExit) as exc:
+            cli.main(
+                ["ask", "Return period?"],
+                settings=context.settings,
+                context=context if injected else None,
+            )
+        assert exc.value.code == 1
+    else:
+        cli.main(
+            ["ask", "Return period?"],
+            settings=context.settings,
+            context=context if injected else None,
+        )
+    assert tracked_http_client.is_closed is not injected
+    assert tracked_http_client.close.call_count == (0 if injected else 1)
 
 
 def test_unknown_citation_is_refused_before_verifier_dispatch(rig):
@@ -733,14 +847,15 @@ def sdk_rig(rig, monkeypatch):
     )
     monkeypatch.setattr(pipeline, "load_index", load_store)
     with httpx2.Client(transport=httpx2.MockTransport(handle)) as http_client:
+        monkeypatch.setattr(pipeline, "DefaultHttpxClient", lambda **_: http_client)
+        monkeypatch.setattr(index_module, "OpenAI", lambda **_: rig.context.embeddings._client)
         monkeypatch.setattr(
             pipeline,
             "_UsageValidatedOpenAI",
-            lambda **kwargs: _UsageValidatedOpenAI(http_client=http_client, **kwargs),
+            _UsageValidatedOpenAI,
         )
         settings = rig.context.settings.model_copy(update={"openai_api_key": SecretStr("dummy")})
         context = create_live_context(settings, group_id="test-ask")
-        context.embeddings._client = rig.context.embeddings._client
         yield SimpleNamespace(context=context, requests=requests, responses=responses)
 
 

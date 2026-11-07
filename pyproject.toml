@@ -5,6 +5,7 @@ description = "Evidence-backed customer support for the fictional TrailSupply sh
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.162.0",
+    "httpx2>=2.12,<3",
     "langchain-core>=1.7.6",
     "langchain-openai>=1.7.4",
     "langgraph>=1.2.20",

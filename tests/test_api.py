@@ -3,6 +3,7 @@
 import asyncio
 import json
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
 from threading import Event, get_ident
@@ -35,6 +36,17 @@ from citarilo.records import AskResponse, read_record
 
 SECRET = "fake-sensitive-api-key"
 QUESTION = "What is the return period?"
+
+
+def test_lifespan_closes_owned_context_on_shutdown(rig, tracked_http_client):
+    context = replace(rig.context, http_client=tracked_http_client)
+    app = api.create_app(settings=rig.settings, context_factory=lambda _: context)
+    with TestClient(app) as client:
+        assert client.get("/api/health").status_code == 200
+        assert not tracked_http_client.is_closed
+    assert tracked_http_client.is_closed
+    context.close()
+    tracked_http_client.close.assert_called_once_with()
 
 
 @pytest.fixture

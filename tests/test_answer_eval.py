@@ -388,7 +388,7 @@ def test_live_cli_context_once_heldout_warning_and_error_exit(rig, monkeypatch, 
     assert "fake-secret" not in capsys.readouterr().out
 
 
-def test_live_factory_built_once_after_group_open(rig, monkeypatch):
+def test_live_factory_built_once_after_group_open(rig, monkeypatch, tracked_http_client):
     from copy import copy
 
     builds = []
@@ -401,13 +401,21 @@ def test_live_factory_built_once_after_group_open(rig, monkeypatch):
         embeddings.usage = []
         store = copy(rig.context.store)
         store.embedding = embeddings
-        return replace(rig.context, group_id=group_id, embeddings=embeddings, store=store)
+        return replace(
+            rig.context,
+            group_id=group_id,
+            embeddings=embeddings,
+            store=store,
+            http_client=tracked_http_client,
+        )
 
     monkeypatch.setattr(ev, "_ledger", lambda _: rig.context.ledger)
     monkeypatch.setattr(ev.pipeline, "create_live_context", create)
     report, _ = evaluate_answers([case("one"), case("two")], rig.context.settings, Decimal("0.05"))
     assert builds == [report.group_id]
     assert len(rig.calls["generate"]) == 2
+    assert tracked_http_client.is_closed
+    tracked_http_client.close.assert_called_once_with()
 
 
 @pytest.mark.parametrize("bad_count,expected", [(1, "PASS"), (2, "FAIL")])
@@ -425,13 +433,19 @@ def test_answerable_gate_boundary(rig, bad_count, expected):
 @pytest.mark.parametrize(
     "verdict,exit_code", [("supported", 2), ("contradicted", 0), ("invalid", 1)]
 )
-def test_probe_cli_exit_codes_with_fake_factory(rig, monkeypatch, capsys, verdict, exit_code):
+def test_probe_cli_exit_codes_with_fake_factory(
+    rig, monkeypatch, capsys, tracked_http_client, verdict, exit_code
+):
     rig.results["verify"]["parsed"]["verdicts"][0]["verdict"] = verdict
     monkeypatch.setattr(cli, "load_probes", lambda _: probes())
 
     def create(settings, ledger, group_id):
         return VerificationContext(
-            settings=settings, ledger=ledger, group_id=group_id, verifier=rig.context.verifier
+            settings=settings,
+            ledger=ledger,
+            group_id=group_id,
+            verifier=rig.context.verifier,
+            http_client=tracked_http_client,
         )
 
     monkeypatch.setattr(ev.pipeline, "create_verification_context", create)
@@ -444,6 +458,56 @@ def test_probe_cli_exit_codes_with_fake_factory(rig, monkeypatch, capsys, verdic
         main(args, settings=rig.context.settings)
     assert "Report:" in capsys.readouterr().out
     assert rig.calls["generate"] == rig.calls["embedding"] == []
+    assert tracked_http_client.is_closed
+    tracked_http_client.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize("kind", ["answers", "probes"])
+@pytest.mark.parametrize("injected", [False, True])
+def test_evaluation_report_failure_closes_only_created_contexts(
+    rig, monkeypatch, tracked_http_client, kind, injected
+):
+    from copy import copy
+
+    def save_failure(*args):
+        raise OSError("Report write failed")
+
+    monkeypatch.setattr(ev, "_save_evaluation", save_failure)
+    monkeypatch.setattr(ev, "_ledger", lambda _: rig.context.ledger)
+    if kind == "answers":
+        context = replace(rig.context, http_client=tracked_http_client)
+
+        def create(settings, *, group_id):
+            embeddings = copy(context.embeddings)
+            embeddings.group_id = group_id
+            store = copy(context.store)
+            store.embedding = embeddings
+            return replace(context, embeddings=embeddings, store=store, group_id=group_id)
+
+        monkeypatch.setattr(ev.pipeline, "create_live_context", create)
+        evaluate, inputs = evaluate_answers, [case()]
+    else:
+        context = VerificationContext(
+            settings=rig.context.settings,
+            ledger=rig.context.ledger,
+            verifier=rig.context.verifier,
+            http_client=tracked_http_client,
+        )
+        monkeypatch.setattr(
+            ev.pipeline,
+            "create_verification_context",
+            lambda settings, ledger, group_id: replace(context, group_id=group_id),
+        )
+        evaluate, inputs = evaluate_probes, probes()
+    with pytest.raises(OSError, match="Report write failed"):
+        evaluate(
+            inputs,
+            context.settings,
+            Decimal("0.05"),
+            context=context if injected else None,
+        )
+    assert tracked_http_client.is_closed is not injected
+    assert tracked_http_client.close.call_count == (0 if injected else 1)
 
 
 def test_template_cli_is_offline_and_never_overwrites(rig, monkeypatch, capsys):
