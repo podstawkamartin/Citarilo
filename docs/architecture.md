@@ -141,6 +141,8 @@ Soubory vznikají postupně s kódem, ne předem.
 
 1. **generate** vrací jazyk odpovědi a nejvýše 4 atomická tvrzení, každé
    s 1–3 ID vět z vyhledaných sekcí.
+   Odpovědi uvádějí pouze dokumentované hodnoty bez odvozených výpočtů;
+   pojistkou zůstává kontrola literálů.
 2. **check** (kód): ID musí patřit k vyhledaným větám; čísla, data a URL
    z tvrzení musí být po normalizaci (české a anglické formáty) v citovaných
    větách; anglická odpověď nesmí obsahovat českou prózu. Jde o filtr,

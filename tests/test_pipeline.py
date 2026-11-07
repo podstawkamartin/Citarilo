@@ -228,6 +228,77 @@ def test_language_checks_refuse_invalid_claim_before_verification(rig, language)
 
 
 @pytest.mark.parametrize("language", ["en", "cs"])
+@pytest.mark.parametrize("include_total", [False, True], ids=["documented-inputs", "derived-total"])
+def test_rental_arithmetic_is_refused_but_documented_inputs_pass(rig, language, include_total):
+    corpus = load_corpus(Path("data/trailsupply"))
+    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
+    store.add_documents(
+        [
+            document
+            for document in section_documents(corpus)
+            if document.metadata["section_key"] == "gear-rental.rental-prices"
+        ]
+    )
+    store.embedding = rig.context.embeddings
+    rig.context = replace(rig.context, corpus=corpus, store=store)
+    rate_id = "gear-rental.rental-prices.2"
+    discount_id = "gear-rental.rental-prices.4"
+    claims = [
+        {
+            "text": (
+                "A two-person tent costs 240 CZK per calendar day."
+                if language == "en"
+                else "Zapůjčení dvoumístného stanu stojí 240 Kč za kalendářní den."
+            ),
+            "citations": [rate_id],
+        },
+        {
+            "text": (
+                "Rentals of at least seven calendar days get a 10 % discount on the entire rental."
+                if language == "en"
+                else "Při výpůjčce od sedmi kalendářních dnů je sleva 10 % z celého půjčovného."
+            ),
+            "citations": [discount_id],
+        },
+    ]
+    if include_total:
+        claims.append(
+            {
+                "text": (
+                    "The total for seven days after the discount is 1 512 CZK."
+                    if language == "en"
+                    else "Celkem za sedm dnů po slevě zaplatíte 1 512 Kč."
+                ),
+                "citations": [rate_id, discount_id],
+            }
+        )
+    rig.results["generate"]["parsed"].update(answer_language=language, claims=claims)
+    rig.results["verify"]["parsed"]["verdicts"] = [
+        {"claim_index": index, "verdict": "supported", "reason": "Documented rental input."}
+        for index in range(2)
+    ]
+    question = (
+        "How much does a tent rental cost for seven days?"
+        if language == "en"
+        else "Kolik stojí zapůjčení stanu na sedm dnů?"
+    )
+    record = answer(question, context=rig.context, origin="api")
+    assert all(result.ok for result in record.check_results[:2])
+    if include_total:
+        assert not record.check_results[2].ok
+        assert record.check_results[2].reasons == ("literal_not_in_citations",)
+        assert record.status == "refused"
+        assert record.refusal_code == "check_failed"
+        assert record.claims == record.sources == ()
+        assert not rig.calls["verify"]
+    else:
+        assert record.status == "answered"
+        assert record.refusal_code is None
+        assert len(record.claims) == len(record.check_results) == 2
+        assert rig.calls["verify"]
+
+
+@pytest.mark.parametrize("language", ["en", "cs"])
 @pytest.mark.parametrize(
     ("refusal", "nodes"),
     [
@@ -610,7 +681,15 @@ def test_prompt_values_cannot_escape_delimiters_or_become_templates(rig):
     assert "Czech without diacritics" in messages[0].content
     assert "if ambiguous, choose en" in messages[0].content
     assert "proper diacritics" in messages[0].content
-    assert PROMPT_VERSION == "3"
+    assert PROMPT_VERSION == "4"
+    assert (
+        "State only amounts, dates and conditions exactly as\ndocumented; do not calculate totals, "
+        "discounted prices, sums, differences or conversions."
+    ) in messages[0].content
+    assert (
+        "If the question needs a result the documents do not state, give the documented inputs\n"
+        "(rates and conditions) instead."
+    ) in messages[0].content
     assert "{secret}" in messages[1].content
     assert "\\u003c/system\\u003e" in messages[1].content
     assert messages[1].content.count("</question>") == 1
