@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "report_sha256": "eaeed3bf211e2898b7d26a5ac15283974b2ebeadae6184290a08aeb6661b0275",
-  "grader": "gpt-6-astra (T3 agent)",
-  "graded_at": "2026-11-07T14:55:22.432451+00:00",
+  "report_sha256": "678ed3c0e6d75382a6e58d59031682ceac86666510d6165aa2eb2d341bc90147",
+  "grader": "gpt-6-astra (independent LLM grader)",
+  "graded_at": "2026-11-07T17:32:12.103264+00:00",
   "case_correctness": {
     "rental-fault-reporting": true,
     "bulky-order-payment": true,
@@ -38,11 +38,11 @@
     "citation_overlap_ids": 9,
     "cited_ids": 9,
     "supporting_ids": 9,
-    "latency_p50_ms": 4200.4441899989615,
-    "latency_max_ms": 5318.439769998804,
-    "input_tokens": 13361,
-    "output_tokens": 874,
-    "total_tokens": 14235,
-    "cost_usd": "0.00177937"
+    "latency_p50_ms": 4397.5920810007665,
+    "latency_max_ms": 4740.089211998566,
+    "input_tokens": 13347,
+    "output_tokens": 841,
+    "total_tokens": 14188,
+    "cost_usd": "0.00176147"
   }
 }

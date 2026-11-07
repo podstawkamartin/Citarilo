@@ -31,23 +31,23 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 ## Výsledky (7. 11. 2026)
 
 Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
-v každém reportu. Odpovědi (prompt v4) jsou v
-[evals/results/2026-11-07](evals/results/2026-11-07), vyhledávání a sondy
-ověřovače v [evals/results/2026-11-06](evals/results/2026-11-06).
+v každém reportu. Vyhledávání a odpovědi (prompt v4) jsou v
+[evals/results/2026-11-07](evals/results/2026-11-07), sondy ověřovače
+v [evals/results/2026-11-06](evals/results/2026-11-06).
 Brány přijetí byly stanovené před laděním.
 
-| Měření | Vývojové (15) | Odložené (5) | Brána |
+| Měření | Vývojové (21) | Odložené (5) | Brána |
 |---|---|---|---|
-| Recall@5 vyhledávání | 1,00 (12/12) | – | ≥ 0,9 |
-| Správně zodpovězené zodpověditelné | 91,7 % (11/12) | 100 % (4/4) | ≥ 80 % |
-| Zodpovězené nezodpověditelné | 0 ze 3 | 0 z 1 | 0 |
-| Úspěšné prompt injection | 0 ze 2 | 0 z 1 | 0 |
-| Latence p50 / max | 4,0 s / 6,6 s | 4,2 s / 5,3 s | – |
-| Cena běhu | $0.0056 | $0.0018 | – |
+| Recall@5 vyhledávání | 1,00 (17/17) | – | ≥ 0,9 |
+| Správně zodpovězené zodpověditelné | 82,4 % (14/17) | 100 % (4/4) | ≥ 80 % |
+| Zodpovězené nezodpověditelné | 0 ze 4 | 0 z 1 | 0 |
+| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | 0 |
+| Latence p50 / max | 4,0 s / 6,1 s | 4,4 s / 4,7 s | – |
+| Cena běhu | $0.0079 | $0.0018 | – |
 
 Ověřovač na 24 sondách (12 párů „podložené / téměř správné“): 0 falešných
 přijetí, 0 falešných odmítnutí. Vývoj včetně indexace, ladění a měření
-latence stál celkem $0.031.
+latence stál celkem $0.042.
 
 **Jak se hodnotilo.** Stav odpovědi, recall a sondy jsou deterministické.
 Sémantickou správnost (povinná fakta, zakázaná tvrzení, podpora každé citace)
@@ -56,9 +56,14 @@ než aplikace (`gpt-6-astra`). Jde o hodnocení modelem, ne o lidskou anotaci; r
 namátková kontrola hraničních případů zatím neproběhla. Odložené případy se
 při ladění nepoužily; spouštějí se jednou pro každou finální verzi promptu.
 
-**Jediná chyba ve vývojové sadě:** u pozdního storna půjčovny odpověď uvedla
-správný poplatek 30 %, ale necitovala větu se sedmidenní hranicí, ze které
-plyne; ověřovač to nezachytil.
+**Chyby ve vývojové sadě (3):**
+- Pozdní storno půjčovny: tvrzení o poplatku 30 % necitovalo větu se
+  sedmidenní hranicí; ověřovač ho správně zamítl a odpověď byla odmítnuta.
+- Zpětný štítek vs. reklamace: ověřovač zamítl podložené tvrzení, protože
+  neopakovalo omezení na běžný balík (příliš přísné odmítnutí).
+- Vrácení o víkendu: odpověď uvedla „osobně“ bez citace věty, která to říká.
+
+Dvě ze tří chyb jsou zbytečná odmítnutí, ne nepravdivé odpovědi.
 
 Vzorek je malý (16 zodpověditelných případů), takže čísla dokládají funkčnost
 a bezpečné chování, ne statisticky přesnou míru chybovosti. Latenci tvoří tři

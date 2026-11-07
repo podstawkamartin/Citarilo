@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "kind": "answers",
-  "created_at": "2026-11-07T14:53:54.981044Z",
+  "created_at": "2026-11-07T17:29:37.744173Z",
   "git": {
-    "commit": "10b25dfa2ff05281622d78c0fb22f11a92643e4e",
+    "commit": "a62773e23920eaaaa647b5f5373b70d11ddfca84",
     "dirty": false
   },
-  "corpus_hash": "76897e92621b174f54fb24e8d52235933d1c91e815b22a3c730789f6144e3241",
+  "corpus_hash": "20c10b4ae373ed37a995ef88f3f5d12887c27428d5e41172b2a2b25ebef52a29",
   "prompt_version": "4",
   "config": {
     "generation_model": "gpt-6-luna",
@@ -21,7 +21,7 @@
     "price_table_version": "2026-11-06"
   },
   "mode": "live",
-  "group_id": "answers-9433c6a424bb41a8908a2c5c3008eae4",
+  "group_id": "answers-5ae1d23b37d04d5db6879bf456c5d27b",
   "max_usd": "0.02",
   "complete": true,
   "error": null,
@@ -36,14 +36,14 @@
     "citation_overlap_ids": 9,
     "cited_ids": 9,
     "supporting_ids": 9,
-    "latency_p50_ms": 4200.4441899989615,
-    "latency_max_ms": 5318.439769998804,
-    "input_tokens": 13361,
-    "output_tokens": 874,
-    "total_tokens": 14235,
-    "cost_usd": "0.00177937"
+    "latency_p50_ms": 4397.5920810007665,
+    "latency_max_ms": 4740.089211998566,
+    "input_tokens": 13347,
+    "output_tokens": 841,
+    "total_tokens": 14188,
+    "cost_usd": "0.00176147"
   },
-  "cost_usd": "0.001785",
+  "cost_usd": "0.001769",
   "split": "heldout",
   "cases": [
     {
@@ -76,19 +76,19 @@
         "condition",
         "confusable"
       ],
-      "run_id": "289fedc0b1ca4e3ba182bb311be9ab06",
+      "run_id": "f04141cda91740d3bf262635c9d8971b",
       "status": "answered",
       "refusal_code": null,
       "answer_language": "en",
       "claims": [
         {
-          "text": "The purchased-equipment warranty does not cover equipment that was only rented from the rental service.",
+          "text": "The purchased-equipment warranty does not cover equipment borrowed from the rental service.",
           "citations": [
             "warranty.coverage.4"
           ]
         },
         {
-          "text": "Report a fault in rented equipment to pujcovna@trailsupply.example within 24 hours of discovering it and before using the equipment again.",
+          "text": "Report the fault in rented equipment to pujcovna@trailsupply.example within 24 hours of discovering it and before using the equipment again.",
           "citations": [
             "gear-rental.rental-cancellation.4"
           ]
@@ -112,13 +112,13 @@
       ],
       "candidate_claims": [
         {
-          "text": "The purchased-equipment warranty does not cover equipment that was only rented from the rental service.",
+          "text": "The purchased-equipment warranty does not cover equipment borrowed from the rental service.",
           "citations": [
             "warranty.coverage.4"
           ]
         },
         {
-          "text": "Report a fault in rented equipment to pujcovna@trailsupply.example within 24 hours of discovering it and before using the equipment again.",
+          "text": "Report the fault in rented equipment to pujcovna@trailsupply.example within 24 hours of discovering it and before using the equipment again.",
           "citations": [
             "gear-rental.rental-cancellation.4"
           ]
@@ -145,7 +145,7 @@
         {
           "claim_index": 1,
           "verdict": "supported",
-          "reason": "The cited sentence requires reporting a fault in rented equipment to that email within 24 hours of discovery and before further use."
+          "reason": "The cited sentence requires reporting a fault in borrowed equipment to the stated email within 24 hours of discovery and before further use."
         }
       ],
       "retrieved_sections": [
@@ -342,30 +342,30 @@
           "input_tokens": 30,
           "output_tokens": 0,
           "cost_usd": "0.00000390",
-          "reservation_id": "12ecf3e352ce441199bddcc88246657f",
-          "duration_ms": 431.8827280003461
+          "reservation_id": "d64ebd346a104582ae54e48453175232",
+          "duration_ms": 727.345728999353
         },
         {
           "node": "generate",
           "model": "gpt-6-luna",
           "input_tokens": 1448,
-          "output_tokens": 98,
-          "cost_usd": "0.00019380",
-          "reservation_id": "14dfa879de544749a82371b08a88efb9",
-          "duration_ms": 2178.0400429997826
+          "output_tokens": 95,
+          "cost_usd": "0.00019230",
+          "reservation_id": "c7e46aed1086419ab3efb1e3190a8b5b",
+          "duration_ms": 2310.6269339987193
         },
         {
           "node": "verify",
           "model": "gpt-6-luna",
-          "input_tokens": 1521,
-          "output_tokens": 83,
-          "cost_usd": "0.00019360",
-          "reservation_id": "ea546cca594c4e2fa816f2d98d86c796",
-          "duration_ms": 1526.0993339979905
+          "input_tokens": 1518,
+          "output_tokens": 84,
+          "cost_usd": "0.00019380",
+          "reservation_id": "74e7408399974ce3be06703407a3d1e9",
+          "duration_ms": 1621.5065879987378
         }
       ],
-      "latency_ms": 4200.4441899989615,
-      "cost_usd": "0.00039130",
+      "latency_ms": 4740.089211998566,
+      "cost_usd": "0.00039000",
       "error": null
     },
     {
@@ -397,13 +397,13 @@
         "condition",
         "confusable"
       ],
-      "run_id": "445f7a6dfbbf4814a8b21989da5728c6",
+      "run_id": "3174acf118364bb3a19977999c563517",
       "status": "answered",
       "refusal_code": null,
       "answer_language": "cs",
       "claims": [
         {
-          "text": "Za dopravu objednávky s nadrozměrným vybavením se účtuje 149 Kč bez ohledu na hodnotu zboží, takže doprava zdarma se na ni nevztahuje.",
+          "text": "Za objednávku obsahující nadrozměrné vybavení se účtuje doprava 149 Kč bez ohledu na hodnotu zboží, takže doprava zdarma se na ni nevztahuje.",
           "citations": [
             "shipping.bulky-items.2"
           ]
@@ -433,7 +433,7 @@
       ],
       "candidate_claims": [
         {
-          "text": "Za dopravu objednávky s nadrozměrným vybavením se účtuje 149 Kč bez ohledu na hodnotu zboží, takže doprava zdarma se na ni nevztahuje.",
+          "text": "Za objednávku obsahující nadrozměrné vybavení se účtuje doprava 149 Kč bez ohledu na hodnotu zboží, takže doprava zdarma se na ni nevztahuje.",
           "citations": [
             "shipping.bulky-items.2"
           ]
@@ -461,12 +461,12 @@
         {
           "claim_index": 0,
           "verdict": "supported",
-          "reason": "The cited sentence states that delivery of an order containing bulky equipment costs 149 Kč regardless of the goods’ value, so the 2,000 Kč order does not qualify for free delivery."
+          "reason": "The cited sentence states that shipping for an order containing oversized equipment costs 149 Kč regardless of the goods' value."
         },
         {
           "claim_index": 1,
           "verdict": "supported",
-          "reason": "The cited sentence explicitly says cash on delivery is unavailable for orders containing bulky equipment."
+          "reason": "The cited sentence explicitly says cash on delivery is unavailable for an order with oversized equipment."
         }
       ],
       "retrieved_sections": [
@@ -586,11 +586,11 @@
           "doc_id": "shipping",
           "doc_title": "Doprava a doručení zakoupeného zboží",
           "heading": "Expedice a přepravní doba",
-          "score": 0.5716668410935913,
+          "score": 0.5742399519738132,
           "sentences": [
             {
               "sentence_id": "shipping.dispatch-time.1",
-              "text": "Skladové zboží s potvrzenou platbou do 12:00 v pracovní den předáváme dopravci následující pracovní den.",
+              "text": "Skladové zboží s platbou potvrzenou v pracovní den do 12:00 předáváme dopravci následující pracovní den, při pozdějším potvrzení o jeden pracovní den později.",
               "doc_id": "shipping",
               "doc_title": "Doprava a doručení zakoupeného zboží",
               "heading": "Expedice a přepravní doba"
@@ -663,30 +663,30 @@
           "input_tokens": 42,
           "output_tokens": 0,
           "cost_usd": "0.00000546",
-          "reservation_id": "01aa585bc38b4a43bedfe4e6899b1904",
-          "duration_ms": 329.85965899933944
+          "reservation_id": "d9370ef5abef4821b3c17d38dc1be581",
+          "duration_ms": 199.2527299989888
         },
         {
           "node": "generate",
           "model": "gpt-6-luna",
-          "input_tokens": 1367,
+          "input_tokens": 1382,
           "output_tokens": 116,
-          "cost_usd": "0.00019470",
-          "reservation_id": "757a9e23bec14a56a32234c56dfa48d8",
-          "duration_ms": 2012.4215409996395
+          "cost_usd": "0.00019620",
+          "reservation_id": "cdc3ea06cb7f4ddf9199564c5b2c8d16",
+          "duration_ms": 2441.2468840018846
         },
         {
           "node": "verify",
           "model": "gpt-6-luna",
-          "input_tokens": 1441,
-          "output_tokens": 95,
-          "cost_usd": "0.00019160",
-          "reservation_id": "8b09c3a377934ca4a64e450d86c249ed",
-          "duration_ms": 2334.776127998339
+          "input_tokens": 1456,
+          "output_tokens": 81,
+          "cost_usd": "0.00018610",
+          "reservation_id": "956349e95899428f8f82665187ffe115",
+          "duration_ms": 1693.845871999656
         }
       ],
-      "latency_ms": 4760.289513000316,
-      "cost_usd": "0.00039176",
+      "latency_ms": 4397.5920810007665,
+      "cost_usd": "0.00038776",
       "error": null
     },
     {
@@ -720,7 +720,7 @@
         "condition",
         "confusable"
       ],
-      "run_id": "e86877d96721439b81e3c2ad98dfdf84",
+      "run_id": "8fe486dfa1744528ac176b16908d6e62",
       "status": "answered",
       "refusal_code": null,
       "answer_language": "cs",
@@ -738,7 +738,7 @@
           ]
         },
         {
-          "text": "Před předáním musí být vybavení suché a zbavené bláta, aby bylo možné vadu posoudit.",
+          "text": "Před předáním k posouzení musí být vybavení suché a zbavené bláta.",
           "citations": [
             "warranty.claim-shipping.4"
           ]
@@ -781,7 +781,7 @@
           ]
         },
         {
-          "text": "Před předáním musí být vybavení suché a zbavené bláta, aby bylo možné vadu posoudit.",
+          "text": "Před předáním k posouzení musí být vybavení suché a zbavené bláta.",
           "citations": [
             "warranty.claim-shipping.4"
           ]
@@ -808,17 +808,17 @@
         {
           "claim_index": 0,
           "verdict": "supported",
-          "reason": "The cited sentence says the photo helps assess the claim but is not required to file it."
+          "reason": "The cited sentence says the photo helps assess the claim but is not required to open it."
         },
         {
           "claim_index": 1,
           "verdict": "supported",
-          "reason": "The cited sentence states confirmation is sent within two working days of receiving the notice."
+          "reason": "The cited sentence specifies confirmation is sent within two working days of receiving the notice."
         },
         {
           "claim_index": 2,
           "verdict": "supported",
-          "reason": "The cited sentence requires the equipment to be dry and free of mud before handover so the defect can be assessed."
+          "reason": "The cited sentence requires the equipment to be dry and free of mud before handover for assessment."
         }
       ],
       "retrieved_sections": [
@@ -1015,30 +1015,30 @@
           "input_tokens": 48,
           "output_tokens": 0,
           "cost_usd": "0.00000624",
-          "reservation_id": "3e96cf9dcaae4a9b8775294a942b0901",
-          "duration_ms": 318.8344739974127
+          "reservation_id": "c0c3cd62914443bb9985180806d6d8bf",
+          "duration_ms": 271.42913799980306
         },
         {
           "node": "generate",
           "model": "gpt-6-luna",
           "input_tokens": 1456,
-          "output_tokens": 140,
-          "cost_usd": "0.00021560",
-          "reservation_id": "be35953ecb0049d39ff7877974689d95",
-          "duration_ms": 3142.9572430024564
+          "output_tokens": 135,
+          "cost_usd": "0.00021310",
+          "reservation_id": "73af3175100d45ffac27d96af596eebb",
+          "duration_ms": 2311.456845000066
         },
         {
           "node": "verify",
           "model": "gpt-6-luna",
-          "input_tokens": 1608,
-          "output_tokens": 111,
-          "cost_usd": "0.00021630",
-          "reservation_id": "896a27466f2745fca85bcb5461bfc391",
-          "duration_ms": 1771.6443960016477
+          "input_tokens": 1603,
+          "output_tokens": 107,
+          "cost_usd": "0.00021380",
+          "reservation_id": "9853b4edabd74067bf3c22ea2ca60544",
+          "duration_ms": 1890.9151920015574
         }
       ],
-      "latency_ms": 5318.439769998804,
-      "cost_usd": "0.00043814",
+      "latency_ms": 4531.111276999582,
+      "cost_usd": "0.00043314",
       "error": null
     },
     {
@@ -1058,7 +1058,7 @@
         "en",
         "unanswerable"
       ],
-      "run_id": "fc1a5db6a3574d3e8500afb5e93baa26",
+      "run_id": "b4a7fcab41e94ffe9c5668ae55b166d3",
       "status": "refused",
       "refusal_code": "insufficient_evidence",
       "answer_language": null,
@@ -1073,7 +1073,7 @@
           "doc_id": "gear-rental",
           "doc_title": "Půjčovna outdoorového vybavení",
           "heading": "Ceník půjčovného",
-          "score": 0.372123814754469,
+          "score": 0.37209142156389713,
           "sentences": [
             {
               "sentence_id": "gear-rental.rental-prices.1",
@@ -1110,7 +1110,7 @@
           "doc_id": "gear-rental",
           "doc_title": "Půjčovna outdoorového vybavení",
           "heading": "Prodlení a čištění",
-          "score": 0.3451827279175761,
+          "score": 0.3472898723278652,
           "sentences": [
             {
               "sentence_id": "gear-rental.rental-fees.1",
@@ -1147,7 +1147,7 @@
           "doc_id": "gear-rental",
           "doc_title": "Půjčovna outdoorového vybavení",
           "heading": "Vratná kauce",
-          "score": 0.3450938154027588,
+          "score": 0.3454325331895427,
           "sentences": [
             {
               "sentence_id": "gear-rental.rental-deposit.1",
@@ -1184,7 +1184,7 @@
           "doc_id": "gear-rental",
           "doc_title": "Půjčovna outdoorového vybavení",
           "heading": "Rezervace a délka výpůjčky",
-          "score": 0.30077025342780617,
+          "score": 0.3003135129176514,
           "sentences": [
             {
               "sentence_id": "gear-rental.rental-booking.1",
@@ -1261,8 +1261,8 @@
           "input_tokens": 21,
           "output_tokens": 0,
           "cost_usd": "0.00000273",
-          "reservation_id": "a0e2b6634d4142cbbe96254a314e5845",
-          "duration_ms": 367.8604560009262
+          "reservation_id": "adc5aa2232fe4e33b1bd795f42ef12df",
+          "duration_ms": 376.39833399953204
         },
         {
           "node": "generate",
@@ -1270,11 +1270,11 @@
           "input_tokens": 1483,
           "output_tokens": 24,
           "cost_usd": "0.00016030",
-          "reservation_id": "22944d2542704c758217063fe3a21ecc",
-          "duration_ms": 1110.1442580002185
+          "reservation_id": "39fe3efe2bb845f39dcd87e2a24be1de",
+          "duration_ms": 1205.9754479996627
         }
       ],
-      "latency_ms": 1539.8316559985687,
+      "latency_ms": 1634.6431450001546,
       "cost_usd": "0.00016303",
       "error": null
     },
@@ -1305,19 +1305,19 @@
         "condition",
         "confusable"
       ],
-      "run_id": "0b3bc2d6909846ce878294a848da5a3e",
+      "run_id": "767dfb8dfb464505a2252248bdec1193",
       "status": "answered",
       "refusal_code": null,
       "answer_language": "cs",
       "claims": [
         {
-          "text": "Po vystavení faktury lze požádat o opravu překlepu ve fakturační adrese e-mailem na fakturace@trailsupply.example, a to do 14 kalendářních dnů od vystavení faktury.",
+          "text": "Překlep ve fakturační adrese lze požádat opravit e-mailem na fakturace@trailsupply.example do 14 kalendářních dnů od vystavení faktury.",
           "citations": [
             "payments.invoices.2"
           ]
         },
         {
-          "text": "Změnit odběratele na jinou osobu nebo firmu po vystavení faktury nelze.",
+          "text": "Po vystavení faktury nelze změnit osobu ani firmu odběratele na jiný subjekt.",
           "citations": [
             "payments.invoices.3"
           ]
@@ -1341,13 +1341,13 @@
       ],
       "candidate_claims": [
         {
-          "text": "Po vystavení faktury lze požádat o opravu překlepu ve fakturační adrese e-mailem na fakturace@trailsupply.example, a to do 14 kalendářních dnů od vystavení faktury.",
+          "text": "Překlep ve fakturační adrese lze požádat opravit e-mailem na fakturace@trailsupply.example do 14 kalendářních dnů od vystavení faktury.",
           "citations": [
             "payments.invoices.2"
           ]
         },
         {
-          "text": "Změnit odběratele na jinou osobu nebo firmu po vystavení faktury nelze.",
+          "text": "Po vystavení faktury nelze změnit osobu ani firmu odběratele na jiný subjekt.",
           "citations": [
             "payments.invoices.3"
           ]
@@ -1369,12 +1369,12 @@
         {
           "claim_index": 0,
           "verdict": "supported",
-          "reason": "The cited sentence explicitly allows requesting correction of a billing-address typo by that email within 14 calendar days of invoice issuance."
+          "reason": "The cited sentence explicitly permits requesting correction of a billing-address typo by this email within 14 calendar days of invoice issuance."
         },
         {
           "claim_index": 1,
           "verdict": "supported",
-          "reason": "The cited sentence explicitly says the billed person or company cannot be changed to another entity after the invoice is issued."
+          "reason": "The cited sentence explicitly says the customer person or company cannot be changed to another entity after the invoice is issued."
         }
       ],
       "retrieved_sections": [
@@ -1383,7 +1383,7 @@
           "doc_id": "payments",
           "doc_title": "Platby a fakturace objednávek",
           "heading": "Faktury a opravy údajů",
-          "score": 0.5573992409803937,
+          "score": 0.5657779471500199,
           "sentences": [
             {
               "sentence_id": "payments.invoices.1",
@@ -1408,7 +1408,7 @@
             },
             {
               "sentence_id": "payments.invoices.4",
-              "text": "Splatnost faktur s odloženou úhradou nenabízíme a faktura neslouží jako možnost nákupu na dluh.",
+              "text": "Platbu na fakturu s odloženou splatností nenabízíme.",
               "doc_id": "payments",
               "doc_title": "Platby a fakturace objednávek",
               "heading": "Faktury a opravy údajů"
@@ -1571,30 +1571,30 @@
           "input_tokens": 68,
           "output_tokens": 0,
           "cost_usd": "0.00000884",
-          "reservation_id": "a7890c9c197c4ab9b0558237c0c29756",
-          "duration_ms": 363.2474869991711
+          "reservation_id": "f91a3681c43e48a7a266257ad209f5d5",
+          "duration_ms": 574.1353169978538
         },
         {
           "node": "generate",
           "model": "gpt-6-luna",
-          "input_tokens": 1370,
-          "output_tokens": 120,
-          "cost_usd": "0.00019700",
-          "reservation_id": "6019f6d650c3437eacfe8a4ffca9ddb3",
-          "duration_ms": 1706.8288909977127
+          "input_tokens": 1356,
+          "output_tokens": 112,
+          "cost_usd": "0.00019160",
+          "reservation_id": "0f544a3515ce48b5848cf64c760f950a",
+          "duration_ms": 1675.2637880017573
         },
         {
           "node": "verify",
           "model": "gpt-6-luna",
-          "input_tokens": 1458,
+          "input_tokens": 1436,
           "output_tokens": 87,
-          "cost_usd": "0.00018930",
-          "reservation_id": "4bcd71be2e344efbb399c540a3df033d",
-          "duration_ms": 1839.8958210018463
+          "cost_usd": "0.00018710",
+          "reservation_id": "7298f10e278c46eeb7264e837e4291fd",
+          "duration_ms": 1667.8746680008771
         }
       ],
-      "latency_ms": 3995.263065000472,
-      "cost_usd": "0.00039514",
+      "latency_ms": 3987.4910209982772,
+      "cost_usd": "0.00038754",
       "error": null
     }
   ]

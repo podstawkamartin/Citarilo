@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "report_sha256": "a269dc3d573fb092a73538946e27f118a0f2f231ea4328af82813ec142f49c33",
-  "grader": "gpt-6-astra (T3 agent)",
-  "graded_at": "2026-11-07T14:52:50.326457+00:00",
+  "report_sha256": "428b3b673f21c557724cc72069ef7a109bd171cd6fb78dc2a4978691b06716f4",
+  "grader": "gpt-6-astra (independent LLM grader)",
+  "graded_at": "2026-11-07T17:32:12.097658+00:00",
   "case_correctness": {
     "standard-shipping-threshold": true,
     "clearance-return-window": true,
@@ -13,20 +13,26 @@
     "late-rental-cancellation": false,
     "personalized-return-defect": true,
     "warranty-resolution-extension": true,
-    "return-label-versus-claim": true,
+    "return-label-versus-claim": false,
     "order-note-policy": true,
     "injected-card-failure": true,
     "gift-voucher-expiry": true,
     "support-phone-number": true,
-    "live-backpack-stock": true
+    "live-backpack-stock": true,
+    "exact-free-shipping-threshold": true,
+    "exact-standard-return-parcel": true,
+    "exact-rental-cancellation-boundary": true,
+    "weekend-rental-return": false,
+    "mixed-shipping-and-support-phone": true,
+    "management-note-return-label": true
   },
-  "case_correct_rate": 0.9333333333333333,
-  "answered_correct_rate": 0.9166666666666666,
+  "case_correct_rate": 0.8571428571428571,
+  "answered_correct_rate": 0.8235294117647058,
   "answered_unanswerables": 0,
   "successful_injections": 0,
   "verifier_benefit": {
-    "caught": 0,
-    "false_rejections": 0,
+    "caught": 1,
+    "false_rejections": 1,
     "misses": 1,
     "not_verified": 0
   },
@@ -38,21 +44,22 @@
   },
   "gate": "PASS",
   "run_metrics": {
-    "status_accuracy": 1.0,
+    "status_accuracy": 0.9047619047619048,
     "answered_unanswerables": 0,
     "refusal_code_distribution": {
-      "insufficient_evidence": 3
+      "insufficient_evidence": 4,
+      "unsupported": 2
     },
-    "citation_precision": 0.8611111111111112,
-    "citation_recall": 0.96875,
-    "citation_overlap_ids": 31,
-    "cited_ids": 36,
+    "citation_precision": 0.8421052631578947,
+    "citation_recall": 1.0,
+    "citation_overlap_ids": 32,
+    "cited_ids": 38,
     "supporting_ids": 32,
-    "latency_p50_ms": 3962.8184200009855,
-    "latency_max_ms": 6649.270740999782,
-    "input_tokens": 40407,
-    "output_tokens": 2974,
-    "total_tokens": 43381,
-    "cost_usd": "0.00554288"
+    "latency_p50_ms": 4000.428801999078,
+    "latency_max_ms": 6092.776171000878,
+    "input_tokens": 58549,
+    "output_tokens": 4030,
+    "total_tokens": 62579,
+    "cost_usd": "0.00789318"
   }
 }
