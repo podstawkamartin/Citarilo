@@ -1,6 +1,6 @@
 # Půjčovna outdoorového vybavení
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Rezervace a délka výpůjčky {#rental-booking}
 Rezervace vybavení se zadává na https://trailsupply.example/pujcovna nejméně tři kalendářní dny před požadovaným převzetím.
@@ -25,6 +25,7 @@ Půjčovna vydává a přebírá vybavení v pracovní dny od 10:00 do 18:00.
 Vybavení z půjčovny je nutné převzít i vrátit osobně a nelze je poslat přepravní službou.
 Při převzetí předloží zákazník potvrzení rezervace a průkaz totožnosti.
 Předčasné vrácení vypůjčeného vybavení nezakládá nárok na vrácení části půjčovného.
+Pokud konec výpůjčky připadne na sobotu, neděli nebo svátek, vybavení se vrací nejbližší následující pracovní den bez poplatku za prodlení.
 
 ## Prodlení a čištění {#rental-fees}
 Za každý započatý kalendářní den po sjednaném dni vrácení účtujeme 300 Kč za každý nevrácený kus vybavení.

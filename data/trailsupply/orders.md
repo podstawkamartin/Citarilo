@@ -1,6 +1,6 @@
 # Objednávky, změny a storno
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Vytvoření objednávky {#placing-order}
 Objednávku zakoupeného zboží lze vytvořit na https://trailsupply.example/obchod bez zákaznického účtu.

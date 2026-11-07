@@ -2,6 +2,8 @@
 name = "citarilo"
 version = "0.1.0"
 description = "Customer support answers from company documents, every claim cited and verified."
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.162.0",

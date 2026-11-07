@@ -337,7 +337,7 @@ def test_probes_false_rejects_errors_and_budget_stop(rig):
 
 
 @pytest.mark.parametrize(
-    "mode,expected", [("--live", "15 answer cases; split dev"), ("--probes", "24 verifier probes")]
+    "mode,expected", [("--live", "21 answer cases; split dev"), ("--probes", "24 verifier probes")]
 )
 def test_dry_run_no_ledger_index_context_or_secrets(mode, expected, tmp_path, monkeypatch, capsys):
     from pydantic import SecretStr

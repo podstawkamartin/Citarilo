@@ -1,6 +1,6 @@
 # Platby a fakturace objednávek
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Způsoby úhrady {#payment-methods}
 Zakoupené zboží lze zaplatit online kartou, bankovním převodem nebo dobírkou.
@@ -30,7 +30,7 @@ Nejasný stav platby kartou lze ověřit na platby@trailsupply.example s uveden�
 Fakturu v PDF zasíláme e-mailem po expedici zakoupeného zboží.
 O opravu překlepu ve fakturační adrese lze požádat na fakturace@trailsupply.example do 14 kalendářních dnů od vystavení faktury.
 Po vystavení faktury nelze změnit osobu nebo firmu odběratele na jiný subjekt.
-Splatnost faktur s odloženou úhradou nenabízíme a faktura neslouží jako možnost nákupu na dluh.
+Platbu na fakturu s odloženou splatností nenabízíme.
 
 ## Platební cesta vratek {#refund-method}
 Peníze za objednávku zaplacenou kartou vracíme na stejnou kartu, ze které byla objednávka uhrazena.

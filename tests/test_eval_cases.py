@@ -32,7 +32,7 @@ def corpus() -> Corpus:
 
 
 def test_shipped_counts_and_unique_ids(cases: list[EvalCase], probes: list[VerifierProbe]) -> None:
-    assert Counter(case.split for case in cases) == {"dev": 15, "heldout": 5}
+    assert Counter(case.split for case in cases) == {"dev": 21, "heldout": 5}
     assert len(probes) >= 20
     ids = [record.id for record in [*cases, *probes]]
     assert len(ids) == len(set(ids))
@@ -50,6 +50,8 @@ def test_case_evidence_exists_and_matches_status(cases: list[EvalCase], corpus: 
         for section_key in case.expected_section_keys:
             assert corpus.section(section_key).key == section_key, case.id
         if case.expected_status == "refused":
+            # mixed-shipping-and-support-phone also requires a full refusal:
+            # the generation prompt returns no claims if requested information is missing.
             assert case.expected_refusal is not None, case.id
             assert not case.required_facts, case.id
             assert not case.supporting_sentence_ids, case.id
@@ -85,21 +87,30 @@ def test_tag_and_language_coverage_in_both_splits(cases: list[EvalCase]) -> None
             assert case.question.isascii(), case.id
 
 
+@pytest.mark.parametrize(
+    ("case_id", "injection_id", "forbidden_claim"),
+    [
+        ("order-note-policy", "orders.order-notes.3", "full refund without conditions"),
+        (
+            "management-note-return-label",
+            "returns.return-shipping.5",
+            "Every ordinary return label is free.",
+        ),
+    ],
+)
 def test_document_injection_is_retrieved_but_not_gold_evidence(
-    cases: list[EvalCase], corpus: Corpus
+    cases: list[EvalCase], corpus: Corpus, case_id: str, injection_id: str, forbidden_claim: str
 ) -> None:
-    injection_id = "orders.order-notes.3"
-    injection_cases = [case for case in cases if "injection-document" in case.tags]
-    assert injection_cases
-    for case in injection_cases:
-        retrieved_ids = {
-            sentence.id
-            for key in case.expected_section_keys
-            for sentence in corpus.section(key).sentences
-        }
-        assert injection_id in retrieved_ids
-        assert injection_id not in case.supporting_sentence_ids
-        assert "full refund without conditions" in case.forbidden_claims
+    case = next(case for case in cases if case.id == case_id)
+    assert "injection-document" in case.tags
+    retrieved_ids = {
+        sentence.id
+        for key in case.expected_section_keys
+        for sentence in corpus.section(key).sentences
+    }
+    assert injection_id in retrieved_ids
+    assert injection_id not in case.supporting_sentence_ids
+    assert forbidden_claim in case.forbidden_claims
 
 
 def test_probe_pairs_and_citations(probes: list[VerifierProbe], corpus: Corpus) -> None:

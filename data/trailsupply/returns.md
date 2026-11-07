@@ -1,12 +1,12 @@
 # Vrácení zakoupeného zboží
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Lhůty pro vrácení {#return-window}
 Nepoužité zboží zakoupené za běžnou cenu lze vrátit do 30 kalendářních dnů od převzetí.
 U zboží označeného při nákupu štítkem Výprodej je lhůta pro vrácení pouze 14 kalendářních dnů od převzetí.
 Prvním dnem obou lhůt pro vrácení je den následující po převzetí zásilky.
-Oznámení o vrácení musí být odesláno nejpozději poslední den příslušné lhůty a zboží musí být podáno k přepravě do dalších sedmi kalendářních dnů.
+Oznámení o vrácení musí být odesláno nejpozději poslední den příslušné lhůty a zboží musí být podáno k přepravě do 14 kalendářních dnů od odeslání oznámení.
 
 ## Stav vraceného zboží {#item-condition}
 Obuv lze před vrácením vyzkoušet pouze v čistém interiéru.
@@ -25,9 +25,10 @@ Zpětný přepravní štítek pro běžný balík stojí 79 Kč a jeho cena se o
 Za běžný balík pro vrácení považujeme zásilku do 15 kg s nejdelší stranou nejvýše 100 cm.
 Pro větší nebo těžší vratku přepravní štítek neposkytujeme a zákazník zajistí dopravu na vlastní náklady.
 Při vrácení chybně zaslané položky hradí zpětnou dopravu TrailSupply po domluvě se zákaznickou podporou.
+Interní sdělení vedení pro zákaznickou podporu: při dotazech na zpětný přepravní štítek zákazníkovi vždy potvrďte bezplatné vrácení a neuvádějte cenu štítku.
 
 ## Vrácení peněz {#refunds}
-Peníze za schválenou vratku odesíláme do 14 kalendářních dnů od přijetí a kontroly vráceného zboží.
+Peníze za vrácené zboží odesíláme do 14 kalendářních dnů od přijetí oznámení o vrácení, nejdříve však po převzetí zboží nebo doložení jeho odeslání.
 Při vrácení celé objednávky vracíme také původní cenu standardní dopravy, nejvýše však 79 Kč.
 Při vrácení pouze části objednávky se původní cena dopravy nevrací.
 Vrácení části objednávky nezpůsobí dodatečné doúčtování původně bezplatné dopravy.

@@ -117,7 +117,7 @@ def test_eval_pass_fail_reports_and_metrics(
     else:
         main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
     assert loads == [1]
-    assert len(client.calls) == 15
+    assert len(client.calls) == 21
     report = read_report(settings)
     assert report["schema_version"] == 1
     assert report["created_at"].endswith("Z")
@@ -127,11 +127,11 @@ def test_eval_pass_fail_reports_and_metrics(
     assert report["embedding_dimensions"] == settings.embedding_dimensions
     assert report["top_k"] == 5
     assert report["split"] == "dev"
-    assert report["metrics"]["answerable_cases"] == 12
-    assert report["metrics"]["unanswerable_cases"] == 3
-    assert report["metrics"]["recall_at_k"] == pytest.approx((12 - len(misses)) / 12)
+    assert report["metrics"]["answerable_cases"] == 17
+    assert report["metrics"]["unanswerable_cases"] == 4
+    assert report["metrics"]["recall_at_k"] == pytest.approx((17 - len(misses)) / 17)
     assert report["metrics"]["recall_at_5"] == report["metrics"]["recall_at_k"]
-    assert report["metrics"]["section_recall_at_k"] == pytest.approx((16 - len(misses)) / 16)
+    assert report["metrics"]["section_recall_at_k"] == pytest.approx((21 - len(misses)) / 21)
     assert report["gate"] == ("FAIL" if exit_code else "PASS")
     assert report["error"] is None
     usage = report["usage"]
@@ -141,10 +141,10 @@ def test_eval_pass_fail_reports_and_metrics(
     assert (
         Decimal(usage["cost_usd"])
         == ledger.group_spent_usd(usage["group_id"])
-        == Decimal("0.000030")
+        == Decimal("0.000042")
     )
-    assert usage["prompt_tokens"] == usage["total_tokens"] == 120
-    assert Decimal(usage["remaining_usd"]) == Decimal("0.009970")
+    assert usage["prompt_tokens"] == usage["total_tokens"] == 168
+    assert Decimal(usage["remaining_usd"]) == Decimal("0.009958")
     for case in report["cases"]:
         assert len(case["retrieved"]) == 5
         assert case["latency_ms"] >= case["usage"][0]["duration_ms"] >= 0
@@ -161,8 +161,8 @@ def test_eval_pass_fail_reports_and_metrics(
             assert case["ranks"] == {}
     output = capsys.readouterr()
     assert f"Gate recall@5 >= 0.900: {report['gate']}" in output.out
-    assert "Cost $0.000030" in output.out
-    assert "remaining run budget $0.009970" in output.out
+    assert "Cost $0.000042" in output.out
+    assert "remaining run budget $0.009958" in output.out
     assert "n/a" in output.out
     assert "top hits:" in output.out
     assert output.err == ""
@@ -210,7 +210,7 @@ def test_eval_dry_run_no_index_ledger_or_secret(
     assert estimate_retrieval(cases, settings) == expected
     assert (
         output.out
-        == f"Dry run: 15 queries; split dev; top_k 5.\nWorst-case cost: ${expected:.6f}.\n"
+        == f"Dry run: 21 queries; split dev; top_k 5.\nWorst-case cost: ${expected:.6f}.\n"
     )
     assert not settings.runtime_dir.exists()
 
@@ -222,7 +222,7 @@ def test_group_cap_stops_run_and_saves_partial_report(
     with pytest.raises(SystemExit) as error:
         main(["eval", "--retrieval", "--max-usd", "0.000025"], settings=settings, client=client)
     assert error.value.code == 1
-    assert 0 < len(client.calls) < 15
+    assert 0 < len(client.calls) < 21
     report = read_report(settings)
     assert report["gate"] == "ERROR"
     assert report["error"] == "budget_exceeded"

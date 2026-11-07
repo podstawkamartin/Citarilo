@@ -1,6 +1,6 @@
 # Doprava a doručení zakoupeného zboží
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Oblast doručení {#delivery-area}
 Zakoupené zboží doručujeme pouze na adresy a výdejní místa v České republice.
@@ -21,7 +21,7 @@ Objednávku s nadrozměrným vybavením doručujeme pouze na adresu.
 Pokud objednávka obsahuje běžné i nadrozměrné vybavení, poplatek 149 Kč se účtuje pouze jednou za celou objednávku.
 
 ## Expedice a přepravní doba {#dispatch-time}
-Skladové zboží s potvrzenou platbou do 12:00 v pracovní den předáváme dopravci následující pracovní den.
+Skladové zboží s platbou potvrzenou v pracovní den do 12:00 předáváme dopravci následující pracovní den, při pozdějším potvrzení o jeden pracovní den později.
 U dobírky nahrazuje potvrzení platby potvrzení přijaté objednávky.
 Obvyklá přepravní doba běžné zásilky je jeden až dva pracovní dny od předání dopravci.
 Obvyklá přepravní doba nadrozměrné zásilky je tři až pět pracovních dnů od předání dopravci.

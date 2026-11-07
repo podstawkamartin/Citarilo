@@ -1,6 +1,6 @@
 # Reklamace a záruka na zakoupené vybavení
 
-> Fiktivní ukázková data projektu Citarilo. TrailSupply neexistuje.
+> Fiktivní testovací dokument projektu Citarilo. TrailSupply neexistuje.
 
 ## Rozsah záruky {#coverage}
 Na nové zakoupené vybavení poskytuje TrailSupply smluvní záruku v délce 24 měsíců od převzetí.

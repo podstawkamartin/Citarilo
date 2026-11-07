@@ -11,7 +11,7 @@ uv run citarilo eval --probes --max-usd 0.05 --dry-run
 uv run citarilo eval --probes --max-usd 0.05
 ```
 
-Answers default to the 15 `dev` cases. `--split heldout` explicitly selects the
+Answers default to the 21 `dev` cases. `--split heldout` explicitly selects the
 five reserved cases and prints a warning; use it once at the end, never for tuning.
 Dry runs do not read `.env`, create clients, load the index, open the ledger or
 send requests. Their worst-case cost uses the pipeline's reservation calculation,
