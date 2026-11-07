@@ -1,4 +1,4 @@
-"""Immutable run audits and the public API/replay contract."""
+"""Immutable run audits and the public API contract."""
 
 from __future__ import annotations
 
@@ -216,7 +216,7 @@ def _validate_final(
 
 
 class AskResponse(RecordModel):
-    """HTTP 200 body and phase-2 replay file, with no internal audit fields."""
+    """HTTP 200 body, with no internal audit fields."""
 
     run_id: Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")]
     mode: Mode

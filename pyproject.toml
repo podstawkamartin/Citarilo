@@ -1,7 +1,7 @@
 [project]
 name = "citarilo"
 version = "0.1.0"
-description = "Evidence-backed customer support for the fictional TrailSupply shop."
+description = "Customer support answers from company documents, every claim cited and verified."
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.162.0",

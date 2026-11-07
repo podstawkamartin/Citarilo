@@ -2,11 +2,8 @@
 
 Citarilo odpovídá na dotazy zákazníků z firemních dokumentů a každé tvrzení
 dokládá konkrétní větou ze zdroje. Když dokumenty odpověď neobsahují, odmítne
-místo vymýšlení. Ukázková data tvoří šest českých dokumentů fiktivního e-shopu
+místo vymýšlení. Dodává se se šesti testovacími dokumenty fiktivního e-shopu
 TrailSupply (vrácení, reklamace, doprava, platby, objednávky, půjčovna).
-
-Stav: fáze 1, lokální backend s živou evaluací. Frontend s přehráváním
-uložených běhů je fáze 2.
 
 ## Jak to funguje
 
@@ -49,13 +46,13 @@ Brány přijetí byly stanovené před laděním.
 | Cena běhu | $0.0056 | $0.0018 | – |
 
 Ověřovač na 24 sondách (12 párů „podložené / téměř správné“): 0 falešných
-přijetí, 0 falešných odmítnutí. Celá fáze 1 včetně indexace, ladění a
-měření latence stála $0.031.
+přijetí, 0 falešných odmítnutí. Vývoj včetně indexace, ladění a měření
+latence stál celkem $0.031.
 
 **Jak se hodnotilo.** Stav odpovědi, recall a sondy jsou deterministické.
 Sémantickou správnost (povinná fakta, zakázaná tvrzení, podpora každé citace)
-hodnotil agent v T3 s jiným, silnějším modelem než aplikace (`gpt-6-astra`),
-bez nákladů z API. Jde o hodnocení agentem, ne o lidskou anotaci; ruční
+hodnotil offline nezávislý LLM hodnotitel se silnějším modelem jiného typu
+než aplikace (`gpt-6-astra`). Jde o hodnocení modelem, ne o lidskou anotaci; ruční
 namátková kontrola hraničních případů zatím neproběhla. Odložené případy se
 při ladění nepoužily; spouštějí se jednou pro každou finální verzi promptu.
 
@@ -110,8 +107,8 @@ naráz.
   v SQLite (atomicky, i mezi procesy). Nevyúčtovaná nebo přerušená volání
   zůstávají započtená. Pevný strop je $3; požadavky vynucují standardní
   cenovou úroveň.
-- Klíč je jen v `.env`, nikdy v záznamech, odpovědích ani logu. API naslouchá
-  pouze na 127.0.0.1.
+- API klíč nastavuje správce v proměnné prostředí nebo v `.env`; nikdy se
+  neobjeví v záznamech, odpovědích ani logu. API naslouchá pouze na 127.0.0.1.
 
 ## Vývoj a testy
 

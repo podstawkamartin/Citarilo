@@ -1,6 +1,6 @@
 # Answer evaluation and offline grading
 
-Only the coordinator runs live evaluations. Automated tests use fakes and block
+Live evaluations are run explicitly by an operator. Automated tests use fakes and block
 network access. These commands explicitly authorize provider spending up to a
 separate run cap, additionally constrained by the persistent global ledger cap:
 
@@ -44,7 +44,7 @@ reservations. These can differ slightly. All USD amounts serialize as strings.
 
 ```sh
 uv run citarilo eval --grading-template .runtime/evals/answers-<timestamp>-<id>.json
-# A separate T3 agent fills the resulting <report>.grades.json; user spot-checks.
+# An independent LLM grader fills <report>.grades.json; a human spot-checks it.
 uv run citarilo eval --summarize <report>.json <report>.json.grades.json
 ```
 

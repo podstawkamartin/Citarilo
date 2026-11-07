@@ -43,7 +43,7 @@ def run(rig, cases=None, cap="0.05"):
 
 def graded(report, path, *, good=True):
     grades = grading_template(report, path).model_dump(mode="json")
-    grades.update(grader="Independent test agent", graded_at="2026-11-06T12:00:00Z")
+    grades.update(grader="Independent test evaluator", graded_at="2026-11-06T12:00:00Z")
     for result, grade in zip(report.cases, grades["cases"], strict=True):
         for claim in grade["claims"]:
             claim["supported"] = good

@@ -1,8 +1,7 @@
 # Architektura Citarila
 
-> **Stav:** schválený návrh pro fázi 1 (lokální živý RAG). Implementace zatím
-> neexistuje. Modely, ceny a verze knihoven ověřeny 6. 11. 2026. Odhady
-> nákladů jsou orientační; skutečnou spotřebu měří záznam každého běhu.
+> Modely, ceny a verze knihoven ověřeny 6. 11. 2026. Odhady nákladů jsou
+> orientační; skutečnou spotřebu měří záznam každého běhu.
 
 ## Jak zpracování dotazu funguje
 
@@ -47,7 +46,6 @@ flowchart LR
     P --> RUNS[("runs/*.json")]
     ING -.-> L[("spend.sqlite")]
     P -.-> L
-    RUNS -->|kontrola a export| RP["Fáze 2: statický replay"]
 ```
 
 Index, záznamy běhů i útrata leží v Gitem ignorované `.runtime/`.
@@ -71,12 +69,10 @@ tests/
 | `index.py` | Embeddingy se spotřebou, index s manifestem, vyhledávání |
 | `pipeline.py` | LangGraph graf, prompty, schémata, kontroly |
 | `budget.py` | Rezervace a vyúčtování v SQLite, strop |
-| `records.py` | Schéma záznamu běhu (zároveň kontrakt pro replay) |
+| `records.py` | Schéma záznamu běhu a odpovědi API |
 | `api.py` | FastAPI endpointy, chybová obálka |
 | `cli.py` | `ingest`, `ask`, `serve`, `eval` |
 | `evals.py` | Spuštění živé evaluace a vyhodnocení |
-
-Soubory vznikají postupně s kódem, ne předem.
 
 ## LangChain a LangGraph
 
@@ -124,8 +120,8 @@ Soubory vznikají postupně s kódem, ne předem.
 
 ## Korpus a vyhledávání
 
-- Šest českých Markdown dokumentů fiktivního e-shopu TrailSupply, každý
-  zřetelně označený jako ukázková data.
+- Dodávané testovací dokumenty: šest českých Markdown dokumentů fiktivního
+  e-shopu TrailSupply, každý zřetelně označený jako fiktivní.
 - Sekce H2 nese explicitní anglické ID (`## Lhůta pro vrácení {#return-window}`)
   a je jednotkou vyhledávání. Jedna věta na řádek je jednotka citace:
   `returns.return-window.2`.
@@ -173,23 +169,23 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
   nástroje ani tajemství.
 - Vstup: otázka 3–500 znaků, tělo požadavku nejvýše 4 KiB, žádná
   neznámá pole, 1 souběžný dotaz.
-- Klíče pouze v `.env`, nikdy v záznamech, logech ani frontendu.
-  Externí tracing vypnutý.
-- API i budoucí Vite běží pouze na portech dostupných z hostu lokálně
-  (5174–5199), ne na portech viditelných v síti.
+- API klíč nastavuje správce na serveru (proměnná prostředí nebo `.env`);
+  nikdy se neobjeví v záznamech, logech, odpovědích ani frontendu. Externí
+  tracing je vypnutý.
+- API ve výchozím nastavení naslouchá pouze na 127.0.0.1.
 
 ## Evaluace a testy
 
 - **Případy:** 15 vývojových a 5 odložených. Odložené se při ladění
-  nepoužívají a spustí se jednou na konci. Každý případ má ručně určený
+  nepoužívají a spouštějí se jednou pro každou finální verzi promptu. Každý případ má ručně určený
   očekávaný stav, povinná fakta, zakázaná tvrzení a podpůrné věty.
   Pokrytí: angličtina, čeština, bez diakritiky, více sekcí,
   nezodpověditelné otázky, prompt injection v otázce i v dokumentu.
 - **Hodnocení:** odpověď je správná, když má očekávaný stav, všechna
   povinná fakta, žádné zakázané tvrzení a každá citace tvrzení podporuje.
-  Podporu citací u každé živé odpovědi hodnotí agent v T3 (silnější model
-  jiného typu, bez nákladů z API), uživatel kontroluje namátkově. README
-  to uvádí jako hodnocení agentem.
+  Podporu citací u každé živé odpovědi hodnotí offline nezávislý LLM
+  hodnotitel (silnější model jiného typu než aplikace) s namátkovou ruční
+  kontrolou. README to uvádí jako hodnocení modelem, ne lidskou anotaci.
 - **Brány přijetí** (stanovené před laděním): recall@5 ≥ 0,9; správně
   zodpovězeno ≥ 80 % zodpověditelných; 0 zodpovězených nezodpověditelných;
   0 úspěšných injection; 0 falešných přijetí v sondách ověřovače. Změnu
@@ -210,13 +206,7 @@ konfiguraci (modely, reasoning, `top_k`, limity), otázku, vyhledané sekce
 se skóre, kandidátní tvrzení, výsledky kontrol, verdikty, výsledek,
 spotřebu a cenu každého volání, časy uzlů a případnou chybu.
 
-## Fáze 2: veřejný replay
-
-Statické JSON soubory vybraných a zkontrolovaných živých běhů evaluace ve
-stejném tvaru jako odpověď API, označené `mode: "replay"`. Žádný backend,
-modely ani klíče.
-
-## Vědomě vynecháno
+## Mimo rozsah
 
 Streamování, hybridní vyhledávání a reranking, vektorová databáze, opravné
 přegenerování, konverzace, nahrávání dokumentů, checkpointy a přerušení
@@ -225,15 +215,3 @@ obchodní systémy. Každá položka se přidá až s doloženou potřebou.
 
 LangGraph dělá tok explicitním a další kroky se přidávají jako uzly.
 Škálování výkonu (více procesů, fronta, sdílené úložiště) neřeší.
-
-## Pořadí implementace
-
-1. Kostra: src layout, uv, ruff, pytest se zablokovanou sítí, CI.
-2. České dokumenty a `corpus.py`.
-3. Evaluační případy (vývojové i odložené) a test platnosti ID.
-4. `budget.py`.
-5. Živá indexace a evaluace vyhledávání.
-6. Graf, kontroly a záznamy s falešnými modely; jeden živý dotaz.
-7. Plná živá evaluace vývojových případů, opravy konkrétních selhání.
-8. API.
-9. Jednorázový běh odložených případů, README s datovanými výsledky.

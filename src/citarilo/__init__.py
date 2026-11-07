@@ -1,4 +1,4 @@
-"""Evidence-backed customer support for TrailSupply."""
+"""Customer support answers from company documents, every claim cited and verified."""
 
 from importlib.metadata import version
 

@@ -369,7 +369,7 @@ def evaluate_retrieval(
 
 
 # Answer/probe reports deliberately retain the evidence, including rejected candidates,
-# so a separate agent can grade them offline without rerunning paid calls.
+# so an independent evaluator can grade them offline without rerunning paid calls.
 
 
 class AnswerResult(EvalCase):
