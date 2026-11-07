@@ -1,0 +1,385 @@
+:root {
+  --ink: #1d2a31;
+  --ink-soft: #52626b;
+  --paper: #f3f6f5;
+  --surface: #ffffff;
+  --rule: #d3dcda;
+  --field: #7b8c89;
+  --accent: #0d6a66;
+  --accent-ink: #ffffff;
+  --marker: #f2e45a;
+  --marker-soft: #f7f0b5;
+  --warn-bg: #fdf3dc;
+  --warn-ink: #6e4a00;
+  --error-bg: #fbe7e5;
+  --error-ink: #8a1f17;
+  --sans: "Public Sans Variable", system-ui, sans-serif;
+  --serif: "Source Serif 4 Variable", Georgia, serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e3eae8;
+    --ink-soft: #9fb0ad;
+    --paper: #11191c;
+    --surface: #182327;
+    --rule: #2c3b40;
+    --field: #6a807c;
+    --accent: #5cc2ba;
+    --accent-ink: #0b1f1d;
+    --marker: rgb(242 228 90 / 0.26);
+    --marker-soft: rgb(242 228 90 / 0.16);
+    --warn-bg: #2f2612;
+    --warn-ink: #f0d18c;
+    --error-bg: #3a1b18;
+    --error-ink: #f4b4ac;
+    color-scheme: dark;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1rem/1.55 var(--sans);
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.wordmark {
+  margin: 0;
+  font: 650 1.75rem/1 var(--serif);
+  letter-spacing: -0.01em;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.notice {
+  margin: 0 0 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  border-radius: 6px;
+}
+
+code {
+  font-size: 0.92em;
+}
+
+.workspace {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  }
+  .document {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+.column {
+  min-width: 0;
+}
+
+/* Question */
+
+.ask {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.ask label {
+  font-weight: 600;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 0.75rem 0.875rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--field);
+  border-radius: 8px;
+}
+
+.ask-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hint {
+  color: var(--ink-soft);
+  font-size: 0.875rem;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.ask button {
+  padding: 0.55rem 1.4rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: 8px;
+}
+
+.ask button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Result */
+
+.result {
+  margin-top: 1.75rem;
+}
+
+.result:focus {
+  outline: none;
+}
+
+.progress {
+  color: var(--ink-soft);
+}
+
+.progress span {
+  font-variant-numeric: tabular-nums;
+}
+
+.outcome {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+}
+
+.outcome h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.outcome p {
+  margin: 0;
+}
+
+.outcome-refused {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+
+.outcome-error {
+  background: var(--error-bg);
+  color: var(--error-ink);
+}
+
+.claims {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font: 400 1.125rem/1.6 var(--serif);
+}
+
+.claims li + li {
+  margin-top: 0.9rem;
+}
+
+.cite {
+  min-width: 1.6em;
+  margin-left: 0.15em;
+  padding: 0 0.35em;
+  font: 600 0.75rem/1.5 var(--sans);
+  vertical-align: 0.25em;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+}
+
+.cite[aria-pressed="true"] {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.sources-heading {
+  margin: 2rem 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.sources {
+  margin: 0;
+  padding-left: 1.6rem;
+}
+
+.sources li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.sources li + li {
+  margin-top: 0.4rem;
+}
+
+.source {
+  display: block;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+}
+
+.source q {
+  font-family: var(--serif);
+}
+
+.source[aria-pressed="true"] q {
+  background: var(--marker);
+  box-decoration-break: clone;
+}
+
+.where {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.run-details {
+  margin-top: 1.75rem;
+  font-size: 0.875rem;
+  color: var(--ink-soft);
+}
+
+.outcome .run-details {
+  margin-top: 0.9rem;
+  color: inherit;
+}
+
+.run-details summary {
+  cursor: pointer;
+}
+
+.steps {
+  margin: 0.5rem 0;
+  padding-left: 1.4rem;
+}
+
+.steps li span:last-child {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps li.failed {
+  color: var(--error-ink);
+}
+
+.tokens {
+  margin: 0;
+}
+
+/* Document */
+
+.document {
+  padding: 1.5rem 1.75rem 2rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+}
+
+.document-empty {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.document-header h2 {
+  margin: 0 0 1rem;
+  font: 650 1.35rem/1.25 var(--serif);
+}
+
+.document-body {
+  font: 400 1rem/1.75 var(--serif);
+  max-width: 68ch;
+}
+
+.document-body h3 {
+  margin: 1.5rem 0 0.25rem;
+  font: 600 0.95rem/1.4 var(--sans);
+}
+
+.document-body p {
+  margin: 0;
+}
+
+.cited {
+  background: linear-gradient(transparent 62%, var(--marker-soft) 62%);
+}
+
+mark.selected {
+  color: inherit;
+  background: var(--marker);
+  padding: 0.05em 0.1em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.loading {
+  color: var(--ink-soft);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto !important;
+  }
+}

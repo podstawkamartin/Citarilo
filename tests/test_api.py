@@ -541,3 +541,27 @@ def test_serve_wires_local_settings_without_starting_app(rig, monkeypatch):
         }
     ]
     assert rig.calls == []
+
+
+def test_serves_built_web_app_with_strict_csp_and_keeps_api_errors(rig, tmp_path):
+    web = tmp_path / "web"
+    (web / "assets").mkdir(parents=True)
+    (web / "index.html").write_text("<!doctype html><title>Citarilo</title>", encoding="utf-8")
+    (web / "assets" / "app.js").write_text("export {};", encoding="utf-8")
+    with TestClient(api.create_app(settings=rig.settings, web_dir=web)) as client:
+        page = client.get("/")
+        assert page.status_code == 200
+        assert "<title>Citarilo</title>" in page.text
+        csp = page.headers["Content-Security-Policy"]
+        assert "script-src 'self'" in csp and "'unsafe-inline'" not in csp
+        assert "frame-ancestors 'none'" in csp
+        assert client.get("/assets/app.js").status_code == 200
+        assert_error(client.get("/api/unknown"), 404, "not_found", ask=False)
+        assert client.get("/api/documents/returns").status_code == 200
+
+
+def test_without_a_build_only_the_api_is_served(rig, tmp_path):
+    with TestClient(api.create_app(settings=rig.settings, web_dir=tmp_path / "missing")) as client:
+        response = client.get("/")
+        assert response.status_code == 404
+        assert response.json()["error"]["code"] == "not_found"

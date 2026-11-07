@@ -165,7 +165,7 @@ def main(
                     _ask(args.question, context=live_context)
         elif args.command == "serve":
             uvicorn.run(
-                create_app(settings=settings),
+                create_app(settings=settings, web_dir=settings.web_dir),
                 host=settings.api_host,
                 port=settings.api_port,
                 reload=False,

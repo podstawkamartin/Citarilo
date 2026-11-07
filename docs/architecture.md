@@ -73,6 +73,7 @@ tests/
 | `records.py` | Schéma záznamu běhu a odpovědi API |
 | `api.py` | FastAPI endpointy, chybová obálka |
 | `cli.py` | `ingest`, `ask`, `serve`, `eval` |
+| `frontend/` | React + TypeScript (Vite): otázka, ověřená odpověď, citace a zvýraznění věty v dokumentu; build servíruje `serve` |
 | `evals.py` | Spuštění živé evaluace a vyhodnocení |
 
 ## LangChain a LangGraph

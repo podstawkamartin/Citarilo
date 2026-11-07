@@ -6,6 +6,7 @@ import re
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, replace
+from pathlib import Path
 from threading import Lock
 from typing import Literal
 
@@ -16,6 +17,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import MutableHeaders
 from starlette.exceptions import HTTPException
 from starlette.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from citarilo import __version__, pipeline
@@ -32,6 +34,12 @@ from citarilo.index import (
 from citarilo.records import AskResponse
 
 _MAX_BODY_BYTES = 4096
+# The web app is a static build: same-origin scripts, styles, fonts and API calls only.
+_WEB_CSP = (
+    "default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; "
+    "img-src 'self' data:; connect-src 'self'; form-action 'self'; "
+    "frame-ancestors 'none'; base-uri 'none'"
+)
 _DOCUMENT_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _ERRORS = {
     "invalid_request": (422, "The request is invalid."),
@@ -75,10 +83,11 @@ class _APIGuards:
                 headers = MutableHeaders(scope=message)
                 headers["X-Content-Type-Options"] = "nosniff"
                 headers["Referrer-Policy"] = "no-referrer"
-                if scope["path"].startswith("/api/"):
-                    headers["Content-Security-Policy"] = (
-                        "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
-                    )
+                headers["Content-Security-Policy"] = (
+                    "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+                    if scope["path"].startswith("/api/")
+                    else _WEB_CSP
+                )
                 if is_ask:
                     headers["Cache-Control"] = "no-store"
             await send(message)
@@ -205,8 +214,12 @@ def create_app(
     *,
     context_factory: Callable[[Settings], pipeline.AnswerContext] = pipeline.create_live_context,
     settings: Settings | None = None,
+    web_dir: Path | None = None,
 ) -> FastAPI:
-    """Build an app; initialize one caller-owned context during lifespan startup."""
+    """Build an app; initialize one caller-owned context during lifespan startup.
+
+    With ``web_dir`` (a built frontend), the same origin also serves the web app.
+    """
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -290,4 +303,7 @@ def create_app(
             ],
         )
 
+    if web_dir is not None and (web_dir / "index.html").is_file():
+        # Mounted last so API routes win; unknown paths still get the JSON 404 envelope.
+        app.mount("/", StaticFiles(directory=web_dir, html=True), name="web")
     return app

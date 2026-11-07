@@ -83,6 +83,19 @@ uv run citarilo ask "Do kdy můžu vrátit zboží z výprodeje?"
 uv run citarilo serve             # API na http://127.0.0.1:5174
 ```
 
+Webové rozhraní (Node.js 24) se sestaví jednou a `citarilo serve` ho pak
+servíruje na stejné adrese jako API:
+
+```sh
+cd frontend && npm ci && npm run build && cd ..
+uv run citarilo serve             # http://127.0.0.1:5174
+```
+
+Uživatel položí otázku, dostane tvrzení s očíslovanými citacemi a kliknutím
+na citaci uvidí zvýrazněnou větu v celém dokumentu. Odmítnutí rozhraní
+vysvětlí místo neověřené odpovědi. Klíč zůstává jen na serveru. Vývoj
+s automatickým obnovováním: `npm run dev` (port 5175, `/api` jde na 5174).
+
 Evaluace (každý placený běh má vlastní strop `--max-usd`):
 
 ```sh
