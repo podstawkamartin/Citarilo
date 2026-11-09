@@ -90,6 +90,15 @@ class _APIGuards:
                 )
                 if is_ask:
                     headers["Cache-Control"] = "no-store"
+                elif not scope["path"].startswith("/api/") and "Cache-Control" not in headers:
+                    # Built assets have content hashes in their names and never change;
+                    # everything else (index.html, theme.js) must be revalidated so a new
+                    # build shows up on a normal reload.
+                    headers["Cache-Control"] = (
+                        "public, max-age=31536000, immutable"
+                        if scope["path"].startswith("/assets/")
+                        else "no-cache"
+                    )
             await send(message)
 
         try:
@@ -134,6 +143,8 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok", "not_ready"]
     corpus_hash: str | None
+    document_count: int
+    sentence_count: int
     index_ready: bool
     key_configured: bool
     remaining_budget_usd: str
@@ -153,12 +164,16 @@ class DocumentSection(BaseModel):
 
 class DocumentResponse(BaseModel):
     title: str
+    # Base name only, never a local path.
+    file_name: str
     sections: list[DocumentSection]
 
 
 @dataclass
 class _AppState:
     corpus: Corpus | None = None
+    document_count: int = 0
+    sentence_count: int = 0
     ledger: BudgetLedger | None = None
     context: pipeline.AnswerContext | None = None
     index_ready: bool = False
@@ -224,6 +239,10 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.api = await run_in_threadpool(_load_state, settings, context_factory)
+        state = app.state.api
+        if state.corpus is not None:
+            state.document_count = len(state.corpus.documents)
+            state.sentence_count = sum(1 for _ in state.corpus.sentences())
         try:
             yield
         finally:
@@ -251,6 +270,8 @@ def create_app(
         return HealthResponse(
             status="ok" if state.error_code is None and remaining > 0 else "not_ready",
             corpus_hash=state.corpus.corpus_hash if state.corpus is not None else None,
+            document_count=state.document_count,
+            sentence_count=state.sentence_count,
             index_ready=state.index_ready,
             key_configured=state.key_configured,
             remaining_budget_usd=str(remaining),
@@ -290,6 +311,7 @@ def create_app(
             return _error("not_found")
         return DocumentResponse(
             title=doc.title,
+            file_name=doc.path.name,
             sections=[
                 DocumentSection(
                     heading=section.heading,

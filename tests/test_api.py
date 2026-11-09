@@ -186,6 +186,8 @@ def test_health_ready_and_context_built_once(rig):
             assert response.json() == {
                 "status": "ok",
                 "corpus_hash": rig.context.corpus.corpus_hash,
+                "document_count": 1,
+                "sentence_count": 2,
                 "index_ready": True,
                 "key_configured": True,
                 "remaining_budget_usd": "3.000000",
@@ -347,6 +349,8 @@ def test_index_unavailable_startup_still_serves_health_and_documents(rig, failur
         assert health.json()["index_ready"] is False
         assert health.json()["key_configured"] is True
         assert health.json()["corpus_hash"] == rig.context.corpus.corpus_hash
+        assert health.json()["document_count"] == 1
+        assert health.json()["sentence_count"] == 2
         assert health.json()["remaining_budget_usd"] == "3.000000"
         assert_headers(health, ask=False)
         assert_error(client.post("/api/ask", json={"question": QUESTION}), 503, "index_unavailable")
@@ -400,6 +404,8 @@ def test_invalid_settings_do_not_prevent_startup_or_echo_values(rig, monkeypatch
         assert health.status_code == 200
         assert health.json()["status"] == "not_ready"
         assert health.json()["corpus_hash"] is None
+        assert health.json()["document_count"] == 0
+        assert health.json()["sentence_count"] == 0
         assert health.json()["remaining_budget_usd"] == "0"
         assert_headers(health, ask=False)
         assert_error(client.post("/api/ask", json={"question": SECRET}), 503, "configuration_error")
@@ -483,6 +489,7 @@ def test_document_contains_only_frontend_source_fields(client):
     assert response.status_code == 200
     assert response.json() == {
         "title": "Vrácení zboží",
+        "file_name": "returns.md",
         "sections": [
             {
                 "heading": "Lhůta",
@@ -555,7 +562,10 @@ def test_serves_built_web_app_with_strict_csp_and_keeps_api_errors(rig, tmp_path
         csp = page.headers["Content-Security-Policy"]
         assert "script-src 'self'" in csp and "'unsafe-inline'" not in csp
         assert "frame-ancestors 'none'" in csp
-        assert client.get("/assets/app.js").status_code == 200
+        assert page.headers["Cache-Control"] == "no-cache"
+        asset = client.get("/assets/app.js")
+        assert asset.status_code == 200
+        assert asset.headers["Cache-Control"] == "public, max-age=31536000, immutable"
         assert_error(client.get("/api/unknown"), 404, "not_found", ask=False)
         assert client.get("/api/documents/returns").status_code == 200
 

@@ -132,8 +132,8 @@ Po importu dávají přesně stejné věty a evaluace nad nimi běží beze změ
 | Endpoint | Popis |
 |---|---|
 | `POST /api/ask` | `{"question": "..."}` → stav, kód odmítnutí, tvrzení s citacemi, zdrojové věty, jazyk odpovědi, metriky |
-| `GET /api/health` | připravenost indexu a klíče, hash korpusu, zbývající rozpočet |
-| `GET /api/documents/{id}` | dokument po sekcích a větách s ID |
+| `GET /api/health` | připravenost indexu a klíče, hash korpusu, počty dokumentů a citovatelných vět (`document_count`, `sentence_count`; bez korpusu 0), zbývající rozpočet |
+| `GET /api/documents/{id}` | dokument po sekcích a větách s ID, název souboru (`file_name`, bez cesty) |
 
 Chyby mají jednotný tvar `{"error": {"code", "message"}}` (413, 422, 429,
 502, 503). Dotaz je omezený na 3–500 znaků a 4 KiB, zpracovává se jeden
