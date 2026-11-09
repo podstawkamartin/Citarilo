@@ -1,102 +1,142 @@
-# Citarilo
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
+    <img src="docs/assets/logo-light.svg" alt="Citarilo" width="277">
+  </picture>
+</p>
 
-Citarilo odpovídá na dotazy zákazníků z firemních dokumentů a každé tvrzení
-dokládá konkrétní větou ze zdroje. Když dokumenty odpověď neobsahují, odmítne
-místo vymýšlení. Dodává se se šesti testovacími dokumenty fiktivního e-shopu
-TrailSupply (vrácení, reklamace, doprava, platby, objednávky, půjčovna).
+<p align="center"><b>English</b> · <a href="README.cs.md">Čeština</a></p>
 
-## Jak to funguje
+**Answers from company documents where every claim is backed by a verbatim
+sentence, or no answer at all.**
+
+Citarilo answers customer questions from a company's own documents. Each claim
+in an answer cites the exact sentences it rests on, and you can open each one
+highlighted in the full document. Before an answer is shown, code checks the
+citations and a second model call verifies that the cited sentences really
+support the claim. When the documents do not contain the answer, or a claim
+fails a check, Citarilo refuses instead of guessing.
+
+It ships with six sample documents of a fictional outdoor shop, TrailSupply
+(returns, warranty claims, shipping, payments, orders, rentals), written in
+Czech.
+
+## What makes it different
+
+- **Citations are sentences, not pages.** Every claim points to one to three
+  specific sentences; the web interface shows them highlighted in place.
+- **Checked twice before you see it.** Code rejects unknown sentence IDs and any
+  number, date or URL that does not appear in the cited sentences; a separate
+  model call then judges whether the citations support the claim.
+- **Refusal is a feature.** Unanswerable questions and failed checks end in a
+  clear refusal with its reason, never in an unverified answer.
+- **Measured, not assumed.** Quality, latency and cost are evaluated on a fixed
+  case set with acceptance gates set in advance; every report is in the
+  repository.
+
+## How it works
 
 ```text
-otázka (EN/CS) → validace → rezervace rozpočtu
-  → retrieve  (embedding, 5 nejbližších sekcí)
-  → generate  (gpt-6-luna: až 4 tvrzení s ID citovaných vět)
-  → check     (kód: ID z vyhledaných vět, čísla/data/URL v citovaných větách)
-  → verify    (druhé volání modelu: podporují tvrzení samotné citované věty?)
-  → assemble  nebo refuse (insufficient_evidence | check_failed | unsupported | contradicted)
-  → záznam běhu (.runtime/runs) a vyúčtování
+question (EN/CS) → validation → budget reservation
+  → retrieve  (embedding, 5 nearest sections)
+  → generate  (gpt-6-luna: up to 4 claims with the IDs of cited sentences)
+  → check     (code: IDs from retrieved sentences; numbers/dates/URLs in cited sentences)
+  → verify    (second model call: do the cited sentences alone support the claim?)
+  → assemble  or refuse (insufficient_evidence | check_failed | unsupported | contradicted)
+  → run record (.runtime/runs) and cost accounting
 ```
 
-- Tok řídí LangGraph `StateGraph` s podmíněnými hranami; modely, index a
-  rozpočet dostávají uzly přes `Runtime` kontext, ne přes globální stav.
-- Strukturovaný výstup modelu má striktní JSON Schema; spotřeba se vyúčtuje
-  z odpovědi poskytovatele dřív, než se výstup validuje.
-- Odpověď je v jazyce otázky, zdrojové věty zůstávají v původní češtině.
-- Tvrzení uvádějí jen hodnoty z dokumentů a nic nedopočítávají (součty,
-  ceny po slevě); dopočítané číslo kontrola zamítne.
-- Všechna tři volání poskytovatele sdílejí jedno HTTP spojení s keep-alive.
-- Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
-  evaluace: [docs/evaluation.md](docs/evaluation.md).
+- The flow is a LangGraph `StateGraph` with conditional edges; models, the
+  index and the budget reach the nodes through the `Runtime` context, not
+  global state.
+- Model output uses a strict JSON Schema; usage is billed from the provider's
+  response before the output is validated.
+- Answers are in the language of the question; quoted sentences stay in the
+  original Czech.
+- Claims state only values from the documents and never derive new ones (sums,
+  discounted prices); a derived number fails the check.
+- Retrieval is vector search over document sections (`text-embedding-3-large`)
+  in an in-memory store persisted as a file with a checksummed manifest. No
+  separate database is needed at this scale.
+- Design details: [docs/architecture.md](docs/architecture.md) (Czech),
+  evaluation method: [docs/evaluation.md](docs/evaluation.md).
 
-## Výsledky (7. 11. 2026)
+## Results (7 Nov 2026)
 
-Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
-v každém reportu. Vyhledávání a odpovědi (prompt v4) jsou v
-[evals/results/2026-11-07](evals/results/2026-11-07), sondy ověřovače
-v [evals/results/2026-11-06](evals/results/2026-11-06).
-Brány přijetí byly stanovené před laděním.
+Live runs against the OpenAI API; configuration, commit and corpus hash are
+stored in every report. Retrieval and answers (prompt v4) are in
+[evals/results/2026-11-07](evals/results/2026-11-07). Acceptance gates were set
+before tuning.
 
-| Měření | Vývojové (21) | Odložené (5) | Brána |
+| Measure | Development (21 cases) | Held-out (5 cases) | Gate |
 |---|---|---|---|
-| Recall@5 vyhledávání | 1,00 (17/17) | – | ≥ 0,9 |
-| Správně zodpovězené zodpověditelné | 82,4 % (14/17) | 100 % (4/4) | ≥ 80 % |
-| Zodpovězené nezodpověditelné | 0 ze 4 | 0 z 1 | 0 |
-| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | 0 |
-| Latence p50 / max | 4,0 s / 6,1 s | 4,4 s / 4,7 s | – |
-| Cena běhu | $0.0079 | $0.0018 | – |
+| Retrieval recall@5 | 1.00 (17/17) | – | ≥ 0.9 |
+| Answerable questions answered correctly | 82.4 % (14/17) | 100 % (4/4) | ≥ 80 % |
+| Unanswerable questions answered | 0 of 4 | 0 of 1 | 0 |
+| Successful prompt injections | 0 of 3 | 0 of 1 | 0 |
+| Latency p50 / max | 4.0 s / 6.1 s | 4.4 s / 4.7 s | – |
+| Cost per question | ≈ $0.0004 | ≈ $0.0004 | – |
 
-Ověřovač na 24 sondách (12 párů „podložené / téměř správné“): 0 falešných
-přijetí, 0 falešných odmítnutí. Vývoj včetně indexace, ladění a měření
-latence stál celkem $0.042.
+**How it was graded.** Answer status, recall and the verifier probes are
+deterministic. Semantic correctness (required facts, forbidden claims, support
+for each citation) was graded offline by an independent LLM grader, a stronger
+model of a different family than the app's (`gpt-6-astra`). This is model
+grading, not human annotation; a manual review of borderline cases has not been
+done yet. Held-out cases were not used for tuning and run once per final prompt
+version.
 
-**Jak se hodnotilo.** Stav odpovědi, recall a sondy jsou deterministické.
-Sémantickou správnost (povinná fakta, zakázaná tvrzení, podpora každé citace)
-hodnotil offline nezávislý LLM hodnotitel se silnějším modelem jiného typu
-než aplikace (`gpt-6-astra`). Jde o hodnocení modelem, ne o lidskou anotaci; ruční
-namátková kontrola hraničních případů zatím neproběhla. Odložené případy se
-při ladění nepoužily; spouštějí se jednou pro každou finální verzi promptu.
+**Errors in the development set (3):**
+- Late rental cancellation: the claim about the 30 % fee did not cite the
+  sentence with the seven-day boundary; the verifier rejected it and the answer
+  was refused.
+- Return label vs. warranty claim: the verifier rejected a supported claim
+  because it did not repeat the restriction to standard parcels (an overly
+  strict refusal).
+- Weekend rental return: the answer said "in person" without citing the
+  sentence that says so, and the verifier let it through.
 
-**Chyby ve vývojové sadě (3):**
-- Pozdní storno půjčovny: tvrzení o poplatku 30 % necitovalo větu se
-  sedmidenní hranicí; ověřovač ho správně zamítl a odpověď byla odmítnuta.
-- Zpětný štítek vs. reklamace: ověřovač zamítl podložené tvrzení, protože
-  neopakovalo omezení na běžný balík (příliš přísné odmítnutí).
-- Vrácení o víkendu: odpověď uvedla „osobně“ bez citace věty, která to říká.
+Two of the three errors are unnecessary refusals; one is an answer with an
+uncited detail.
 
-Dvě ze tří chyb jsou zbytečná odmítnutí, ne nepravdivé odpovědi.
+**Verifier probes.** On 24 probes (12 pairs of a supported claim and a near-miss)
+the verifier had 0 false acceptances and 0 false rejections
+([evals/results/2026-11-06](evals/results/2026-11-06)). This was measured with
+prompt v3 on the earlier revision of the sample documents and has not yet been
+re-run for v4.
 
-Vzorek je malý (16 zodpověditelných případů), takže čísla dokládají funkčnost
-a bezpečné chování, ne statisticky přesnou míru chybovosti. Latenci tvoří tři
-po sobě jdoucí volání poskytovatele (embedding, generování, ověření); většinu
-času zabírá generování a ověření na straně modelu.
+The sample is small (21 answerable cases in total), so the numbers show that
+the system works and fails safely, not a statistically precise error rate.
+Latency is three sequential provider calls (embedding, generation,
+verification); most of it is generation and verification on the model side.
 
-## Spuštění
+## Getting started
 
-Potřeba: Python 3.12, [uv](https://docs.astral.sh/uv/), OpenAI API klíč.
+Requirements: Python 3.12, [uv](https://docs.astral.sh/uv/), an OpenAI API
+key; Node.js 24 for the web interface.
 
 ```sh
 uv sync
-cp .env.example .env              # doplnit OPENAI_API_KEY
-uv run citarilo ingest --dry-run  # odhad ceny bez sítě
-uv run citarilo ingest            # index sekcí (≈ $0.001)
+cp .env.example .env              # set OPENAI_API_KEY
+uv run citarilo ingest --dry-run  # cost estimate, no network
+uv run citarilo ingest            # build the section index (≈ $0.001)
 uv run citarilo ask "Do kdy můžu vrátit zboží z výprodeje?"
-uv run citarilo serve             # API na http://127.0.0.1:5174
 ```
 
-Webové rozhraní (Node.js 24) se sestaví jednou a `citarilo serve` ho pak
-servíruje na stejné adrese jako API:
+The web interface is built once; `citarilo serve` then serves it on the same
+address as the API:
 
 ```sh
 cd frontend && npm ci && npm run build && cd ..
 uv run citarilo serve             # http://127.0.0.1:5174
 ```
 
-Uživatel položí otázku, dostane tvrzení s očíslovanými citacemi a kliknutím
-na citaci uvidí zvýrazněnou větu v celém dokumentu. Odmítnutí rozhraní
-vysvětlí místo neověřené odpovědi. Klíč zůstává jen na serveru. Vývoj
-s automatickým obnovováním: `npm run dev` (port 5175, `/api` jde na 5174).
+The interface is in Czech. An answer is laid out as claims, the cited
+sentences, the source document with the selected sentence highlighted, and the
+checks the answer passed with their time and cost. A refusal explains its
+reason. The API key stays on the server. For development with live reload:
+`npm run dev` (port 5175, `/api` is proxied to 5174).
 
-Evaluace (každý placený běh má vlastní strop `--max-usd`):
+Evaluation (each paid run has its own `--max-usd` cap):
 
 ```sh
 uv run citarilo eval --retrieval --max-usd 0.01
@@ -104,67 +144,81 @@ uv run citarilo eval --live --max-usd 0.05
 uv run citarilo eval --probes --max-usd 0.05
 ```
 
-## Vlastní dokumenty
+## Your own documents
 
-`citarilo import` převede firemní dokumenty (PDF s textovou vrstvou, DOCX,
-Markdown) do formátu, ze kterého Citarilo cituje: sekce podle nadpisů a jedna
-věta na řádek se stabilním ID. Výstup je čitelný Markdown ke kontrole před
-indexací.
+`citarilo import` converts documents (PDF with a text layer, DOCX, Markdown)
+into the format Citarilo cites from: sections by heading and one sentence per
+line with a stable ID. The output is readable Markdown to review before
+indexing.
 
 ```sh
-uv run citarilo import ~/dokumenty/*.pdf ~/dokumenty/*.docx --out data/firma
-# zkontrolovat data/firma/*.md, potom v .env nastavit DATA_DIR=data/firma
+uv run citarilo import ~/documents/*.pdf ~/documents/*.docx --out data/company
+# review data/company/*.md, then set DATA_DIR=data/company in .env
 uv run citarilo ingest
 ```
 
-Import raději odmítne, než aby tiše ztratil nebo přeházel text: naskenovaná
-PDF bez textu, tabulky, vícesloupcovou sazbu, sledované změny a další
-nepodporované struktury hlásí s návodem na úpravu. Je určený pro soubory od
-správce, ne pro nahrávání od anonymních uživatelů.
+Restart the server after a new `ingest`. The index is bound to the hash of the
+documents, so a server never answers from an outdated index; it reports that
+the index needs rebuilding instead.
 
-Stejné testovací dokumenty jsou i ve firemních formátech v
-[examples/trailsupply-raw](examples/trailsupply-raw) (PDF, DOCX, Markdown).
-Po importu dávají přesně stejné věty a evaluace nad nimi běží beze změny
-(vývojová sada 7. 11. 2026: recall@5 1,00; 20 z 21 očekávaných stavů).
+Import refuses rather than silently losing or reordering text: scanned PDFs
+without text, tables, multi-column layouts, tracked changes and other
+unsupported structures are reported with guidance. It is meant for files from
+an administrator, not for uploads from anonymous users.
+
+The sample documents also come in office formats in
+[examples/trailsupply-raw](examples/trailsupply-raw) (PDF, DOCX, Markdown);
+importing them reproduces exactly the same sentences.
+
+**Note:** the answering and verification prompts are currently written for the
+TrailSupply sample documents in Czech. Documents of another company or in
+another language need the prompts adapted in `src/citarilo/prompts.py` and
+the evaluation cases updated.
 
 ## API
 
-| Endpoint | Popis |
+| Endpoint | Description |
 |---|---|
-| `POST /api/ask` | `{"question": "..."}` → stav, kód odmítnutí, tvrzení s citacemi, zdrojové věty, jazyk odpovědi, metriky |
-| `GET /api/health` | připravenost indexu a klíče, hash korpusu, počty dokumentů a citovatelných vět (`document_count`, `sentence_count`; bez korpusu 0), zbývající rozpočet |
-| `GET /api/documents/{id}` | dokument po sekcích a větách s ID, název souboru (`file_name`, bez cesty) |
+| `POST /api/ask` | `{"question": "..."}` → status, refusal code, claims with citations, source sentences, answer language, metrics |
+| `GET /api/health` | index and key readiness, corpus hash, number of documents and citable sentences (`document_count`, `sentence_count`; 0 without a corpus), remaining budget |
+| `GET /api/documents/{id}` | the document by sections and sentences with IDs, its file name (`file_name`, without a path) |
 
-Chyby mají jednotný tvar `{"error": {"code", "message"}}` (413, 422, 429,
-502, 503). Dotaz je omezený na 3–500 znaků a 4 KiB, zpracovává se jeden
-naráz.
+Errors share one shape `{"error": {"code", "message"}}` (413, 422, 429, 502,
+503). A question is limited to 3–500 characters and 4 KiB; one question is
+processed at a time.
 
-## Bezpečnost a rozpočet
+## Security and budget
 
-- Dokumenty i otázky jsou nedůvěryhodná data v oddělených blocích; model nemá
-  nástroje ani tajemství. Vložený pokyn v dokumentu (`orders.order-notes.3`)
-  je součástí testů.
-- Každé placené volání si před odesláním rezervuje nejhorší možnou cenu
-  v SQLite (atomicky, i mezi procesy). Nevyúčtovaná nebo přerušená volání
-  zůstávají započtená. Pevný strop je $3; požadavky vynucují standardní
-  cenovou úroveň.
-- API klíč nastavuje správce v proměnné prostředí nebo v `.env`; nikdy se
-  neobjeví v záznamech, odpovědích ani logu. API naslouchá pouze na 127.0.0.1.
+- Documents and questions are untrusted data in separate blocks; the model has
+  no tools and no secrets. An instruction planted in a document
+  (`orders.order-notes.3`) is part of the tests.
+- Every paid call reserves its worst-case cost in SQLite before it is sent
+  (atomically, also across processes). Unbilled or interrupted calls stay
+  counted. The total spending cap is at most $3; when it is reached, the server
+  stops answering. Requests enforce the standard price tier.
+- The administrator sets the API key in an environment variable or `.env`; it
+  never appears in records, responses or logs. The API listens only on
+  127.0.0.1, with a strict Content Security Policy for the web interface.
 
-## Vývoj a testy
+## Development and tests
 
 ```sh
 uv run ruff check && uv run ruff format --check
 uv run pytest
+cd frontend && npm test && npm run typecheck
 ```
 
-Testy jsou deterministické, se zablokovanou sítí a falešnými modely; nikdy
-nevolají placené API ani nečtou lokální klíč. Stejné kontroly běží v GitHub
-Actions.
+Tests are deterministic, with the network blocked and fake models; they never
+call the paid API or read a local key. The same checks run in GitHub Actions.
 
-## Omezení
+## Limitations
 
-Vědomě vynecháno: streamování, hybridní vyhledávání a reranking, vektorová
-databáze, konverzace, nahrávání dokumentů přes webové rozhraní, OCR, Docker
-a napojení na obchodní systémy. Ověření kombinuje deterministické filtry a kontrolu modelem, takže
-není důkazem pravdivosti; jeho chybovost se měří. Data jsou fiktivní.
+- One question at a time and local access only (127.0.0.1); there are no user
+  accounts. Serving a team needs a reverse proxy with authentication and
+  concurrent request handling.
+- Text only: no OCR, tables or images. Documents are added on the server with
+  `import` and `ingest`, not through the web interface.
+- Single questions, no conversation; no streaming, hybrid search or reranking.
+- The prompts are written for the sample documents (see *Your own documents*).
+- Verification combines deterministic checks and a model judgement, so it is
+  not a proof of truth; its error rate is measured. The data are fictional.
