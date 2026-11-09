@@ -19,20 +19,19 @@ function loadDocument(runId: string, docId: string): Promise<DocumentView> {
   return pending;
 }
 
-/** Shows the cited sentence highlighted in its full document, in reading context. */
+/** The original document as a sheet of paper, with the selected citation highlighted in place. */
 export function DocumentPanel({
   runId,
   source,
   citedIds,
-  scrollRequest,
 }: {
   runId: string;
   source: Source | null;
   citedIds: string[];
-  scrollRequest: number;
 }) {
   const [doc, setDoc] = useState<{ id: string; view: DocumentView } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const body = useRef<HTMLDivElement>(null);
   const marked = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -41,52 +40,56 @@ export function DocumentPanel({
     setError(null);
     loadDocument(runId, source.doc_id).then(
       (view) => current && setDoc({ id: `${runId}:${source.doc_id}`, view }),
-      (e) => current && setError(e instanceof ApiError ? e.message : "The document could not be loaded."),
+      (e) => current && setError(e instanceof ApiError ? e.message : "Dokument se nepodařilo načíst."),
     );
     return () => {
       current = false;
     };
   }, [runId, source]);
 
+  // Scroll only inside the sheet, so choosing a citation never moves the page.
   useEffect(() => {
-    if (scrollRequest === 0) return;
+    const container = body.current;
+    const mark = marked.current;
+    if (!container || !mark) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    marked.current?.scrollIntoView?.({ block: "nearest", behavior: reduced ? "auto" : "smooth" });
-  }, [doc, scrollRequest]);
+    container.scrollTo?.({ top: Math.max(0, mark.offsetTop - 48), behavior: reduced ? "auto" : "smooth" });
+  }, [doc, source]);
 
-  if (!source) {
-    return (
-      <aside className="column document document-empty" aria-label="Source document">
-        <p>Select a citation to read it in its document.</p>
-      </aside>
-    );
-  }
+  if (!source) return null;
   const view = doc?.id === `${runId}:${source.doc_id}` ? doc.view : null;
 
   return (
-    <aside className="column document" aria-label="Source document">
-      <header className="document-header">
-        <h2>{source.doc_title}</h2>
+    <article className="paper" aria-labelledby="doc-title" lang="cs">
+      <header>
+        <h2 id="doc-title">{source.doc_title}</h2>
+        <p className="meta">{view?.file_name ?? "\u00a0"}</p>
       </header>
-      {error && <p role="alert">{error}</p>}
-      {!view && !error && <p className="loading">Opening the document…</p>}
+      {error && (
+        <p className="loading" role="alert">
+          {error}
+        </p>
+      )}
+      {!view && !error && <p className="loading">Otevírám dokument…</p>}
       {view && (
-        <div className="document-body">
+        <div className="paper-body" ref={body} tabIndex={0} role="region" aria-label="Text dokumentu">
           {view.sections.map((section) => (
             <section key={section.key}>
               <h3>{section.heading}</h3>
-              <p>
+              <p className="text">
                 {section.sentences.map((sentence) => {
                   const isSelected = sentence.id === source.sentence_id;
                   const isCited = citedIds.includes(sentence.id);
                   return (
                     <span key={sentence.id}>
                       {isSelected ? (
-                        <mark ref={marked} className="selected">
+                        <mark ref={marked} className="on">
                           {sentence.text}
                         </mark>
+                      ) : isCited ? (
+                        <mark>{sentence.text}</mark>
                       ) : (
-                        <span className={isCited ? "cited" : undefined}>{sentence.text}</span>
+                        sentence.text
                       )}{" "}
                     </span>
                   );
@@ -96,6 +99,6 @@ export function DocumentPanel({
           ))}
         </div>
       )}
-    </aside>
+    </article>
   );
 }

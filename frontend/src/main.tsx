@@ -1,4 +1,5 @@
-import "@fontsource-variable/public-sans";
+import "@fontsource-variable/inter-tight";
+import "@fontsource-variable/jetbrains-mono";
 import "@fontsource-variable/source-serif-4";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";

@@ -34,10 +34,14 @@ export type Health = {
   status: "ok" | "not_ready";
   index_ready: boolean;
   key_configured: boolean;
+  // Absent on servers older than these fields.
+  document_count?: number;
+  sentence_count?: number;
 };
 
 export type DocumentView = {
   title: string;
+  file_name: string;
   sections: { heading: string; key: string; sentences: { id: string; text: string }[] }[];
 };
 
@@ -56,14 +60,14 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     response = await fetch(path, { ...init, headers: { Accept: "application/json", ...init?.headers } });
   } catch {
-    throw new ApiError("network_error", "The server is not reachable. Check that citarilo serve is running.");
+    throw new ApiError("network_error", "Server není dostupný. Zkontrolujte, že běží citarilo serve.");
   }
   const body = await response.json().catch(() => null);
   if (!response.ok) {
     const error = body?.error;
     throw new ApiError(
       typeof error?.code === "string" ? error.code : "http_error",
-      typeof error?.message === "string" ? error.message : `The server responded with ${response.status}.`,
+      typeof error?.message === "string" ? error.message : `Server odpověděl chybou ${response.status}.`,
     );
   }
   return body as T;

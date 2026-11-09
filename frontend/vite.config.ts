@@ -10,7 +10,8 @@ export default defineConfig({
     strictPort: true,
     proxy: { "/api": "http://127.0.0.1:5174" },
   },
-  build: { outDir: "dist", sourcemap: false },
+  // Never inline assets as data: URIs; the server CSP allows fonts only from the same origin.
+  build: { outDir: "dist", sourcemap: false, assetsInlineLimit: 0 },
   test: {
     environment: "jsdom",
     globals: true,
