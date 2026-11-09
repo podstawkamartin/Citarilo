@@ -63,7 +63,14 @@ export function App() {
   return (
     <div className="page">
       <header className="top">
-        <h1 className="brand">Citarilo</h1>
+        <h1 className="brand">
+          <svg viewBox="0 0 33 33" aria-hidden="true">
+            <rect className="m-blue" width="13" height="13" rx="3" />
+            <rect className="m-violet" x="10" y="10" width="13" height="13" rx="3" />
+            <rect className="m-green" x="20" y="20" width="13" height="13" rx="3" />
+          </svg>
+          Citarilo
+        </h1>
         <Status health={health} />
         <ThemeToggle />
       </header>

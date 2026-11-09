@@ -144,18 +144,26 @@ button {
   display: flex;
   align-items: center;
   margin: 0 auto 0 0;
+  gap: 10px;
   font: 700 16px var(--sans);
   letter-spacing: -0.01em;
 }
 
-.brand::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  margin-right: 40px;
-  border-radius: 3px;
-  background: var(--blue);
-  box-shadow: 14px 0 0 var(--violet), 28px 0 0 var(--green);
+.brand svg {
+  width: 22px;
+  height: 22px;
+}
+
+.brand .m-blue {
+  fill: var(--blue);
+}
+
+.brand .m-violet {
+  fill: var(--violet);
+}
+
+.brand .m-green {
+  fill: var(--green);
 }
 
 .status {
@@ -1038,10 +1046,6 @@ svg.threads path {
   .board {
     grid-template-columns: minmax(0, 1fr);
     row-gap: 22px;
-  }
-
-  .brand::before {
-    margin-right: 34px;
   }
 
   .status {
