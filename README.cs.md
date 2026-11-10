@@ -125,13 +125,13 @@ stejné adrese jako API:
 
 ```sh
 cd frontend && npm ci && npm run build && cd ..
-uv run citarilo serve             # http://127.0.0.1:5174
+uv run citarilo serve             # http://127.0.0.1:5177
 ```
 
 Rozhraní je česky. Odpověď ukáže tvrzení, citované věty, zdrojový dokument se
 zvýrazněnou vybranou větou a kontroly, kterými prošla, včetně času a ceny.
 Odmítnutí vysvětlí důvod. Klíč zůstává jen na serveru. Vývoj s automatickým
-obnovováním: `npm run dev` (port 5175, `/api` jde na 5174).
+obnovováním: `npm run dev` (port 5178, `/api` jde na 5177).
 
 Evaluace (každý placený běh má vlastní strop `--max-usd`):
 

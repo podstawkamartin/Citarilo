@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     runtime_dir: Path = Path(".runtime")
     web_dir: Path = Path("frontend/dist")
     api_host: Literal["127.0.0.1"] = "127.0.0.1"
-    api_port: int = Field(default=5174, ge=5174, le=5199)
+    api_port: int = Field(default=5177, ge=5174, le=5199)
 
     @property
     def qdrant_path(self) -> Path:

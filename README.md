@@ -129,14 +129,14 @@ address as the API:
 
 ```sh
 cd frontend && npm ci && npm run build && cd ..
-uv run citarilo serve             # http://127.0.0.1:5174
+uv run citarilo serve             # http://127.0.0.1:5177
 ```
 
 The interface is in Czech. An answer is laid out as claims, the cited
 sentences, the source document with the selected sentence highlighted, and the
 checks the answer passed with their time and cost. A refusal explains its
 reason. The API key stays on the server. For development with live reload:
-`npm run dev` (port 5175, `/api` is proxied to 5174).
+`npm run dev` (port 5178, `/api` is proxied to 5177).
 
 Evaluation (each paid run has its own `--max-usd` cap):
 
