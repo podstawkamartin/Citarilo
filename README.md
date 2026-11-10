@@ -17,6 +17,8 @@ citations and a second model call verifies that the cited sentences really
 support the claim. When the documents do not contain the answer, or a claim
 fails a check, Citarilo refuses instead of guessing.
 
+![A question is typed and sent; the verified answer appears with its claims linked to the cited sentences, and the selected sentence is highlighted in the source document.](docs/assets/citarilo-answer.gif)
+
 It ships with six sample documents of a fictional outdoor shop, TrailSupply
 (returns, warranty claims, shipping, payments, orders, rentals), written in
 Czech.

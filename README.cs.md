@@ -17,6 +17,8 @@ citace a druhé volání modelu ověří, že citované věty tvrzení opravdu
 podporují. Když dokumenty odpověď neobsahují nebo tvrzení kontrolou neprojde,
 Citarilo odmítne místo hádání.
 
+![Napsání a odeslání otázky; ověřená odpověď s tvrzeními propojenými s citovanými větami a vybraná věta zvýrazněná ve zdrojovém dokumentu.](docs/assets/citarilo-answer.gif)
+
 Dodává se se šesti testovacími dokumenty fiktivního outdoorového obchodu
 TrailSupply (vrácení, reklamace, doprava, platby, objednávky, půjčovna)
 v češtině.

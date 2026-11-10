@@ -144,14 +144,28 @@ button {
   display: flex;
   align-items: center;
   margin: 0 auto 0 0;
-  gap: 10px;
-  font: 700 16px var(--sans);
-  letter-spacing: -0.01em;
+  gap: 14px;
+  font: 700 27px/1 var(--sans);
+  letter-spacing: -0.02em;
 }
 
+/* The bar is 54px tall; the brand stays below that so the ask box does not move. */
 .brand svg {
-  width: 22px;
-  height: 22px;
+  width: 36px;
+  height: 36px;
+}
+
+@media (max-width: 520px) {
+  /* Leave room for the corpus status and theme toggle on phones. */
+  .brand {
+    gap: 8px;
+    font-size: 18px;
+  }
+
+  .brand svg {
+    width: 26px;
+    height: 26px;
+  }
 }
 
 .brand .m-blue {
