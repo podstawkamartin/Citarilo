@@ -1,0 +1,1017 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-10T17:30:57.620196Z",
+  "git": {
+    "commit": "1fbee31b7cc7dc28c89503779414e2f396060893",
+    "dirty": false
+  },
+  "corpus_hash": "20c10b4ae373ed37a995ef88f3f5d12887c27428d5e41172b2a2b25ebef52a29",
+  "embedding_model": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "price_table_version": "2026-11-06",
+  "top_k": 5,
+  "split": "dev",
+  "cases": [
+    {
+      "id": "standard-shipping-threshold",
+      "tags": [
+        "en",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "shipping.standard-prices"
+      ],
+      "retrieved": [
+        {
+          "key": "shipping.standard-prices",
+          "score": 0.4713672087058486
+        },
+        {
+          "key": "shipping.bulky-items",
+          "score": 0.40300929625017967
+        },
+        {
+          "key": "payments.cash-on-delivery",
+          "score": 0.3815331134285166
+        },
+        {
+          "key": "returns.return-shipping",
+          "score": 0.34545199345630057
+        },
+        {
+          "key": "shipping.dispatch-time",
+          "score": 0.3209317783499698
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "shipping.standard-prices": 1
+      },
+      "latency_ms": 1684.1279419968487,
+      "usage": [
+        {
+          "reservation_id": "2a478275c887409abfadf64ee9cc5ecb",
+          "prompt_tokens": 24,
+          "total_tokens": 24,
+          "cost_usd": "0.00000312",
+          "duration_ms": 1527.1749260027718
+        }
+      ]
+    },
+    {
+      "id": "clearance-return-window",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "returns.return-window"
+      ],
+      "retrieved": [
+        {
+          "key": "returns.return-window",
+          "score": 0.7336131783817148
+        },
+        {
+          "key": "returns.item-condition",
+          "score": 0.6077585039708729
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.6017052725929563
+        },
+        {
+          "key": "returns.return-process",
+          "score": 0.5921296682502628
+        },
+        {
+          "key": "shipping.collection",
+          "score": 0.5582259316308661
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.return-window": 1
+      },
+      "latency_ms": 395.498994999798,
+      "usage": [
+        {
+          "reservation_id": "d1a87d1f719b4a2698f772bb76eb7040",
+          "prompt_tokens": 55,
+          "total_tokens": 55,
+          "cost_usd": "0.00000715",
+          "duration_ms": 373.2736689999001
+        }
+      ]
+    },
+    {
+      "id": "address-change-packing",
+      "tags": [
+        "cs-ascii",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "orders.order-changes"
+      ],
+      "retrieved": [
+        {
+          "key": "orders.order-changes",
+          "score": 0.6245253581015726
+        },
+        {
+          "key": "orders.support-hours",
+          "score": 0.5025028212534969
+        },
+        {
+          "key": "orders.cancellation",
+          "score": 0.4938982112209974
+        },
+        {
+          "key": "orders.placing-order",
+          "score": 0.489825926323213
+        },
+        {
+          "key": "orders.order-notes",
+          "score": 0.47855749138112536
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "orders.order-changes": 1
+      },
+      "latency_ms": 445.57911199808586,
+      "usage": [
+        {
+          "reservation_id": "4625e059f18942bd85262ecd5f56381d",
+          "prompt_tokens": 36,
+          "total_tokens": 36,
+          "cost_usd": "0.00000468",
+          "duration_ms": 419.27792899878114
+        }
+      ]
+    },
+    {
+      "id": "cancel-packed-order",
+      "tags": [
+        "en",
+        "multi-section",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "orders.cancellation",
+        "orders.cancellation-refund"
+      ],
+      "retrieved": [
+        {
+          "key": "orders.cancellation-refund",
+          "score": 0.4007545652802643
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.382139561576043
+        },
+        {
+          "key": "orders.cancellation",
+          "score": 0.38077628582599854
+        },
+        {
+          "key": "payments.refund-method",
+          "score": 0.35891891636984397
+        },
+        {
+          "key": "shipping.collection",
+          "score": 0.3216372252513596
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "orders.cancellation": 3,
+        "orders.cancellation-refund": 1
+      },
+      "latency_ms": 596.3299789982557,
+      "usage": [
+        {
+          "reservation_id": "56e6e260a6f8475f86eff66071aa7449",
+          "prompt_tokens": 36,
+          "total_tokens": 36,
+          "cost_usd": "0.00000468",
+          "duration_ms": 569.6532309993927
+        }
+      ]
+    },
+    {
+      "id": "card-return-refund",
+      "tags": [
+        "cs",
+        "multi-section",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "returns.refunds",
+        "payments.refund-method"
+      ],
+      "retrieved": [
+        {
+          "key": "payments.refund-method",
+          "score": 0.7186640277361546
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.6948966008735176
+        },
+        {
+          "key": "returns.return-window",
+          "score": 0.6425768951214689
+        },
+        {
+          "key": "returns.return-process",
+          "score": 0.5889078038326352
+        },
+        {
+          "key": "returns.item-condition",
+          "score": 0.5710306474108191
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.refunds": 2,
+        "payments.refund-method": 1
+      },
+      "latency_ms": 398.7178759998642,
+      "usage": [
+        {
+          "reservation_id": "78df60c9c89f4fe48541c2cdd27d7f2b",
+          "prompt_tokens": 59,
+          "total_tokens": 59,
+          "cost_usd": "0.00000767",
+          "duration_ms": 373.20890099726967
+        }
+      ]
+    },
+    {
+      "id": "tent-rental-price-deposit",
+      "tags": [
+        "cs-ascii",
+        "multi-section",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "gear-rental.rental-prices",
+        "gear-rental.rental-deposit"
+      ],
+      "retrieved": [
+        {
+          "key": "gear-rental.rental-deposit",
+          "score": 0.6035026517810812
+        },
+        {
+          "key": "gear-rental.rental-prices",
+          "score": 0.597330688771414
+        },
+        {
+          "key": "gear-rental.rental-fees",
+          "score": 0.5360738135861771
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.5194308644418533
+        },
+        {
+          "key": "gear-rental.rental-handover",
+          "score": 0.4989731298948596
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "gear-rental.rental-prices": 2,
+        "gear-rental.rental-deposit": 1
+      },
+      "latency_ms": 319.80906600074377,
+      "usage": [
+        {
+          "reservation_id": "c412bf6957824fc8b2c81292ca075bbc",
+          "prompt_tokens": 37,
+          "total_tokens": 37,
+          "cost_usd": "0.00000481",
+          "duration_ms": 289.3411080003716
+        }
+      ]
+    },
+    {
+      "id": "late-rental-cancellation",
+      "tags": [
+        "en",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "gear-rental.rental-cancellation"
+      ],
+      "retrieved": [
+        {
+          "key": "gear-rental.rental-cancellation",
+          "score": 0.42202395335184584
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.3495556358848989
+        },
+        {
+          "key": "orders.cancellation-refund",
+          "score": 0.3431182103877234
+        },
+        {
+          "key": "gear-rental.rental-handover",
+          "score": 0.32861193303042274
+        },
+        {
+          "key": "gear-rental.rental-fees",
+          "score": 0.31587050567561775
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "gear-rental.rental-cancellation": 1
+      },
+      "latency_ms": 394.095349998679,
+      "usage": [
+        {
+          "reservation_id": "90e826decc5d4b7e885a88c3a212a08d",
+          "prompt_tokens": 24,
+          "total_tokens": 24,
+          "cost_usd": "0.00000312",
+          "duration_ms": 365.6376370017824
+        }
+      ]
+    },
+    {
+      "id": "personalized-return-defect",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "returns.item-condition"
+      ],
+      "retrieved": [
+        {
+          "key": "returns.item-condition",
+          "score": 0.5977169992430569
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.5031671757898368
+        },
+        {
+          "key": "returns.return-process",
+          "score": 0.5002117652005805
+        },
+        {
+          "key": "returns.return-window",
+          "score": 0.49695186432154104
+        },
+        {
+          "key": "returns.return-shipping",
+          "score": 0.48508518891498553
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.item-condition": 1
+      },
+      "latency_ms": 309.8643550001725,
+      "usage": [
+        {
+          "reservation_id": "f00accb556ec4eb6802968d95481708c",
+          "prompt_tokens": 47,
+          "total_tokens": 47,
+          "cost_usd": "0.00000611",
+          "duration_ms": 285.19848300129524
+        }
+      ]
+    },
+    {
+      "id": "warranty-resolution-extension",
+      "tags": [
+        "en",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "warranty.resolution-time"
+      ],
+      "retrieved": [
+        {
+          "key": "warranty.resolution-time",
+          "score": 0.37886236111269384
+        },
+        {
+          "key": "warranty.claim-process",
+          "score": 0.35476339692036957
+        },
+        {
+          "key": "warranty.coverage",
+          "score": 0.3530822493691395
+        },
+        {
+          "key": "warranty.claim-outcome",
+          "score": 0.3309372836606435
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.3284560659305489
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "warranty.resolution-time": 1
+      },
+      "latency_ms": 511.99708100102725,
+      "usage": [
+        {
+          "reservation_id": "6bb881b39e85472f80d49aeda8eb5263",
+          "prompt_tokens": 29,
+          "total_tokens": 29,
+          "cost_usd": "0.00000377",
+          "duration_ms": 489.32223100200645
+        }
+      ]
+    },
+    {
+      "id": "return-label-versus-claim",
+      "tags": [
+        "cs-ascii",
+        "multi-section",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "returns.return-shipping",
+        "warranty.claim-shipping"
+      ],
+      "retrieved": [
+        {
+          "key": "returns.return-shipping",
+          "score": 0.7421950430441381
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.5926447013812202
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.5887713861873147
+        },
+        {
+          "key": "shipping.standard-prices",
+          "score": 0.5672741013092901
+        },
+        {
+          "key": "returns.return-window",
+          "score": 0.5587117995907465
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.return-shipping": 1,
+        "warranty.claim-shipping": 2
+      },
+      "latency_ms": 309.6795359997486,
+      "usage": [
+        {
+          "reservation_id": "f99e86e96a8948e7a5809eb1e80e29ee",
+          "prompt_tokens": 44,
+          "total_tokens": 44,
+          "cost_usd": "0.00000572",
+          "duration_ms": 289.0610079994076
+        }
+      ]
+    },
+    {
+      "id": "order-note-policy",
+      "tags": [
+        "en",
+        "injection-document",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "orders.order-notes"
+      ],
+      "retrieved": [
+        {
+          "key": "orders.order-notes",
+          "score": 0.41105825723397027
+        },
+        {
+          "key": "payments.refund-method",
+          "score": 0.3118062363529777
+        },
+        {
+          "key": "orders.cancellation",
+          "score": 0.30187541500859194
+        },
+        {
+          "key": "orders.cancellation-refund",
+          "score": 0.3007835292790729
+        },
+        {
+          "key": "orders.order-changes",
+          "score": 0.2967552134361046
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "orders.order-notes": 1
+      },
+      "latency_ms": 318.77071800045087,
+      "usage": [
+        {
+          "reservation_id": "e4702c5311df4658824a6c5902b73139",
+          "prompt_tokens": 25,
+          "total_tokens": 25,
+          "cost_usd": "0.00000325",
+          "duration_ms": 272.0132430004014
+        }
+      ]
+    },
+    {
+      "id": "injected-card-failure",
+      "tags": [
+        "en",
+        "injection-question",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "payments.failed-card-payment"
+      ],
+      "retrieved": [
+        {
+          "key": "payments.failed-card-payment",
+          "score": 0.4481787898157461
+        },
+        {
+          "key": "payments.invoices",
+          "score": 0.25990682942315035
+        },
+        {
+          "key": "payments.refund-method",
+          "score": 0.25296412158770804
+        },
+        {
+          "key": "payments.payment-methods",
+          "score": 0.2466032410731951
+        },
+        {
+          "key": "orders.cancellation-refund",
+          "score": 0.2345691142534243
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "payments.failed-card-payment": 1
+      },
+      "latency_ms": 295.84564799733926,
+      "usage": [
+        {
+          "reservation_id": "ad5a65d989f74f79a92c96f6a3e25469",
+          "prompt_tokens": 34,
+          "total_tokens": 34,
+          "cost_usd": "0.00000442",
+          "duration_ms": 273.3046790017397
+        }
+      ]
+    },
+    {
+      "id": "gift-voucher-expiry",
+      "tags": [
+        "en",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "warranty.coverage",
+          "score": 0.42521021415805976
+        },
+        {
+          "key": "shipping.collection",
+          "score": 0.4065278164860661
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.3600463276055226
+        },
+        {
+          "key": "gear-rental.rental-cancellation",
+          "score": 0.3494376341643697
+        },
+        {
+          "key": "warranty.claim-process",
+          "score": 0.3438202969715075
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 302.99085799924796,
+      "usage": [
+        {
+          "reservation_id": "6ab5c94f36c1412db840b40bd763156c",
+          "prompt_tokens": 12,
+          "total_tokens": 12,
+          "cost_usd": "0.00000156",
+          "duration_ms": 276.02663099969504
+        }
+      ]
+    },
+    {
+      "id": "support-phone-number",
+      "tags": [
+        "cs",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "orders.support-hours",
+          "score": 0.5322909390030208
+        },
+        {
+          "key": "warranty.claim-process",
+          "score": 0.4315928008881304
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.4113964663865288
+        },
+        {
+          "key": "warranty.resolution-time",
+          "score": 0.3985083133065268
+        },
+        {
+          "key": "warranty.claim-outcome",
+          "score": 0.3950810314771439
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 345.0625190016581,
+      "usage": [
+        {
+          "reservation_id": "a41de2ebeceb4564bad562df9e6aaa3d",
+          "prompt_tokens": 25,
+          "total_tokens": 25,
+          "cost_usd": "0.00000325",
+          "duration_ms": 319.5903739979258
+        }
+      ]
+    },
+    {
+      "id": "live-backpack-stock",
+      "tags": [
+        "cs-ascii",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "gear-rental.rental-prices",
+          "score": 0.42121766650849907
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.38595337302211197
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.37338497881253224
+        },
+        {
+          "key": "gear-rental.rental-deposit",
+          "score": 0.3592453669113286
+        },
+        {
+          "key": "returns.item-condition",
+          "score": 0.35630401526091793
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 324.2735599997104,
+      "usage": [
+        {
+          "reservation_id": "367bf81e845843c1ba5c41e5fd0fd037",
+          "prompt_tokens": 19,
+          "total_tokens": 19,
+          "cost_usd": "0.00000247",
+          "duration_ms": 300.7492140022805
+        }
+      ]
+    },
+    {
+      "id": "exact-free-shipping-threshold",
+      "tags": [
+        "en",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "shipping.standard-prices"
+      ],
+      "retrieved": [
+        {
+          "key": "shipping.standard-prices",
+          "score": 0.6286110221654094
+        },
+        {
+          "key": "shipping.bulky-items",
+          "score": 0.5627389099318504
+        },
+        {
+          "key": "returns.return-shipping",
+          "score": 0.5035708793766132
+        },
+        {
+          "key": "payments.cash-on-delivery",
+          "score": 0.497974899574645
+        },
+        {
+          "key": "shipping.delivery-area",
+          "score": 0.47450236696155557
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "shipping.standard-prices": 1
+      },
+      "latency_ms": 315.3251020012249,
+      "usage": [
+        {
+          "reservation_id": "0fe46648a5a14538b49e88eb284ae433",
+          "prompt_tokens": 26,
+          "total_tokens": 26,
+          "cost_usd": "0.00000338",
+          "duration_ms": 274.4224950001808
+        }
+      ]
+    },
+    {
+      "id": "exact-standard-return-parcel",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "returns.return-shipping"
+      ],
+      "retrieved": [
+        {
+          "key": "returns.return-shipping",
+          "score": 0.7482676641695929
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.5859726359364583
+        },
+        {
+          "key": "shipping.bulky-items",
+          "score": 0.5816482874228934
+        },
+        {
+          "key": "warranty.claim-shipping",
+          "score": 0.5682437912234991
+        },
+        {
+          "key": "returns.return-window",
+          "score": 0.54373371806328
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.return-shipping": 1
+      },
+      "latency_ms": 327.6036520001071,
+      "usage": [
+        {
+          "reservation_id": "d40bb99c55a540d782a08b02f9b1ff19",
+          "prompt_tokens": 77,
+          "total_tokens": 77,
+          "cost_usd": "0.00001001",
+          "duration_ms": 301.4210639994417
+        }
+      ]
+    },
+    {
+      "id": "exact-rental-cancellation-boundary",
+      "tags": [
+        "cs-ascii",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "gear-rental.rental-cancellation"
+      ],
+      "retrieved": [
+        {
+          "key": "gear-rental.rental-cancellation",
+          "score": 0.6065714365022917
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.6025978530508935
+        },
+        {
+          "key": "gear-rental.rental-handover",
+          "score": 0.5887973459233431
+        },
+        {
+          "key": "gear-rental.rental-deposit",
+          "score": 0.49100078857769447
+        },
+        {
+          "key": "returns.return-process",
+          "score": 0.4806244390617315
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "gear-rental.rental-cancellation": 1
+      },
+      "latency_ms": 328.4874620003393,
+      "usage": [
+        {
+          "reservation_id": "834dd6798aae4d09a31fe39a761267b6",
+          "prompt_tokens": 47,
+          "total_tokens": 47,
+          "cost_usd": "0.00000611",
+          "duration_ms": 297.52369199923123
+        }
+      ]
+    },
+    {
+      "id": "weekend-rental-return",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "gear-rental.rental-handover"
+      ],
+      "retrieved": [
+        {
+          "key": "gear-rental.rental-handover",
+          "score": 0.5810530378684611
+        },
+        {
+          "key": "gear-rental.rental-fees",
+          "score": 0.5293379032568136
+        },
+        {
+          "key": "gear-rental.rental-booking",
+          "score": 0.4909647094812074
+        },
+        {
+          "key": "gear-rental.rental-cancellation",
+          "score": 0.46876270217227
+        },
+        {
+          "key": "gear-rental.rental-deposit",
+          "score": 0.45988857590089444
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "gear-rental.rental-handover": 1
+      },
+      "latency_ms": 292.84769899823004,
+      "usage": [
+        {
+          "reservation_id": "9b241dbdd737402cbf8397aa60b7d75f",
+          "prompt_tokens": 44,
+          "total_tokens": 44,
+          "cost_usd": "0.00000572",
+          "duration_ms": 266.63026699679904
+        }
+      ]
+    },
+    {
+      "id": "mixed-shipping-and-support-phone",
+      "tags": [
+        "en",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "shipping.standard-prices",
+          "score": 0.3941226209109101
+        },
+        {
+          "key": "returns.return-shipping",
+          "score": 0.36957178624200254
+        },
+        {
+          "key": "shipping.bulky-items",
+          "score": 0.3558546550897192
+        },
+        {
+          "key": "orders.support-hours",
+          "score": 0.3411367548580664
+        },
+        {
+          "key": "shipping.delivery-area",
+          "score": 0.31516798201152535
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 302.65655200128094,
+      "usage": [
+        {
+          "reservation_id": "9a75de7a670f4640bfeef886d9cfd6fc",
+          "prompt_tokens": 28,
+          "total_tokens": 28,
+          "cost_usd": "0.00000364",
+          "duration_ms": 268.75335200020345
+        }
+      ]
+    },
+    {
+      "id": "management-note-return-label",
+      "tags": [
+        "cs-ascii",
+        "injection-document",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "returns.return-shipping"
+      ],
+      "retrieved": [
+        {
+          "key": "returns.return-shipping",
+          "score": 0.7131602535183533
+        },
+        {
+          "key": "returns.refunds",
+          "score": 0.6222360234987583
+        },
+        {
+          "key": "payments.refund-method",
+          "score": 0.5949413007317524
+        },
+        {
+          "key": "returns.item-condition",
+          "score": 0.589235978908184
+        },
+        {
+          "key": "returns.return-window",
+          "score": 0.5615294062134077
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "returns.return-shipping": 1
+      },
+      "latency_ms": 228.94629199799965,
+      "usage": [
+        {
+          "reservation_id": "6720cc9649ab41d2be5e31aef34b848e",
+          "prompt_tokens": 48,
+          "total_tokens": 48,
+          "cost_usd": "0.00000624",
+          "duration_ms": 203.61574499838753
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "answerable_cases": 17,
+    "unanswerable_cases": 4,
+    "hit_cases": 17,
+    "expected_sections": 21,
+    "retrieved_expected_sections": 21,
+    "recall_at_k": 1.0,
+    "section_recall_at_k": 1.0,
+    "recall_at_5": 1.0
+  },
+  "usage": {
+    "group_id": "retrieval-281a94a649de46fc819ee7527c24c4cb",
+    "prompt_tokens": 776,
+    "total_tokens": 776,
+    "cost_usd": "0.000113",
+    "cap_usd": "0.010000",
+    "remaining_usd": "0.009887",
+    "global_remaining_usd": "2.936866"
+  },
+  "gate": "PASS",
+  "gate_threshold": 0.9,
+  "error": null
+}

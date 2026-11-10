@@ -64,13 +64,16 @@ question (EN/CS) → validation → budget reservation
 - Design details: [docs/architecture.md](docs/architecture.md) (Czech),
   evaluation method: [docs/evaluation.md](docs/evaluation.md).
 
-## Results (7 Nov 2026)
+## Results (7 and 10 Nov 2026)
 
 Live runs against the OpenAI API; configuration, commit and corpus hash are
 stored in every report. Retrieval and answers (prompt v4) are in
 [evals/results/2026-11-07](evals/results/2026-11-07). Acceptance gates were set
-before tuning. The 2026-11-07 runs used the previous in-memory store with
-the same exact cosine search.
+before tuning. The 7 Nov answer runs used the previous in-memory store with the
+same exact cosine search. After the move to Qdrant, retrieval was measured again
+on 10 Nov ([evals/results/2026-11-10](evals/results/2026-11-10)): recall@5 is
+again 1.00, and all 21 questions retrieve the same five sections as before (one
+question swaps ranks 3 and 4).
 
 | Measure | Development (21 cases) | Held-out (5 cases) | Gate |
 |---|---|---|---|
@@ -103,10 +106,17 @@ Two of the three errors are unnecessary refusals; one is an answer with an
 uncited detail.
 
 **Verifier probes.** On 24 probes (12 pairs of a supported claim and a near-miss)
-the verifier had 0 false acceptances and 0 false rejections
-([evals/results/2026-11-06](evals/results/2026-11-06)). This was measured with
-prompt v3 on the earlier revision of the sample documents and has not yet been
-re-run for v4.
+the verifier had 0 false acceptances and 0 false rejections with prompt v4 and
+the current documents ([evals/results/2026-11-10](evals/results/2026-11-10)).
+23 of 24 verdicts matched exactly; one near-miss labelled unsupported was judged
+contradicted, which is still a rejection.
+
+**Vector store.** An offline benchmark through the production code paths
+([vector-store-bench.json](evals/results/2026-11-10/vector-store-bench.json))
+shows startup validation of 24 ms and a median query of 1.5 ms for the 36
+sample sections. Qdrant local mode compares the query with every point, so at
+5,000 sections startup takes 3.4 s and a median query 34 ms; larger corpora call
+for a Qdrant server.
 
 The sample is small (21 answerable cases in total), so the numbers show that
 the system works and fails safely, not a statistically precise error rate.

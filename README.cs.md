@@ -63,13 +63,17 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 - Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
   evaluace: [docs/evaluation.md](docs/evaluation.md) (anglicky).
 
-## Výsledky (7. 11. 2026)
+## Výsledky (7. a 10. 11. 2026)
 
 Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
 v každém reportu. Vyhledávání a odpovědi (prompt v4) jsou v
 [evals/results/2026-11-07](evals/results/2026-11-07). Brány přijetí byly
-stanovené před laděním. Běhy z 7. 11. 2026 používaly předchozí paměťové
-úložiště se stejným přesným kosinovým vyhledáváním.
+stanovené před laděním. Odpovědi ze 7. 11. používaly předchozí paměťové
+úložiště se stejným přesným kosinovým vyhledáváním. Po přechodu na Qdrant se
+vyhledávání 10. 11. změřilo znovu
+([evals/results/2026-11-10](evals/results/2026-11-10)): recall@5 je opět 1,00
+a všech 21 otázek najde stejných pět sekcí jako dřív (u jedné otázky se
+prohodilo 3. a 4. místo).
 
 | Měření | Vývojové (21 případů) | Odložené (5 případů) | Brána |
 |---|---|---|---|
@@ -100,9 +104,17 @@ Dvě ze tří chyb jsou zbytečná odmítnutí, jedna je odpověď s necitovaný
 detailem.
 
 **Sondy ověřovače.** Na 24 sondách (12 párů „podložené / téměř správné“
-tvrzení) měl ověřovač 0 falešných přijetí a 0 falešných odmítnutí
-([evals/results/2026-11-06](evals/results/2026-11-06)). Měřeno s promptem v3
-nad předchozí verzí testovacích dokumentů; pro v4 zatím znovu nespuštěno.
+tvrzení) měl ověřovač s promptem v4 nad aktuálními dokumenty 0 falešných
+přijetí a 0 falešných odmítnutí
+([evals/results/2026-11-10](evals/results/2026-11-10)). Přesně sedělo 23 z 24
+verdiktů; jedno téměř správné tvrzení označené jako nepodložené ověřovač
+vyhodnotil jako v rozporu, což je stále odmítnutí.
+
+**Vektorové úložiště.** Offline benchmark přes produkční kód
+([vector-store-bench.json](evals/results/2026-11-10/vector-store-bench.json))
+ukazuje u 36 testovacích sekcí ověření při startu 24 ms a medián dotazu 1,5 ms.
+Lokální režim Qdrantu porovnává dotaz se všemi body, takže při 5 000 sekcích
+trvá start 3,4 s a medián dotazu 34 ms; větší korpus potřebuje Qdrant server.
 
 Vzorek je malý (celkem 21 zodpověditelných případů), takže čísla dokládají
 funkčnost a bezpečné chování, ne statisticky přesnou míru chybovosti. Latenci

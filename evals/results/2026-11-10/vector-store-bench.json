@@ -1,0 +1,98 @@
+{
+  "started_at": "2026-11-10T17:32:35.217915+00:00",
+  "finished_at": "2026-11-10T17:35:57.202464+00:00",
+  "python": "3.12.3",
+  "qdrant_client": "1.20.0",
+  "numpy": "2.5.4",
+  "cpu_model": "AMD Ryzen 7 7435HS",
+  "git": {
+    "commit": "1fbee31b7cc7dc28c89503779414e2f396060893",
+    "dirty": false
+  },
+  "seed": 20261110,
+  "blas_threads": 1,
+  "warmup_repeats": 1,
+  "results": [
+    {
+      "points": 36,
+      "dimensions": 3072,
+      "repeats": 3,
+      "queries_per_repeat": 200,
+      "build_publish_ms": [
+        251.29825499971048,
+        251.76686200211407,
+        252.37190799816744
+      ],
+      "load_validation_ms": [
+        23.909666000690777,
+        77.36134999868227,
+        24.26804799688398
+      ],
+      "disk_bytes": [
+        1045075,
+        1045075,
+        1045075
+      ],
+      "build_publish_p50_ms": 251.76686200211407,
+      "load_validation_p50_ms": 24.26804799688398,
+      "query_p50_ms": 1.487918500060914,
+      "query_p95_ms": 1.5913321014522805,
+      "top_5_overlap": 1.0,
+      "max_abs_score_difference": 1.2212453270876722e-15
+    },
+    {
+      "points": 1000,
+      "dimensions": 3072,
+      "repeats": 3,
+      "queries_per_repeat": 200,
+      "build_publish_ms": [
+        6352.014492997114,
+        6524.0170110009785,
+        6427.51992400008
+      ],
+      "load_validation_ms": [
+        592.0547810019343,
+        595.8622809994267,
+        668.8790850021178
+      ],
+      "disk_bytes": [
+        28774995,
+        28774995,
+        28774995
+      ],
+      "build_publish_p50_ms": 6427.51992400008,
+      "load_validation_p50_ms": 595.8622809994267,
+      "query_p50_ms": 6.909489498866606,
+      "query_p95_ms": 7.81853174939897,
+      "top_5_overlap": 1.0,
+      "max_abs_score_difference": 1.3322676295501878e-15
+    },
+    {
+      "points": 5000,
+      "dimensions": 3072,
+      "repeats": 3,
+      "queries_per_repeat": 200,
+      "build_publish_ms": [
+        32950.35235999967,
+        32951.79221999933,
+        32813.50852000105
+      ],
+      "load_validation_ms": [
+        3423.06310999993,
+        3474.0530739982205,
+        3259.185989998514
+      ],
+      "disk_bytes": [
+        143852115,
+        143852115,
+        143852115
+      ],
+      "build_publish_p50_ms": 32950.35235999967,
+      "load_validation_p50_ms": 3423.06310999993,
+      "query_p50_ms": 33.74756699849968,
+      "query_p95_ms": 42.0080544983648,
+      "top_5_overlap": 1.0,
+      "max_abs_score_difference": 8.881784197001252e-16
+    }
+  ]
+}
