@@ -15,7 +15,6 @@ from uuid import uuid4
 import httpx2
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.runnables import Runnable
-from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
@@ -29,7 +28,7 @@ from citarilo.budget import BudgetExceeded, BudgetLedger, actual_cost, max_cost
 from citarilo.checks import check_claims
 from citarilo.config import Settings
 from citarilo.corpus import Corpus, load_corpus
-from citarilo.index import MissingAPIKeyError, UsageTrackingEmbeddings, load_index, search
+from citarilo.index import MissingAPIKeyError, SectionIndex, UsageTrackingEmbeddings, load_index
 from citarilo.prompts import PROMPT_VERSION, data_value, generation_messages, verification_messages
 from citarilo.records import (
     AnswerLanguage,
@@ -166,7 +165,7 @@ class AnswerContext:
 
     settings: Settings
     corpus: Corpus
-    store: InMemoryVectorStore
+    store: SectionIndex
     embeddings: UsageTrackingEmbeddings
     ledger: BudgetLedger
     generator: StructuredRunnable
@@ -177,18 +176,21 @@ class AnswerContext:
     http_client: httpx2.Client | None = field(default=None, repr=False, compare=False)
 
     def close(self) -> None:
-        """Close the owned connection pool, including across request-local copies."""
-        if self.http_client is not None and not self.http_client.is_closed:
-            self.http_client.close()
+        """Close the owned index and connection pool, including across request-local copies."""
+        try:
+            self.store.close()
+        finally:
+            if self.http_client is not None and not self.http_client.is_closed:
+                self.http_client.close()
 
     def __post_init__(self) -> None:
         if (
-            self.store.embeddings is not self.embeddings
+            self.store.dimensions != self.settings.embedding_dimensions
             or self.embeddings.ledger is not self.ledger
             or self.embeddings.group_id != self.group_id
             or self.embeddings.settings is not self.settings
         ):
-            raise ValueError("Context must share its store adapter, settings, ledger and group")
+            raise ValueError("Context must share dimensions, settings, ledger and group")
 
 
 @dataclass(frozen=True)
@@ -381,7 +383,9 @@ def _retrieve(state: AnswerState, context: AnswerContext) -> AnswerState:
     usage_start = len(context.embeddings.usage)
     started = perf_counter()
     try:
-        ranked = search(context.store, state["question"], context.settings.top_k)
+        ranked = context.store.search(
+            state["question"], context.settings.top_k, embeddings=context.embeddings
+        )
         titles = {doc.doc_id: doc.title for doc in context.corpus.documents}
         sections = []
         for key, score, _ in ranked:
@@ -681,6 +685,7 @@ def create_live_context(settings: Settings, *, group_id: str | None = None) -> A
         price_table=settings.price_table,
     )
     http_client = _live_http_client(settings)
+    store = None
     try:
         embeddings = UsageTrackingEmbeddings(
             settings,
@@ -715,7 +720,11 @@ def create_live_context(settings: Settings, *, group_id: str | None = None) -> A
             http_client=http_client,
         )
     except BaseException:
-        http_client.close()
+        try:
+            if store is not None:
+                store.close()
+        finally:
+            http_client.close()
         raise
 
 

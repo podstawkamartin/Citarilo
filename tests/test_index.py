@@ -1,15 +1,18 @@
 """Offline embedding accounting, persisted compatibility, and ranked retrieval."""
 
-import hashlib
 import json
 from collections.abc import Callable
+from contextlib import closing
 from decimal import Decimal
 from pathlib import Path
+from unittest.mock import Mock
 
+import numpy as np
 import pytest
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from openai.types import CreateEmbeddingResponse
 from pydantic import SecretStr
+from qdrant_client import QdrantClient, models
 
 import citarilo.index as index_module
 from citarilo.budget import BudgetExceeded, BudgetLedger, max_cost
@@ -17,6 +20,7 @@ from citarilo.config import Settings
 from citarilo.corpus import CHUNKING_VERSION, Corpus, load_corpus, section_documents
 from citarilo.index import (
     EmbeddingResponseError,
+    IndexLockedError,
     IndexMismatchError,
     IndexMissingError,
     MissingAPIKeyError,
@@ -25,7 +29,6 @@ from citarilo.index import (
     estimate_ingest,
     load_index,
     retrieve,
-    search,
 )
 
 
@@ -296,6 +299,7 @@ def test_build_persist_load_round_trip(
     fake = FakeClient()
     manifest = build_index(corpus, settings, ledger, client=fake, group_id="ingest")
     assert len(fake.calls) == 1
+    assert manifest.schema_version == 2
     assert manifest.embedding_model == settings.embedding_model
     assert manifest.dimensions == settings.embedding_dimensions
     assert manifest.chunking_version == CHUNKING_VERSION
@@ -303,16 +307,22 @@ def test_build_persist_load_round_trip(
     assert manifest.section_count == 6
     assert manifest.created_at.utcoffset().total_seconds() == 0
     assert manifest.usage[0].prompt_tokens > 0
-    assert manifest.index_sha256 == hashlib.sha256(settings.index_path.read_bytes()).hexdigest()
+    assert len(manifest.points_sha256) == 64
     assert json.loads(settings.index_manifest_path.read_text()) == manifest.model_dump(mode="json")
-
-    store = load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
-    assert len(fake.calls) == 1
+    with closing(QdrantClient(path=str(settings.qdrant_path))) as client:
+        points, _ = client.scroll("sections", limit=100, with_vectors=True)
+        assert np.linalg.norm([point.vector for point in points], axis=1) == pytest.approx(1)
     documents = section_documents(corpus)
-    loaded = store.get_by_ids([document.metadata["section_key"] for document in documents])
-    assert [(doc.page_content, doc.metadata) for doc in loaded] == [
-        (doc.page_content, doc.metadata) for doc in documents
-    ]
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)) as store:
+        for document in documents:
+            key, score, loaded = store.search(document.page_content, 1)[0]
+            assert key == document.metadata["section_key"]
+            assert score == pytest.approx(1)
+            assert (loaded.page_content, loaded.metadata) == (
+                document.page_content,
+                document.metadata,
+            )
+    assert len(fake.calls) == 1
 
 
 @pytest.mark.parametrize(
@@ -323,7 +333,7 @@ def test_build_persist_load_round_trip(
         ("chunking_version", "future"),
         ("corpus_hash", "changed"),
         ("section_count", 7),
-        ("index_sha256", "0" * 64),
+        ("points_sha256", "0" * 64),
     ],
 )
 def test_each_manifest_mismatch(
@@ -337,6 +347,8 @@ def test_each_manifest_mismatch(
     with pytest.raises(IndexMismatchError, match=field):
         retrieve("question", corpus, settings, ledger, client=fake)
     assert len(fake.calls) == 1
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass  # Every failure released the lock.
 
 
 @pytest.mark.parametrize("field", ["embedding_model", "embedding_dimensions"])
@@ -360,15 +372,21 @@ def test_changed_corpus_rejects_index(
         load_index(changed, settings, DeterministicFakeEmbedding(size=8))
 
 
-@pytest.mark.parametrize("missing", ["both", "dump", "manifest"])
+@pytest.mark.parametrize("missing", ["both", "collection", "manifest"])
 def test_missing_index(
     settings: Settings, corpus: Corpus, ledger: BudgetLedger, missing: str
 ) -> None:
     if missing != "both":
         build_index(corpus, settings, ledger, client=FakeClient())
-        (settings.index_path if missing == "dump" else settings.index_manifest_path).unlink()
+        if missing == "collection":
+            with closing(QdrantClient(path=str(settings.qdrant_path))) as client:
+                client.delete_collection("sections")
+        else:
+            settings.index_manifest_path.unlink()
     with pytest.raises(IndexMissingError):
         load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
 
 
 @pytest.mark.parametrize("content", ["not json", '{"schema_version": 999}', "{}", "[]"])
@@ -381,29 +399,150 @@ def test_invalid_manifest(
         load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
 
 
-@pytest.mark.parametrize("corruption", ["checksum", "dimensions", "metadata", "sections", "json"])
-def test_corrupt_store(
-    settings: Settings, corpus: Corpus, ledger: BudgetLedger, corruption: str
-) -> None:
+def test_v1_manifest_requires_explicit_ingest(settings, corpus, ledger, monkeypatch):
     build_index(corpus, settings, ledger, client=FakeClient())
-    data = json.loads(settings.index_path.read_text())
-    first = next(iter(data.values()))
-    if corruption == "dimensions":
-        first["vector"] = [1.0]
-    elif corruption == "metadata":
-        first["metadata"]["sentence_ids"] = ["injected.id.1"]
-    elif corruption == "sections":
-        data.pop(next(iter(data)))
-    else:
-        first["text"] = "corrupt"
-    raw = b"invalid json" if corruption == "json" else json.dumps(data).encode()
-    settings.index_path.write_bytes(raw)
-    if corruption != "checksum":
-        manifest = json.loads(settings.index_manifest_path.read_text())
-        manifest["index_sha256"] = hashlib.sha256(raw).hexdigest()
-        settings.index_manifest_path.write_text(json.dumps(manifest))
+    manifest = json.loads(settings.index_manifest_path.read_text())
+    manifest["schema_version"] = 1
+    manifest["index_sha256"] = manifest.pop("points_sha256")
+    settings.index_manifest_path.write_text(json.dumps(manifest))
+    monkeypatch.setattr(
+        index_module, "_open_client", lambda _: pytest.fail("Must check manifest first")
+    )
+    with pytest.raises(IndexMismatchError, match="run citarilo ingest"):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+
+
+@pytest.mark.parametrize("manifest_state", ["missing", "stale"])
+def test_bad_manifest_never_opens_qdrant(settings, corpus, ledger, monkeypatch, manifest_state):
+    if manifest_state == "stale":
+        build_index(corpus, settings, ledger, client=FakeClient())
+        settings.embedding_dimensions += 1
+    monkeypatch.setattr(
+        index_module, "_open_client", lambda _: pytest.fail("Must check manifest first")
+    )
+    with pytest.raises((IndexMissingError, IndexMismatchError)):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+
+
+@pytest.mark.parametrize(
+    "corruption", ["text", "metadata", "extra", "missing", "keys", "vector", "zero"]
+)
+def test_corrupt_store(settings, corpus, ledger, corruption):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    with closing(QdrantClient(path=str(settings.qdrant_path))) as client:
+        points, _ = client.scroll("sections", with_vectors=True, limit=100)
+        point = points[0]
+        if corruption == "missing":
+            client.delete("sections", points_selector=[point.id], wait=True)
+        elif corruption == "extra":
+            client.upsert(
+                "sections",
+                [models.PointStruct(id=123, vector=point.vector, payload=point.payload)],
+                wait=True,
+            )
+        else:
+            if corruption == "text":
+                point.payload["page_content"] = "corrupt"
+            elif corruption == "metadata":
+                point.payload["metadata"]["sentence_ids"] = ["injected.id.1"]
+            elif corruption == "keys":
+                point.payload["metadata"]["section_key"] = "unknown.section"
+            elif corruption == "vector":
+                point.vector = [1.0] * settings.embedding_dimensions
+            else:
+                point.vector = [0.0] * settings.embedding_dimensions
+            client.upsert(
+                "sections",
+                [models.PointStruct(id=point.id, vector=point.vector, payload=point.payload)],
+                wait=True,
+            )
+    with pytest.raises(
+        IndexMismatchError, match="points_sha256" if corruption == "vector" else None
+    ):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
+
+
+@pytest.mark.parametrize("size,distance", [(9, models.Distance.COSINE), (8, models.Distance.DOT)])
+def test_bad_collection_configuration(settings, corpus, ledger, size, distance):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    with closing(QdrantClient(path=str(settings.qdrant_path))) as client:
+        client.delete_collection("sections")
+        client.create_collection(
+            "sections", vectors_config=models.VectorParams(size=size, distance=distance)
+        )
     with pytest.raises(IndexMismatchError):
         load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+
+
+def test_lock_error_precedes_embedding_reservation(settings, corpus, ledger, monkeypatch):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    before = ledger.summary()
+    fake = FakeClient()
+    with monkeypatch.context() as patch, index_module._acquire_index_lock(settings):
+        patch.setattr(
+            index_module,
+            "_open_client",
+            lambda _: pytest.fail("Held app lock must prevent client construction"),
+        )
+        with pytest.raises(IndexLockedError, match="Stop it and try again"):
+            build_index(corpus, settings, ledger, client=fake)
+        with pytest.raises(IndexLockedError):
+            load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    assert fake.calls == []
+    assert ledger.summary() == before
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)):
+        pass
+
+
+def test_paginated_readback(settings, corpus, ledger, monkeypatch):
+    calls = []
+    scroll = QdrantClient.scroll
+
+    def counted(self, *args, **kwargs):
+        calls.append(kwargs["offset"])
+        return scroll(self, *args, **kwargs)
+
+    monkeypatch.setattr(QdrantClient, "scroll", counted)
+    build_index(corpus, settings, ledger, client=FakeClient(), scroll_page_size=2)
+    assert len(calls) == 3 and calls[0] is None
+    calls.clear()
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8), scroll_page_size=2):
+        pass
+    assert len(calls) == 3 and calls[0] is None
+
+
+def test_load_never_embeds_and_close_is_idempotent(settings, corpus, ledger, monkeypatch):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    embeddings = DeterministicFakeEmbedding(size=8)
+    monkeypatch.setattr(
+        DeterministicFakeEmbedding,
+        "embed_query",
+        lambda *args: pytest.fail("Load must never embed"),
+    )
+    monkeypatch.setattr(
+        DeterministicFakeEmbedding,
+        "embed_documents",
+        lambda *args: pytest.fail("Load must never embed"),
+    )
+    store = load_index(corpus, settings, embeddings)
+    close = Mock(wraps=store._client.close)
+    monkeypatch.setattr(store._client, "close", close)
+    store.close()
+    store.close()
+    close.assert_called_once_with()
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
+
+
+def test_failed_embedding_releases_lock(settings, corpus, ledger):
+    fake = FakeClient()
+    fake.error = RuntimeError("Embedding failed")
+    with pytest.raises(RuntimeError, match="Embedding failed"):
+        build_index(corpus, settings, ledger, client=fake)
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
 
 
 def test_interrupted_publish_fails_closed_and_cleans_temporary_files(
@@ -412,10 +551,8 @@ def test_interrupted_publish_fails_closed_and_cleans_temporary_files(
     build_index(corpus, settings, ledger, client=FakeClient())
     old_manifest = settings.index_manifest_path.read_bytes()
     replace = index_module.os.replace
-    published = []
 
     def interrupted_replace(source, destination):
-        published.append(destination)
         if destination == settings.index_manifest_path:
             raise OSError("interrupted manifest publication")
         replace(source, destination)
@@ -425,10 +562,9 @@ def test_interrupted_publish_fails_closed_and_cleans_temporary_files(
     fake.vector = [1.0] * 8
     with pytest.raises(OSError, match="interrupted"):
         build_index(corpus, settings, ledger, client=fake)
-    assert published == [settings.index_path, settings.index_manifest_path]
     assert settings.index_manifest_path.read_bytes() == old_manifest
     assert list(settings.runtime_dir.glob(".index-*")) == []
-    with pytest.raises(IndexMismatchError, match="index_sha256"):
+    with pytest.raises(IndexMismatchError, match="points_sha256"):
         load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
 
 
@@ -439,8 +575,13 @@ def test_retrieval_order_k_and_query_budget(
     fake = FakeClient()
     build_index(corpus, settings, ledger, client=fake, group_id="ingest")
     query = section_documents(corpus)[2].page_content
-    offline = load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
-    expected = offline.similarity_search_with_score(query, k=settings.top_k if k is None else k)
+    documents = section_documents(corpus)
+    fake_embeddings = DeterministicFakeEmbedding(size=8)
+    matrix = np.array(fake_embeddings.embed_documents([doc.page_content for doc in documents]))
+    query_vector = np.array(fake_embeddings.embed_query(query))
+    scores = matrix @ query_vector / (np.linalg.norm(matrix, axis=1) * np.linalg.norm(query_vector))
+    ranks = np.argsort(-scores)[: settings.top_k if k is None else k]
+    expected = [(documents[i], scores[i]) for i in ranks]
 
     results = retrieve(query, corpus, settings, ledger, group_id="ask-1", k=k, client=fake)
     assert [key for key, _, _ in results] == [doc.metadata["section_key"] for doc, _ in expected]
@@ -500,35 +641,264 @@ def test_loaded_search_reuses_store_and_exposes_query_usage(
     build_index(corpus, settings, ledger, client=fake)
     fake.calls.clear()
     adapter = UsageTrackingEmbeddings(settings, ledger, client=fake, group_id="eval")
-    store = load_index(corpus, settings, adapter)
-    settings.index_path.unlink()
-    settings.index_manifest_path.unlink()
-    ticks = iter([1.0, 1.125, 2.0, 2.25])
-    monkeypatch.setattr(index_module, "perf_counter", lambda: next(ticks))
-    documents = section_documents(corpus)
-    for i in (0, 2):
-        result = search(store, documents[i].page_content, 3)
-        assert result[0][0] == documents[i].metadata["section_key"]
-        assert result[0][1] == pytest.approx(1.0)
-        assert len(result) == 3
-    assert len(fake.calls) == len(adapter.usage) == 2
-    assert [usage.duration_ms for usage in adapter.usage] == [125, 250]
-    assert len({usage.reservation_id for usage in adapter.usage}) == 2
-    for usage in adapter.usage:
-        assert usage.total_tokens == usage.prompt_tokens > 0
-        from citarilo.budget import actual_cost
+    with load_index(corpus, settings, adapter) as store:
+        settings.index_manifest_path.unlink()
+        ticks = iter([1.0, 1.125, 2.0, 2.25])
+        monkeypatch.setattr(index_module, "perf_counter", lambda: next(ticks))
+        documents = section_documents(corpus)
+        for i in (0, 2):
+            result = store.search(documents[i].page_content, 3)
+            assert result[0][0] == documents[i].metadata["section_key"]
+            assert result[0][1] == pytest.approx(1.0)
+            assert len(result) == 3
+        assert len(fake.calls) == len(adapter.usage) == 2
+        assert [usage.duration_ms for usage in adapter.usage] == [125, 250]
+        assert len({usage.reservation_id for usage in adapter.usage}) == 2
+        for usage in adapter.usage:
+            assert usage.total_tokens == usage.prompt_tokens > 0
+            from citarilo.budget import actual_cost
 
-        assert usage.cost_usd == actual_cost(
-            settings.embedding_model, usage.prompt_tokens, 0, price_table=settings.price_table
-        )
+            assert usage.cost_usd == actual_cost(
+                settings.embedding_model, usage.prompt_tokens, 0, price_table=settings.price_table
+            )
 
 
 @pytest.mark.parametrize("k", [0, -1, True, 1.5])
-def test_search_invalid_k_never_dispatches(settings: Settings, ledger: BudgetLedger, k) -> None:
-    from langchain_core.vectorstores import InMemoryVectorStore
+def test_search_invalid_k_never_dispatches(
+    settings: Settings, ledger: BudgetLedger, k, section_index_factory
+) -> None:
 
     fake = FakeClient()
     adapter = UsageTrackingEmbeddings(settings, ledger, client=fake)
     with pytest.raises(ValueError, match="k must"):
-        search(InMemoryVectorStore(adapter), "question", k)
+        section_index_factory([], adapter).search("question", k)
     assert fake.calls == []
+
+
+@pytest.mark.parametrize("vector", [[1.0], [float("inf")] * 8, [float("nan")] * 8])
+def test_invalid_readback_vectors_release_client(settings, corpus, ledger, monkeypatch, vector):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    scroll = QdrantClient.scroll
+
+    def corrupted(self, *args, **kwargs):
+        points, offset = scroll(self, *args, **kwargs)
+        points[0].vector = vector
+        return points, offset
+
+    monkeypatch.setattr(QdrantClient, "scroll", corrupted)
+    with pytest.raises(IndexMismatchError):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
+
+
+def test_search_override_reuses_client_without_owning_it(settings, corpus, ledger):
+    fake = FakeClient()
+    build_index(corpus, settings, ledger, client=fake)
+    default = UsageTrackingEmbeddings(settings, ledger, client=fake, group_id="default")
+    alternate = UsageTrackingEmbeddings(settings, ledger, client=fake, group_id="alternate")
+    with load_index(corpus, settings, default) as store:
+        query = section_documents(corpus)[0].page_content
+        assert store.search(query, 1, embeddings=alternate)[0][1] == pytest.approx(1)
+        assert default.usage == [] and len(alternate.usage) == 1
+        assert ledger.group_spent_usd("default") == 0
+        assert ledger.group_spent_usd("alternate") > 0
+        assert store.search(query, 1)[0][1] == pytest.approx(1)
+        assert len(default.usage) == 1
+
+
+@pytest.mark.parametrize("previous_index", [False, True])
+def test_reopen_lock_race_does_not_publish_manifest(
+    settings, corpus, ledger, monkeypatch, previous_index
+):
+    if previous_index:
+        build_index(corpus, settings, ledger, client=FakeClient())
+    previous = settings.index_manifest_path.read_bytes() if previous_index else None
+    open_client = index_module._open_client
+    blocker = None
+    opens = 0
+
+    def contested_reopen(settings):
+        nonlocal blocker, opens
+        opens += 1
+        if opens == 2:
+            blocker = QdrantClient(path=str(settings.qdrant_path))
+        return open_client(settings)
+
+    monkeypatch.setattr(index_module, "_open_client", contested_reopen)
+    fake = FakeClient()
+    fake.vector = [1.0] * 8
+    try:
+        with pytest.raises(IndexLockedError):
+            build_index(corpus, settings, ledger, client=fake)
+    finally:
+        if blocker is not None:
+            blocker.close()
+    assert len(fake.calls) == 1
+    if previous_index:
+        assert settings.index_manifest_path.read_bytes() == previous
+    else:
+        assert not settings.index_manifest_path.exists()
+    with pytest.raises(IndexMismatchError if previous_index else IndexMissingError):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    with closing(QdrantClient(path=str(settings.qdrant_path))):
+        pass
+
+
+@pytest.mark.parametrize("previous_index", [False, True])
+def test_completed_competing_writer_cannot_substitute_vectors(
+    settings, corpus, ledger, monkeypatch, previous_index
+):
+    if previous_index:
+        build_index(corpus, settings, ledger, client=FakeClient())
+    previous = settings.index_manifest_path.read_bytes() if previous_index else None
+    open_client = index_module._open_client
+    opens = 0
+    competitor = FakeClient()
+
+    def replaced_before_reopen(settings):
+        nonlocal opens
+        opens += 1
+        if opens == 2:
+            before = ledger.summary()
+            with pytest.raises(IndexLockedError):
+                build_index(corpus, settings, ledger, client=competitor)
+            assert competitor.calls == [] and ledger.summary() == before
+            # A writer bypassing Citarilo's app lock finishes and releases the
+            # Qdrant folder lock before A resumes; readback must still reject it.
+            with closing(QdrantClient(path=str(settings.qdrant_path))) as writer:
+                points, _ = writer.scroll("sections", limit=100, with_vectors=True)
+                writer.upsert(
+                    "sections",
+                    [
+                        models.PointStruct(
+                            id=p.id, vector=[1.0] * settings.embedding_dimensions, payload=p.payload
+                        )
+                        for p in points
+                    ],
+                    wait=True,
+                )
+        return open_client(settings)
+
+    monkeypatch.setattr(index_module, "_open_client", replaced_before_reopen)
+    with pytest.raises(IndexMismatchError, match="Persisted vectors differ"):
+        build_index(corpus, settings, ledger, client=FakeClient())
+    if previous_index:
+        assert settings.index_manifest_path.read_bytes() == previous
+    else:
+        assert not settings.index_manifest_path.exists()
+    with index_module._acquire_index_lock(settings):
+        pass
+
+
+@pytest.mark.parametrize("stage", ["before", "after"])
+def test_failed_client_construction_closes_and_releases_app_lock(
+    settings, corpus, ledger, monkeypatch, stage
+):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    initialize = QdrantClient.__init__
+    close = QdrantClient.close
+    instances = []
+    closed = []
+
+    def fail(self, *args, **kwargs):
+        instances.append(self)
+        if stage == "after":
+            initialize(self, *args, **kwargs)
+        raise RuntimeError("Partial client construction failed")
+
+    def tracked_close(self, *args, **kwargs):
+        closed.append(self)
+        close(self, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(QdrantClient, "__init__", fail)
+        patch.setattr(QdrantClient, "close", tracked_close)
+        with pytest.raises(IndexMismatchError):
+            load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+        assert closed == instances
+        if stage == "after":
+            assert instances[0]._client.closed
+        with index_module._acquire_index_lock(settings):
+            pass
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)):
+        pass
+
+
+@pytest.mark.parametrize("corruption", ["meta", "sqlite"])
+def test_ingest_repairs_corrupt_storage_without_opening_it(
+    settings, corpus, ledger, monkeypatch, corruption
+):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    path = (
+        settings.qdrant_path / "meta.json"
+        if corruption == "meta"
+        else next(settings.qdrant_path.rglob("storage.sqlite"))
+    )
+    path.write_bytes(b"not valid storage")
+    manifest = settings.index_manifest_path.read_bytes()
+    with pytest.raises(IndexMismatchError):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    with index_module._acquire_index_lock(settings):
+        pass
+    fake = FakeClient()
+    fake.error = RuntimeError("Embedding failed")
+    with pytest.raises(RuntimeError, match="Embedding failed"):
+        build_index(corpus, settings, ledger, client=fake)
+    assert path.read_bytes() == b"not valid storage"
+    assert settings.index_manifest_path.read_bytes() == manifest
+    with index_module._acquire_index_lock(settings):
+        pass
+    open_client = index_module._open_client
+    opens = []
+
+    def fresh_only(settings):
+        if not opens:
+            assert not settings.qdrant_path.exists()
+        opens.append(settings.qdrant_path)
+        return open_client(settings)
+
+    monkeypatch.setattr(index_module, "_open_client", fresh_only)
+    repaired = build_index(corpus, settings, ledger, client=FakeClient())
+    assert repaired.section_count == len(section_documents(corpus))
+    assert len(opens) == 2
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)) as store:
+        assert store.search(section_documents(corpus)[0].page_content, 1)[0][1] == pytest.approx(1)
+
+
+@pytest.mark.parametrize("kind", ["file", "symlink"])
+def test_ingest_replaces_storage_path_that_is_not_a_directory(
+    settings, corpus, ledger, tmp_path, kind
+):
+    settings.runtime_dir.mkdir(parents=True, exist_ok=True)
+    if kind == "file":
+        settings.qdrant_path.write_bytes(b"not a directory")
+    else:
+        target = tmp_path / "elsewhere"
+        target.mkdir()
+        (target / "keep.txt").write_text("untouched")
+        settings.qdrant_path.symlink_to(target, target_is_directory=True)
+    build_index(corpus, settings, ledger, client=FakeClient())
+    assert settings.qdrant_path.is_dir() and not settings.qdrant_path.is_symlink()
+    if kind == "symlink":
+        assert (target / "keep.txt").read_text() == "untouched"
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)) as store:
+        assert store.search(section_documents(corpus)[0].page_content, 1)[0][1] == pytest.approx(1)
+
+
+def test_section_index_releases_app_lock_even_if_client_close_raises(
+    settings, corpus, ledger, monkeypatch
+):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    store = load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    close = store._client.close
+
+    def failure():
+        close()
+        raise RuntimeError("Close failed")
+
+    monkeypatch.setattr(store._client, "close", failure)
+    with pytest.raises(RuntimeError, match="Close failed"):
+        store.close()
+    with index_module._acquire_index_lock(settings):
+        pass

@@ -56,8 +56,9 @@ question (EN/CS) → validation → budget reservation
 - Claims state only values from the documents and never derive new ones (sums,
   discounted prices); a derived number fails the check.
 - Retrieval is vector search over document sections (`text-embedding-3-large`)
-  in an in-memory store persisted as a file with a checksummed manifest. No
-  separate database is needed at this scale.
+  in Qdrant embedded local mode (`.runtime/qdrant`), with a corpus-bound
+  manifest and a checksum of the stored points. The checksum detects corruption
+  and inconsistent builds, not a malicious local writer.
 - Design details: [docs/architecture.md](docs/architecture.md) (Czech),
   evaluation method: [docs/evaluation.md](docs/evaluation.md).
 
@@ -66,7 +67,8 @@ question (EN/CS) → validation → budget reservation
 Live runs against the OpenAI API; configuration, commit and corpus hash are
 stored in every report. Retrieval and answers (prompt v4) are in
 [evals/results/2026-11-07](evals/results/2026-11-07). Acceptance gates were set
-before tuning.
+before tuning. The 2026-11-07 runs used the previous in-memory store with
+the same exact cosine search.
 
 | Measure | Development (21 cases) | Held-out (5 cases) | Gate |
 |---|---|---|---|
@@ -154,12 +156,14 @@ indexing.
 ```sh
 uv run citarilo import ~/documents/*.pdf ~/documents/*.docx --out data/company
 # review data/company/*.md, then set DATA_DIR=data/company in .env
+# stop the running server before ingest, then start it again
 uv run citarilo ingest
 ```
 
-Restart the server after a new `ingest`. The index is bound to the hash of the
-documents, so a server never answers from an outdated index; it reports that
-the index needs rebuilding instead.
+Stop the server, run `ingest`, then start it again. At startup, the server
+checks the index against the documents and refuses an outdated index. It keeps
+that validated snapshot until restart; document changes require another ingest
+and restart.
 
 Import refuses rather than silently losing or reordering text: scanned PDFs
 without text, tables, multi-column layouts, tracked changes and other
@@ -189,6 +193,8 @@ processed at a time.
 
 ## Security and budget
 
+- `.runtime/` is trusted local state; Qdrant local storage must not be copied
+  from untrusted sources.
 - Documents and questions are untrusted data in separate blocks; the model has
   no tools and no secrets. An instruction planted in a document
   (`orders.order-notes.3`) is part of the tests.
@@ -213,6 +219,9 @@ call the paid API or read a local key. The same checks run in GitHub Actions.
 
 ## Limitations
 
+- Qdrant runs embedded, with one process at a time owning the local index.
+  Stop the server before using CLI `ask`, `eval` or `ingest`. Qdrant server
+  mode is not wired yet.
 - One question at a time and local access only (127.0.0.1); there are no user
   accounts. Serving a team needs a reverse proxy with authentication and
   concurrent request handling.

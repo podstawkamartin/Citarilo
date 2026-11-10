@@ -29,6 +29,7 @@ from citarilo.evals import (
 from citarilo.grading import summarize, write_grading_template
 from citarilo.index import (
     EmbeddingsClient,
+    IndexLockedError,
     IndexMismatchError,
     IndexMissingError,
     MissingAPIKeyError,
@@ -191,6 +192,8 @@ def main(
         parser.exit(1, "citarilo: error: Invalid corpus; check the configured data directory.\n")
     except IndexMissingError:
         parser.exit(1, "citarilo: error: Index missing; run citarilo ingest explicitly.\n")
+    except IndexLockedError as exc:
+        parser.exit(1, f"citarilo: error: {exc}\n")
     except IndexMismatchError:
         parser.exit(
             1, "citarilo: error: Index mismatch or corruption; run citarilo ingest explicitly.\n"

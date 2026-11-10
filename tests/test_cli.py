@@ -96,7 +96,7 @@ def test_ingest_with_injected_client(
     client = SimpleNamespace(embeddings=SimpleNamespace(create=create))
     main(["ingest"], settings=settings, client=client)
     assert len(calls) == 1
-    assert settings.index_path.is_file()
+    assert settings.qdrant_path.is_dir()
     manifest = json.loads(settings.index_manifest_path.read_text())
     assert manifest["usage"][0]["prompt_tokens"] == 12
     ledger = BudgetLedger(
@@ -158,7 +158,7 @@ def test_budget_exceeded_is_reported_without_dispatch(
         main(["ingest"], settings=settings)
     assert error.value.code == 1
     assert "Budget exceeded" in capsys.readouterr().err
-    assert not settings.index_path.exists()
+    assert not settings.index_manifest_path.exists()
 
 
 def test_no_command_shows_help(capsys: pytest.CaptureFixture[str]) -> None:
@@ -177,3 +177,18 @@ def test_version_does_not_load_settings(
         main(["--version"])
     assert error.value.code == 0
     assert capsys.readouterr().out == "citarilo 0.1.0\n"
+
+
+def test_ingest_locked_index_has_clear_error_and_no_reservation(settings, capsys):
+    settings.openai_api_key = SecretStr("fake-key")
+    with (
+        index_module._acquire_index_lock(settings),
+        pytest.raises(SystemExit) as exc,
+    ):
+        main(["ingest"], settings=settings)
+    assert exc.value.code == 1
+    assert "The local index is in use by another Citarilo process" in capsys.readouterr().err
+    ledger = BudgetLedger(
+        settings.spend_db_path, settings.budget_cap_usd, settings.price_table_version
+    )
+    assert ledger.spent_usd() == 0 and ledger.summary()["reserved"] == 0

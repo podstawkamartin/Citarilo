@@ -12,7 +12,6 @@ import pytest
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
-from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 
@@ -57,7 +56,7 @@ def structured(parsed, *, usage=True, parsing_error=None):
 
 
 @pytest.fixture
-def rig(tmp_path: Path):
+def rig(tmp_path: Path, section_index_factory):
     data = tmp_path / "data"
     data.mkdir()
     (data / "returns.md").write_text(
@@ -128,9 +127,7 @@ def rig(tmp_path: Path):
         operation="retrieve",
         client=SimpleNamespace(embeddings=SimpleNamespace(create=embed)),
     )
-    store = InMemoryVectorStore(fake)
-    store.add_documents(section_documents(corpus))
-    store.embedding = embeddings
+    store = section_index_factory(section_documents(corpus), embeddings)
 
     def invoke(node, messages):
         calls[node].append(messages)
@@ -229,17 +226,18 @@ def test_language_checks_refuse_invalid_claim_before_verification(rig, language)
 
 @pytest.mark.parametrize("language", ["en", "cs"])
 @pytest.mark.parametrize("include_total", [False, True], ids=["documented-inputs", "derived-total"])
-def test_rental_arithmetic_is_refused_but_documented_inputs_pass(rig, language, include_total):
+def test_rental_arithmetic_is_refused_but_documented_inputs_pass(
+    rig, language, include_total, section_index_factory
+):
     corpus = load_corpus(Path("data/trailsupply"))
-    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
-    store.add_documents(
+    store = section_index_factory(
         [
             document
             for document in section_documents(corpus)
             if document.metadata["section_key"] == "gear-rental.rental-prices"
-        ]
+        ],
+        rig.context.embeddings,
     )
-    store.embedding = rig.context.embeddings
     rig.context = replace(rig.context, corpus=corpus, store=store)
     rate_id = "gear-rental.rental-prices.2"
     discount_id = "gear-rental.rental-prices.4"
@@ -535,7 +533,7 @@ def test_context_rejects_a_different_embedding_adapter(rig):
 
 
 def test_factory_wires_responses_settings_using_only_a_fake_constructor(
-    rig, monkeypatch, tracked_http_client
+    rig, monkeypatch, tracked_http_client, section_index_factory
 ):
     configurations = []
     schemas = []
@@ -564,7 +562,9 @@ def test_factory_wires_responses_settings_using_only_a_fake_constructor(
     monkeypatch.setattr(index_module, "OpenAI", make_sdk_client)
     monkeypatch.setattr(pipeline, "_UsageValidatedOpenAI", make_sdk_client)
     monkeypatch.setattr(
-        pipeline, "load_index", lambda corpus, settings, embeddings: InMemoryVectorStore(embeddings)
+        pipeline,
+        "load_index",
+        lambda corpus, settings, embeddings: section_index_factory([], embeddings),
     )
     context = create_live_context(settings)
     assert context.mode == "live"
@@ -640,15 +640,18 @@ def test_verification_context_owns_and_closes_http_client(
 
 @pytest.mark.parametrize("stage", ["index", "generate", "verify"])
 def test_live_context_closes_http_client_on_setup_failure(
-    rig, monkeypatch, tracked_http_client, stage
+    rig, monkeypatch, tracked_http_client, stage, section_index_factory
 ):
     settings = rig.context.settings.model_copy(update={"openai_api_key": SecretStr("dummy")})
     monkeypatch.setattr(pipeline, "DefaultHttpxClient", lambda **_: tracked_http_client)
+    stores = []
 
     def load_store(corpus, settings, embeddings):
         if stage == "index":
             raise RuntimeError("Index setup failed")
-        return InMemoryVectorStore(embeddings)
+        store = section_index_factory([], embeddings)
+        stores.append(store)
+        return store
 
     def model(settings, name, effort, schema, **kwargs):
         if (schema is GenerationOutput) == (stage == "generate"):
@@ -659,6 +662,7 @@ def test_live_context_closes_http_client_on_setup_failure(
     monkeypatch.setattr(pipeline, "_live_model", model)
     with pytest.raises(RuntimeError, match="setup failed"):
         create_live_context(settings)
+    assert all(store._closed for store in stores)
     assert tracked_http_client.is_closed
     tracked_http_client.close.assert_called_once_with()
 
@@ -871,7 +875,7 @@ def test_raw_length_is_limited_before_whitespace_trimming(rig):
 
 
 @pytest.fixture
-def sdk_rig(rig, monkeypatch):
+def sdk_rig(rig, monkeypatch, section_index_factory):
     """Exercise the production factory, installed LangChain and SDK without sockets."""
     requests = []
 
@@ -914,10 +918,7 @@ def sdk_rig(rig, monkeypatch):
         return httpx2.Response(200, json=responses[index])
 
     def load_store(corpus, settings, embeddings):
-        store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
-        store.add_documents(section_documents(corpus))
-        store.embedding = embeddings
-        return store
+        return section_index_factory(section_documents(corpus), embeddings)
 
     monkeypatch.setattr(ChatOpenAI, "__init__", _CHAT_INIT)
     # Disable LangChain's socket-option capability probe, retaining socket guards.

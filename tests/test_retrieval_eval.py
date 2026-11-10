@@ -267,7 +267,7 @@ def test_invalid_index_fails_before_requests(
 ) -> None:
     settings, client = setup
     if problem == "missing":
-        settings.index_path.unlink()
+        settings.index_manifest_path.unlink()
     else:
         settings.embedding_dimensions += 1
     with pytest.raises(SystemExit) as error:

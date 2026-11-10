@@ -11,8 +11,6 @@ from zipfile import ZIP_DEFLATED, ZipFile
 import pytest
 from docx import Document
 from docx.oxml import OxmlElement
-from langchain_core.embeddings import DeterministicFakeEmbedding
-from langchain_core.vectorstores import InMemoryVectorStore
 from lxml.etree import Element
 from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen.canvas import Canvas
@@ -457,22 +455,22 @@ def test_switching_corpora_requires_ingest_and_new_manifest(imported, tmp_path):
         load_index(corpus, settings, embeddings)
     manifest = build_index(corpus, settings, ledger, client=client)
     assert manifest.corpus_hash == corpus.corpus_hash
-    assert load_index(corpus, settings, embeddings)
+    with load_index(corpus, settings, embeddings):
+        pass
 
 
-def test_fake_answer_evaluation_uses_imported_citations(imported, rig):
+def test_fake_answer_evaluation_uses_imported_citations(imported, rig, section_index_factory):
     directory, corpus, _ = imported
     settings = rig.context.settings
     settings.data_dir = directory
-    store = InMemoryVectorStore(DeterministicFakeEmbedding(size=8))
-    store.add_documents(
+    store = section_index_factory(
         [
             d
             for d in section_documents(corpus)
             if d.metadata["section_key"] == "shipping.ceny-beznych-zasilek"
-        ]
+        ],
+        rig.context.embeddings,
     )
-    store.embedding = rig.context.embeddings
     context = replace(rig.context, corpus=corpus, store=store)
     sid = "shipping.ceny-beznych-zasilek.3"
     rig.results["generate"] = structured(

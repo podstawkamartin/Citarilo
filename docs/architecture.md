@@ -39,7 +39,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    D["data/trailsupply/*.md"] --> ING["citarilo ingest"] --> I[("index.json")]
+    D["data/trailsupply/*.md"] --> ING["citarilo ingest"] --> I[("Qdrant<br/>.runtime/qdrant")]
     API["citarilo serve<br/>FastAPI"] --> P["LangGraph pipeline"]
     CASES["evals/*.jsonl"] --> EV["citarilo eval --live"] --> P
     I --> P
@@ -84,7 +84,7 @@ tests/
 | Závislosti uzlů | `context_schema`, `Runtime` | Modely a záznamník běhu bez globálních proměnných |
 | Prompty | `ChatPromptTemplate` | Oddělené role a proměnné; dokumenty se vkládají jen jako hodnoty |
 | Generování | `ChatOpenAI` (Responses API), `with_structured_output(method="json_schema", strict=True, include_raw=True)` | Striktní schéma výstupu a spotřeba z `usage_metadata` |
-| Vyhledávání | `Document`, `InMemoryVectorStore.similarity_search_with_score` | Standardní vyhledávání se skóre; ID a text vět v metadatech |
+| Vyhledávání | `Document`, `SectionIndex.search`, `QdrantClient.query_points` | Přímý klient Qdrantu v lokálním režimu; kosinové skóre, ID a text vět v metadatech |
 | Testy | `DeterministicFakeEmbedding`, `RunnableLambda` | Deterministické testy bez sítě a placených volání |
 
 - Embeddingy: OpenAI API spotřebu vrací, ale rozhraní LangChain
@@ -130,7 +130,21 @@ tests/
 - ID platí vždy spolu s hashem korpusu, který obsahuje každý záznam běhu.
 - Pouze vektorové vyhledávání, 5 nejbližších sekcí. Index se staví jen
   explicitním `citarilo ingest`; manifest obsahuje model, dimenze, verzi
-  dělení textu a hash korpusu. Nesoulad → 503.
+  dělení textu, hash korpusu, počet sekcí a kontrolní součet bodů. Nesoulad → 503.
+- Qdrant běží ve vestavěném lokálním režimu (`.runtime/qdrant`), bez samostatného
+  serveru. Kolekce `sections` používá přesné kosinové vyhledávání. Manifest v2
+  obsahuje kontrolní součet textu, metadat i vektorů přečtených zpět z úložiště.
+  Odhalí poškození a nekonzistentní sestavení, nechrání před útočníkem
+  s možností lokálního zápisu. Načtení nevolá model.
+- Aplikační výhradní zámek `.runtime/index.lock` se získává před indexací
+  a před otevřením indexu, včetně intervalu zavření a opětovného otevření
+  Qdrantu. Indexace po úspěšném embeddingu odstraní celé staré úložiště
+  a vytvoří nové, takže opraví i poškozený index bez načtení jeho obsahu.
+- Index se ověřuje při startu. Pouze připravený server drží tento stav
+  i zámek do ukončení; nepřipravený server při sondě index otevře a zavře.
+  Před `ingest`, CLI `ask` nebo `eval` server zastavte. Po indexaci ho znovu
+  spusťte. Chybějící či neplatný index zámek nedrží; serverový režim Qdrantu
+  ani automatické přenačítání nejsou zapojené.
 - Otázky anglicky i česky (i bez diakritiky). Odpověď je v jazyce otázky
   (`answer_language`, pro atribut `lang` ve frontendu), zdroje v původní
   češtině. Rozhraní, kód a důvody ověřovače jsou anglicky.
@@ -168,7 +182,8 @@ se vypíše upozornění. Celá dávka se validuje před publikací souborů; ex
 cíl vyžaduje `--force`. Původní zdroje nelze přepsat ani s tímto přepínačem.
 
 Správce nastaví `DATA_DIR` na výsledný adresář a explicitně spustí
-`citarilo ingest`. Změněná ID mění hash korpusu; starý index se odmítne
+`citarilo ingest` při zastaveném serveru a potom server znovu zapne.
+Změněná ID mění hash korpusu; starý index se při startu odmítne
 standardní kontrolou manifestu. Testovací surové dokumenty v
 `examples/trailsupply-raw/` sestaví `uv run python scripts/build_sample_documents.py`
 ze stejných vět jako `data/trailsupply`. Písmo Liberation Sans je přiloženo
@@ -206,6 +221,10 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
 - Frontend vykresluje pouze prostý text; citace přicházejí strukturovaně.
 
 ## Bezpečnost
+
+- Lokální Qdrant deserializuje body pomocí `pickle` před kontrolou součtu;
+  `.runtime/` je důvěryhodný lokální stav zapisovaný pouze Citarilem a úložiště
+  Qdrantu se nesmí kopírovat z nedůvěryhodných zdrojů.
 
 - Dokumenty jsou nedůvěryhodná data v oddělených blocích. Model nemá
   nástroje ani tajemství.
@@ -250,7 +269,7 @@ spotřebu a cenu každého volání, časy uzlů a případnou chybu.
 
 ## Mimo rozsah
 
-Streamování, hybridní vyhledávání a reranking, vektorová databáze, opravné
+Streamování, hybridní vyhledávání a reranking, opravné
 přegenerování, konverzace, nahrávání dokumentů, checkpointy a přerušení
 v LangGraph, Docker, LangSmith, placený model v roli hodnotitele a napojení na
 obchodní systémy. Každá položka se přidá až s doloženou potřebou.

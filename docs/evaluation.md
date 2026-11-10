@@ -150,3 +150,36 @@ Exit codes: 0 = PASS (or an ungraded answer run ready for grading), 2 = valid
 completed evaluation with failing gates, 1 = technical/input/grading error or
 incomplete live run. Retrieval recall@5 remains a separate gate from `--retrieval`;
 the answer summary does not claim that retrieval or probes passed.
+
+
+## Vector store benchmark
+
+```sh
+uv run python scripts/bench_vector_store.py --out /tmp/citarilo-vector-bench.json
+# Smaller custom run (still 200 queries per measured repetition):
+uv run python scripts/bench_vector_store.py --sizes 8 --repeats 1 --out /tmp/small-bench.json
+```
+
+This offline benchmark uses seeded synthetic unit vectors at 3072 dimensions and
+section-shaped payloads. The default sizes are the bundled TrailSupply section
+count, 1,000 and 5,000 points. It runs the production `build_index`, `load_index`
+and `SectionIndex.search` paths with a fake embeddings endpoint and inert
+reservation callbacks; it never reads `.env`, calls a provider, opens a spend
+ledger or changes the application index. All indexes live in temporary directories.
+
+After one discarded build/load warm-up and a query warm-up for each repetition,
+it records three repetitions of build/publish time, full load and validation time
+(the index portion of server startup), and 200 query latencies per repetition
+(p50/p95 across all measured queries). Build timing includes the fake embedding
+adapter and manifest publication; query timing includes the fake query adapter.
+It reports the Qdrant directory size after closing each client, top-5 overlap and
+maximum absolute returned-score difference against exact numpy cosine search;
+it fails if overlap is below 1 or score difference exceeds 1e-5. JSON also records
+Python, numpy and qdrant-client versions, CPU, Git commit/dirty state, seed and
+timestamps. BLAS uses one thread for reproducible comparisons.
+
+This measures embedded local mode only: brute-force cosine search in a single
+process. It does not measure Qdrant server mode, concurrent clients, network or
+model latency, retrieval relevance, answer quality, or end-to-end HTTP startup.
+The published 2026-11-07 results used the previous in-memory store with the same
+exact cosine search; this synthetic benchmark does not replace live evaluation.

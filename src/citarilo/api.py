@@ -25,6 +25,7 @@ from citarilo.budget import BudgetExceeded, BudgetLedger
 from citarilo.config import Settings
 from citarilo.corpus import Corpus, CorpusError, load_corpus
 from citarilo.index import (
+    IndexLockedError,
     IndexMismatchError,
     IndexMissingError,
     MissingAPIKeyError,
@@ -196,7 +197,7 @@ def _load_state(
         if not state.key_configured:
             state.error_code = "configuration_error"
         return state
-    except (IndexMissingError, IndexMismatchError):
+    except (IndexMissingError, IndexMismatchError, IndexLockedError):
         state.error_code = "index_unavailable"
     except (MissingAPIKeyError, CorpusError, ValidationError, ValueError):
         state.error_code = "configuration_error"
@@ -214,10 +215,14 @@ def _load_state(
                 settings.price_table_version,
                 price_table=settings.price_table,
             )
-            load_index(state.corpus, settings, UsageTrackingEmbeddings(settings, state.ledger))
+            with load_index(
+                state.corpus, settings, UsageTrackingEmbeddings(settings, state.ledger)
+            ):
+                pass
             state.index_ready = True
-        except (IndexMissingError, IndexMismatchError):
-            pass
+        except (IndexMissingError, IndexMismatchError, IndexLockedError):
+            if state.error_code != "configuration_error":
+                state.error_code = "index_unavailable"
         except (CorpusError, ValueError):
             state.error_code = "configuration_error"
         except Exception:
@@ -292,7 +297,7 @@ def create_app(
             return record.to_response()
         except BudgetExceeded:
             return _error("budget_exhausted")
-        except (IndexMissingError, IndexMismatchError):
+        except (IndexMissingError, IndexMismatchError, IndexLockedError):
             return _error("index_unavailable")
         except MissingAPIKeyError:
             return _error("configuration_error")

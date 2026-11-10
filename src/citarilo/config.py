@@ -62,8 +62,12 @@ class Settings(BaseSettings):
     api_port: int = Field(default=5174, ge=5174, le=5199)
 
     @property
-    def index_path(self) -> Path:
-        return self.runtime_dir / "index.json"
+    def qdrant_path(self) -> Path:
+        return self.runtime_dir / "qdrant"
+
+    @property
+    def index_lock_path(self) -> Path:
+        return self.runtime_dir / "index.lock"
 
     @property
     def index_manifest_path(self) -> Path:

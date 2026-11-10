@@ -54,8 +54,10 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 - Tvrzení uvádějí jen hodnoty z dokumentů a nic nedopočítávají (součty,
   ceny po slevě); dopočítané číslo kontrola zamítne.
 - Vyhledávání je vektorové nad sekcemi dokumentů (`text-embedding-3-large`)
-  v paměťovém úložišti uloženém do souboru s manifestem a kontrolním součtem.
-  Při této velikosti není potřeba samostatná databáze.
+  v Qdrantu ve vestavěném lokálním režimu (`.runtime/qdrant`), s manifestem
+  svázaným s korpusem a kontrolním součtem uložených bodů. Kontrolní součet
+  odhalí poškození a nekonzistentní sestavení, nechrání před útočníkem
+  s možností lokálního zápisu.
 - Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
   evaluace: [docs/evaluation.md](docs/evaluation.md) (anglicky).
 
@@ -64,7 +66,8 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
 v každém reportu. Vyhledávání a odpovědi (prompt v4) jsou v
 [evals/results/2026-11-07](evals/results/2026-11-07). Brány přijetí byly
-stanovené před laděním.
+stanovené před laděním. Běhy z 7. 11. 2026 používaly předchozí paměťové
+úložiště se stejným přesným kosinovým vyhledáváním.
 
 | Měření | Vývojové (21 případů) | Odložené (5 případů) | Brána |
 |---|---|---|---|
@@ -147,12 +150,13 @@ do formátu, ze kterého Citarilo cituje: sekce podle nadpisů a jedna věta na
 ```sh
 uv run citarilo import ~/dokumenty/*.pdf ~/dokumenty/*.docx --out data/firma
 # zkontrolovat data/firma/*.md, potom v .env nastavit DATA_DIR=data/firma
+# před indexací zastavit běžící server, potom ho znovu spustit
 uv run citarilo ingest
 ```
 
-Po novém `ingest` restartujte server. Index je svázaný s hashem dokumentů,
-takže server nikdy neodpovídá ze zastaralého indexu; místo toho ohlásí, že je
-potřeba index sestavit znovu.
+Zastavte server, spusťte `ingest` a server znovu zapněte. Při startu server
+zkontroluje index proti dokumentům a zastaralý index odmítne. Ověřený stav
+používá až do restartu; změny dokumentů vyžadují novou indexaci a restart.
 
 Import raději odmítne, než aby tiše ztratil nebo přeházel text: naskenovaná
 PDF bez textu, tabulky, vícesloupcovou sazbu, sledované změny a další
@@ -182,6 +186,8 @@ naráz.
 
 ## Bezpečnost a rozpočet
 
+- `.runtime/` je důvěryhodný lokální stav; lokální úložiště Qdrantu se nesmí
+  kopírovat z nedůvěryhodných zdrojů.
 - Dokumenty i otázky jsou nedůvěryhodná data v oddělených blocích; model nemá
   nástroje ani tajemství. Vložený pokyn v dokumentu (`orders.order-notes.3`)
   je součástí testů.
@@ -207,6 +213,9 @@ Actions.
 
 ## Omezení
 
+- Qdrant běží ve vestavěném režimu a lokální index může vlastnit jen jeden
+  proces současně. Před CLI `ask`, `eval` nebo `ingest` zastavte server.
+  Serverový režim Qdrantu zatím není zapojený.
 - Jeden dotaz naráz a jen lokální přístup (127.0.0.1); uživatelské účty
   nejsou. Pro tým je potřeba reverzní proxy s přihlášením a souběžné
   zpracování dotazů.

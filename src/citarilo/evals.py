@@ -39,7 +39,6 @@ from citarilo.index import (
     EmbeddingUsage,
     UsageTrackingEmbeddings,
     load_index,
-    search,
 )
 from citarilo.prompts import PROMPT_VERSION, verification_messages
 from citarilo.records import (
@@ -368,86 +367,86 @@ def evaluate_retrieval(
     embeddings = UsageTrackingEmbeddings(
         settings, ledger, group_id=group_id, client=client, operation="eval-retrieval"
     )
-    store = load_index(corpus, settings, embeddings)
-    created_at = datetime.now(UTC)
-    git = get_git_info()
-    results: list[RetrievalResult] = []
-    gate_hits = 0
-    error = None
-    try:
-        for case in cases:
-            started = perf_counter()
-            usage_start = len(embeddings.usage)
-            ranked = search(store, case.question, max(5, settings.top_k))
-            latency_ms = (perf_counter() - started) * 1000
-            hits = [
-                RetrievalHit(key=key, score=score) for key, score, _ in ranked[: settings.top_k]
-            ]
-            positions = {hit.key: rank for rank, hit in enumerate(hits, start=1)}
-            expected = case.expected_section_keys
-            if expected and set(expected) <= {key for key, _, _ in ranked[:5]}:
-                gate_hits += 1
-            results.append(
-                RetrievalResult(
-                    id=case.id,
-                    tags=case.tags,
-                    expected_section_keys=expected,
-                    retrieved=hits,
-                    hit=all(key in positions for key in expected) if expected else None,
-                    ranks={key: positions.get(key) for key in expected},
-                    latency_ms=latency_ms,
-                    usage=embeddings.usage[usage_start:],
+    with load_index(corpus, settings, embeddings) as store:
+        created_at = datetime.now(UTC)
+        git = get_git_info()
+        results: list[RetrievalResult] = []
+        gate_hits = 0
+        error = None
+        try:
+            for case in cases:
+                started = perf_counter()
+                usage_start = len(embeddings.usage)
+                ranked = store.search(case.question, max(5, settings.top_k))
+                latency_ms = (perf_counter() - started) * 1000
+                hits = [
+                    RetrievalHit(key=key, score=score) for key, score, _ in ranked[: settings.top_k]
+                ]
+                positions = {hit.key: rank for rank, hit in enumerate(hits, start=1)}
+                expected = case.expected_section_keys
+                if expected and set(expected) <= {key for key, _, _ in ranked[:5]}:
+                    gate_hits += 1
+                results.append(
+                    RetrievalResult(
+                        id=case.id,
+                        tags=case.tags,
+                        expected_section_keys=expected,
+                        retrieved=hits,
+                        hit=all(key in positions for key in expected) if expected else None,
+                        ranks={key: positions.get(key) for key in expected},
+                        latency_ms=latency_ms,
+                        usage=embeddings.usage[usage_start:],
+                    )
                 )
+        except BaseException as exc:
+            error = "budget_exceeded" if isinstance(exc, BudgetExceeded) else "retrieval_failed"
+            raise
+        finally:
+            answerable = [result for result in results if result.hit is not None]
+            count = len(answerable)
+            hit_cases = sum(result.hit is True for result in answerable)
+            expected_count = sum(len(result.ranks) for result in answerable)
+            found = sum(rank is not None for result in answerable for rank in result.ranks.values())
+            recall_at_5 = gate_hits / count if count else None
+            spent = ledger.group_spent_usd(group_id)
+            report = RetrievalReport(
+                created_at=created_at,
+                git=git,
+                corpus_hash=corpus.corpus_hash,
+                embedding_model=settings.embedding_model,
+                embedding_dimensions=settings.embedding_dimensions,
+                price_table_version=settings.price_table_version,
+                top_k=settings.top_k,
+                split=split,
+                cases=results,
+                metrics=RetrievalMetrics(
+                    answerable_cases=count,
+                    unanswerable_cases=len(results) - count,
+                    hit_cases=hit_cases,
+                    expected_sections=expected_count,
+                    retrieved_expected_sections=found,
+                    recall_at_k=hit_cases / count if count else None,
+                    section_recall_at_k=found / expected_count if expected_count else None,
+                    recall_at_5=recall_at_5,
+                ),
+                usage={
+                    "group_id": group_id,
+                    "prompt_tokens": sum(usage.prompt_tokens for usage in embeddings.usage),
+                    "total_tokens": sum(usage.total_tokens for usage in embeddings.usage),
+                    "cost_usd": spent,
+                    "cap_usd": cap,
+                    "remaining_usd": max(Decimal(0), cap - spent),
+                    "global_remaining_usd": ledger.remaining_usd(),
+                },
+                gate="ERROR"
+                if error
+                else "PASS"
+                if recall_at_5 is not None and recall_at_5 >= 0.9
+                else "FAIL",
+                error=error,
             )
-    except BaseException as exc:
-        error = "budget_exceeded" if isinstance(exc, BudgetExceeded) else "retrieval_failed"
-        raise
-    finally:
-        answerable = [result for result in results if result.hit is not None]
-        count = len(answerable)
-        hit_cases = sum(result.hit is True for result in answerable)
-        expected_count = sum(len(result.ranks) for result in answerable)
-        found = sum(rank is not None for result in answerable for rank in result.ranks.values())
-        recall_at_5 = gate_hits / count if count else None
-        spent = ledger.group_spent_usd(group_id)
-        report = RetrievalReport(
-            created_at=created_at,
-            git=git,
-            corpus_hash=corpus.corpus_hash,
-            embedding_model=settings.embedding_model,
-            embedding_dimensions=settings.embedding_dimensions,
-            price_table_version=settings.price_table_version,
-            top_k=settings.top_k,
-            split=split,
-            cases=results,
-            metrics=RetrievalMetrics(
-                answerable_cases=count,
-                unanswerable_cases=len(results) - count,
-                hit_cases=hit_cases,
-                expected_sections=expected_count,
-                retrieved_expected_sections=found,
-                recall_at_k=hit_cases / count if count else None,
-                section_recall_at_k=found / expected_count if expected_count else None,
-                recall_at_5=recall_at_5,
-            ),
-            usage={
-                "group_id": group_id,
-                "prompt_tokens": sum(usage.prompt_tokens for usage in embeddings.usage),
-                "total_tokens": sum(usage.total_tokens for usage in embeddings.usage),
-                "cost_usd": spent,
-                "cap_usd": cap,
-                "remaining_usd": max(Decimal(0), cap - spent),
-                "global_remaining_usd": ledger.remaining_usd(),
-            },
-            gate="ERROR"
-            if error
-            else "PASS"
-            if recall_at_5 is not None and recall_at_5 >= 0.9
-            else "FAIL",
-            error=error,
-        )
-        path = _write_retrieval_report(report, settings.runtime_dir / "evals", run_id[:8])
-    return report, path
+            path = _write_retrieval_report(report, settings.runtime_dir / "evals", run_id[:8])
+        return report, path
 
 
 # Answer/probe reports deliberately retain the evidence, including rejected candidates,
@@ -660,9 +659,7 @@ def evaluate_answers(
         embeddings = copy(context.embeddings)
         embeddings.group_id = group_id
         embeddings.usage = []
-        store = copy(context.store)
-        store.embedding = embeddings
-        context = replace(context, embeddings=embeddings, store=store, group_id=group_id)
+        context = replace(context, embeddings=embeddings, group_id=group_id)
     with closing(context) if owns_context else nullcontext(context):
         created_at, git = datetime.now(UTC), get_git_info()
         results = [_answer_result(c, None) for c in cases]

@@ -406,13 +406,10 @@ def test_live_factory_built_once_after_group_open(rig, monkeypatch, tracked_http
         embeddings = copy(rig.context.embeddings)
         embeddings.group_id = group_id
         embeddings.usage = []
-        store = copy(rig.context.store)
-        store.embedding = embeddings
         return replace(
             rig.context,
             group_id=group_id,
             embeddings=embeddings,
-            store=store,
             http_client=tracked_http_client,
         )
 
@@ -487,9 +484,7 @@ def test_evaluation_report_failure_closes_only_created_contexts(
         def create(settings, *, group_id):
             embeddings = copy(context.embeddings)
             embeddings.group_id = group_id
-            store = copy(context.store)
-            store.embedding = embeddings
-            return replace(context, embeddings=embeddings, store=store, group_id=group_id)
+            return replace(context, embeddings=embeddings, group_id=group_id)
 
         monkeypatch.setattr(ev.pipeline, "create_live_context", create)
         evaluate, inputs = evaluate_answers, [case()]

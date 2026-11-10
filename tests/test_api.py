@@ -16,7 +16,6 @@ from fastapi.testclient import TestClient
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
-from langchain_core.vectorstores import InMemoryVectorStore
 from pydantic import SecretStr
 
 from citarilo import __version__, api, pipeline
@@ -25,6 +24,7 @@ from citarilo.cli import main
 from citarilo.config import Settings
 from citarilo.corpus import load_corpus, section_documents
 from citarilo.index import (
+    IndexLockedError,
     IndexMismatchError,
     IndexMissingError,
     MissingAPIKeyError,
@@ -50,7 +50,7 @@ def test_lifespan_closes_owned_context_on_shutdown(rig, tracked_http_client):
 
 
 @pytest.fixture
-def rig(tmp_path: Path):
+def rig(tmp_path: Path, section_index_factory):
     data = tmp_path / "data"
     data.mkdir()
     (data / "returns.md").write_text(
@@ -87,9 +87,7 @@ def rig(tmp_path: Path):
 
     client = SimpleNamespace(embeddings=SimpleNamespace(create=embed))
     embeddings = UsageTrackingEmbeddings(settings, ledger, client=client)
-    store = InMemoryVectorStore(fake)
-    store.add_documents(section_documents(corpus))
-    store.embedding = embeddings
+    store = section_index_factory(section_documents(corpus), embeddings)
     results = {
         "generate": {
             "status": "answered",
@@ -436,6 +434,7 @@ def test_provider_error_has_safe_502_and_persisted_record(client, rig):
     [
         (PipelineError("private-code", SECRET), 502, "provider_error"),
         (IndexMissingError(SECRET), 503, "index_unavailable"),
+        (IndexLockedError(), 503, "index_unavailable"),
         (IndexMismatchError(SECRET), 503, "index_unavailable"),
         (MissingAPIKeyError(SECRET), 503, "configuration_error"),
         (RuntimeError(SECRET), 500, "internal_error"),
@@ -575,3 +574,31 @@ def test_without_a_build_only_the_api_is_served(rig, tmp_path):
         response = client.get("/")
         assert response.status_code == 404
         assert response.json()["error"]["code"] == "not_found"
+
+
+def test_held_local_index_is_unavailable_without_provider_calls(rig):
+    from citarilo.index import load_index
+
+    build_index(rig.context.corpus, rig.settings, rig.context.ledger, client=rig.client)
+    rig.calls.clear()
+    with (
+        load_index(rig.context.corpus, rig.settings, rig.context.embeddings),
+        TestClient(api.create_app(settings=rig.settings)) as client,
+    ):
+        health = client.get("/api/health").json()
+        assert health["status"] == "not_ready" and not health["index_ready"]
+        assert_error(client.post("/api/ask", json={"question": QUESTION}), 503, "index_unavailable")
+    assert rig.calls == []
+
+
+def test_independent_readiness_probe_releases_index_lock(rig):
+    from citarilo.index import load_index
+
+    build_index(rig.context.corpus, rig.settings, rig.context.ledger, client=rig.client)
+    rig.calls.clear()
+    rig.settings.openai_api_key = None
+    with TestClient(api.create_app(settings=rig.settings)) as client:
+        assert client.get("/api/health").json()["index_ready"]
+        with load_index(rig.context.corpus, rig.settings, rig.context.embeddings):
+            pass  # A not-ready API must leave the directory available to ingest.
+    assert rig.calls == []
