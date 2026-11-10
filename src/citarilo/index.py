@@ -29,7 +29,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from qdrant_client import QdrantClient, models
 
 from citarilo.budget import BudgetLedger, actual_cost, max_cost
-from citarilo.config import Settings
+from citarilo.config import Settings, make_private_dir
 from citarilo.corpus import CHUNKING_VERSION, Corpus, section_documents
 
 _MAX_INPUT_TOKENS = 8192
@@ -373,7 +373,7 @@ def build_index(
 
 def _acquire_index_lock(settings: Settings) -> portalocker.Lock:
     """Serialize Citarilo owners across the entire Qdrant close/reopen interval."""
-    settings.runtime_dir.mkdir(parents=True, exist_ok=True)
+    make_private_dir(settings.runtime_dir)
     lock = portalocker.Lock(
         str(settings.index_lock_path),
         mode="a",

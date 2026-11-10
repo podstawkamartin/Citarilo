@@ -224,8 +224,8 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
 
 - Lokální Qdrant deserializuje body pomocí `pickle` před kontrolou součtu;
   `.runtime/` je důvěryhodný lokální stav zapisovaný pouze Citarilem a úložiště
-  Qdrantu se nesmí kopírovat z nedůvěryhodných zdrojů.
-
+  Qdrantu se nesmí kopírovat z nedůvěryhodných zdrojů. Adresář `.runtime/`
+  vzniká (nebo se zpřísní) s právy 0700.
 - Dokumenty jsou nedůvěryhodná data v oddělených blocích. Model nemá
   nástroje ani tajemství.
 - Vstup: otázka 3–500 znaků, tělo požadavku nejvýše 4 KiB, žádná
@@ -233,7 +233,9 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
 - API klíč nastavuje správce na serveru (proměnná prostředí nebo `.env`);
   nikdy se neobjeví v záznamech, logech, odpovědích ani frontendu. Externí
   tracing je vypnutý.
-- API ve výchozím nastavení naslouchá pouze na 127.0.0.1.
+- API naslouchá pouze na 127.0.0.1 a odmítne požadavek s jinou hlavičkou
+  `Host` než `127.0.0.1` nebo `localhost` (ochrana proti DNS rebindingu).
+  Stránky `/docs` a `/openapi.json` jsou vypnuté.
 
 ## Evaluace a testy
 

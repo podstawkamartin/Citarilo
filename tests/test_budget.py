@@ -680,3 +680,12 @@ def test_in_flight_call_left_unsettled_is_abandoned(ledger: BudgetLedger) -> Non
         reservation.mark_sent()
     assert reservation.status == "abandoned"
     assert ledger.spent_usd() == Decimal("1")
+
+
+def test_runtime_directory_is_private_to_its_owner(tmp_path):
+    runtime = tmp_path / "runtime"
+    BudgetLedger(runtime / "spend.sqlite", Decimal("3"), VERSION, price_table=PRICES)
+    assert runtime.stat().st_mode & 0o777 == 0o700
+    runtime.chmod(0o775)
+    BudgetLedger(runtime / "spend.sqlite", Decimal("3"), VERSION, price_table=PRICES)
+    assert runtime.stat().st_mode & 0o777 == 0o700

@@ -195,8 +195,9 @@ processed at a time.
 
 ## Security and budget
 
-- `.runtime/` is trusted local state; Qdrant local storage must not be copied
-  from untrusted sources.
+- `.runtime/` is trusted local state, created so that only its owner can open
+  it; Qdrant local storage must not be copied from untrusted sources. Keep `.env`
+  private as well (`chmod 600 .env`).
 - Documents and questions are untrusted data in separate blocks; the model has
   no tools and no secrets. An instruction planted in a document
   (`orders.order-notes.3`) is part of the tests.
@@ -206,7 +207,9 @@ processed at a time.
   stops answering. Requests enforce the standard price tier.
 - The administrator sets the API key in an environment variable or `.env`; it
   never appears in records, responses or logs. The API listens only on
-  127.0.0.1, with a strict Content Security Policy for the web interface.
+  127.0.0.1 and answers only requests addressed to `127.0.0.1` or `localhost`,
+  so a web page cannot reach it by rebinding its own domain. The web interface
+  has a strict Content Security Policy; API documentation pages are not served.
 
 ## Development and tests
 

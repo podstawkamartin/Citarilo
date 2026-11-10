@@ -41,8 +41,12 @@ _WEB_CSP = (
     "img-src 'self' data:; connect-src 'self'; form-action 'self'; "
     "frame-ancestors 'none'; base-uri 'none'"
 )
+# The server only listens on loopback. Rejecting other Host names stops a web page
+# that rebinds its own domain to 127.0.0.1 from reading documents or spending budget.
+_ALLOWED_HOSTS = frozenset({"127.0.0.1", "localhost"})
 _DOCUMENT_ID = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*\Z")
 _ERRORS = {
+    "invalid_host": (400, "The Host header is not allowed."),
     "invalid_request": (422, "The request is invalid."),
     "payload_too_large": (413, "The request body exceeds 4 KiB."),
     "busy": (429, "Another question is being processed. Try again later."),
@@ -55,13 +59,19 @@ _ERRORS = {
 }
 
 
+def _host_allowed(scope: Scope) -> bool:
+    host = next((value for key, value in scope["headers"] if key == b"host"), b"")
+    name = host.decode("latin-1").rsplit(":", 1)[0] if host.count(b":") <= 1 else ""
+    return name.lower() in _ALLOWED_HOSTS
+
+
 def _error(code: str) -> JSONResponse:
     status, message = _ERRORS[code]
     return JSONResponse({"error": {"code": code, "message": message}}, status_code=status)
 
 
 class _APIGuards:
-    """Bound bytes before FastAPI parses JSON and sanitize unexpected failures.
+    """Check the Host, bound bytes before FastAPI parses JSON and sanitize failures.
 
     Catch failures here so Starlette's outer server-error middleware does not
     re-raise them to the server logger with potentially sensitive exception text.
@@ -76,6 +86,7 @@ class _APIGuards:
             return
         response_started = False
         is_ask = scope["path"] == "/api/ask"
+        host_allowed = _host_allowed(scope)
 
         async def safe_send(message: Message) -> None:
             nonlocal response_started
@@ -86,7 +97,7 @@ class _APIGuards:
                 headers["Referrer-Policy"] = "no-referrer"
                 headers["Content-Security-Policy"] = (
                     "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
-                    if scope["path"].startswith("/api/")
+                    if scope["path"].startswith("/api/") or not host_allowed
                     else _WEB_CSP
                 )
                 if is_ask:
@@ -103,6 +114,9 @@ class _APIGuards:
             await send(message)
 
         try:
+            if not host_allowed:
+                await _error("invalid_host")(scope, receive, safe_send)
+                return
             if is_ask:
                 body = bytearray()
                 async for chunk in Request(scope, receive).stream():
@@ -254,7 +268,14 @@ def create_app(
             if app.state.api.context is not None:
                 await run_in_threadpool(app.state.api.context.close)
 
-    app = FastAPI(title="Citarilo", version=__version__, lifespan=lifespan)
+    app = FastAPI(
+        title="Citarilo",
+        version=__version__,
+        lifespan=lifespan,
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+    )
     app.add_middleware(_APIGuards)
     ask_lock = Lock()
 

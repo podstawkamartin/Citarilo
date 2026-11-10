@@ -12,7 +12,7 @@ from fractions import Fraction
 from pathlib import Path
 from uuid import uuid4
 
-from citarilo.config import Settings, TokenPrice
+from citarilo.config import Settings, TokenPrice, make_private_dir
 
 SCHEMA_VERSION = 1
 HARD_CAP_USD = Decimal("3")
@@ -147,7 +147,7 @@ class BudgetLedger:
         self.price_table_version = price_table_version
         prices = Settings().price_table if price_table is None else price_table
         self._prices = {model: price.model_copy(deep=True) for model, price in prices.items()}
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        make_private_dir(self.db_path.parent)
         self._enable_wal()
         with self._transaction() as connection:
             version = connection.execute("PRAGMA user_version").fetchone()[0]

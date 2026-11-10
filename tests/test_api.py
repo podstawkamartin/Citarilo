@@ -12,7 +12,7 @@ from types import SimpleNamespace
 import pytest
 import uvicorn
 from fastapi import FastAPI
-from fastapi.testclient import TestClient
+from fastapi.testclient import TestClient as _TestClient
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
@@ -33,6 +33,12 @@ from citarilo.index import (
 )
 from citarilo.pipeline import AnswerContext, PipelineError
 from citarilo.records import AskResponse, read_record
+
+
+def TestClient(app, **kwargs):  # noqa: N802 - drop-in for fastapi.testclient.TestClient
+    """The API only answers requests addressed to loopback, like the browser sends."""
+    return _TestClient(app, base_url="http://127.0.0.1:5177", **kwargs)
+
 
 SECRET = "fake-sensitive-api-key"
 QUESTION = "What is the return period?"
@@ -324,7 +330,12 @@ def test_chunked_body_without_content_length_is_bounded_before_parsing(app, monk
 
         async with app.router.lifespan_context(app):
             await app(
-                {"type": "http", "method": "POST", "path": "/api/ask", "headers": []},
+                {
+                    "type": "http",
+                    "method": "POST",
+                    "path": "/api/ask",
+                    "headers": [(b"host", b"127.0.0.1:5177")],
+                },
                 receive,
                 send,
             )
@@ -515,14 +526,38 @@ def test_unknown_route_and_wrong_method_use_error_envelope(client):
     assert_error(client.get("/api/ask"), 422, "invalid_request")
 
 
-def test_cors_is_disabled_and_openapi_is_available(client):
+def test_cors_is_disabled_and_api_docs_are_not_served(client):
     response = client.options(
         "/api/ask",
         headers={"Origin": "https://example.com", "Access-Control-Request-Method": "POST"},
     )
     assert_error(response, 422, "invalid_request")
-    assert client.get("/openapi.json").status_code == 200
-    assert client.get("/docs").status_code == 200
+    for path in ("/openapi.json", "/docs", "/redoc"):
+        assert client.get(path).status_code == 404
+
+
+@pytest.mark.parametrize(
+    "host", ["evil.example", "evil.example:5177", "127.0.0.1.evil.example", "[::1]:5177", ""]
+)
+@pytest.mark.parametrize("path", ["/api/health", "/api/documents/returns", "/"])
+def test_requests_for_other_hosts_are_rejected(client, host, path):
+    assert_error(client.get(path, headers={"Host": host}), 400, "invalid_host", ask=False)
+
+
+def test_rebound_host_cannot_ask(client):
+    response = client.post(
+        "/api/ask",
+        json={"question": "Do kdy můžu vrátit zboží?"},
+        headers={"Host": "evil.example:5177"},
+    )
+    assert_error(response, 400, "invalid_host")
+
+
+@pytest.mark.parametrize(
+    "host", ["127.0.0.1", "127.0.0.1:5177", "localhost:5177", "LOCALHOST:5178"]
+)
+def test_loopback_hosts_are_accepted(client, host):
+    assert client.get("/api/health", headers={"Host": host}).status_code == 200
 
 
 def test_serve_wires_local_settings_without_starting_app(rig, monkeypatch):

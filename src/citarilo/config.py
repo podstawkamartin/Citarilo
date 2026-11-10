@@ -1,5 +1,6 @@
 """Typed configuration for local Citarilo runs."""
 
+import os
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal
@@ -8,6 +9,17 @@ from pydantic import BaseModel, Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 type ReasoningEffort = Literal["none", "low", "medium", "high"]
+
+
+def make_private_dir(path: Path) -> Path:
+    """Create (or tighten) a directory only its owner can enter.
+
+    Runtime state includes the spend ledger, run records with questions and answers,
+    and the Qdrant storage, which must not be writable by other local users.
+    """
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    os.chmod(path, 0o700)
+    return path
 
 
 class TokenPrice(BaseModel):

@@ -188,8 +188,9 @@ naráz.
 
 ## Bezpečnost a rozpočet
 
-- `.runtime/` je důvěryhodný lokální stav; lokální úložiště Qdrantu se nesmí
-  kopírovat z nedůvěryhodných zdrojů.
+- `.runtime/` je důvěryhodný lokální stav, který se vytváří tak, aby do něj
+  měl přístup jen jeho vlastník; lokální úložiště Qdrantu se nesmí kopírovat
+  z nedůvěryhodných zdrojů. Soukromý má být i `.env` (`chmod 600 .env`).
 - Dokumenty i otázky jsou nedůvěryhodná data v oddělených blocích; model nemá
   nástroje ani tajemství. Vložený pokyn v dokumentu (`orders.order-notes.3`)
   je součástí testů.
@@ -199,7 +200,10 @@ naráz.
   server přestane odpovídat. Požadavky vynucují standardní cenovou úroveň.
 - API klíč nastavuje správce v proměnné prostředí nebo v `.env`; nikdy se
   neobjeví v záznamech, odpovědích ani logu. API naslouchá pouze na
-  127.0.0.1, webové rozhraní má striktní Content Security Policy.
+  127.0.0.1 a odpovídá jen na požadavky adresované na `127.0.0.1` nebo
+  `localhost`, takže se k němu cizí stránka nedostane přesměrováním své domény.
+  Webové rozhraní má striktní Content Security Policy; stránky s dokumentací API
+  se neservírují.
 
 ## Vývoj a testy
 
