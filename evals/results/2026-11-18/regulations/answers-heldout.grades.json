@@ -1,0 +1,448 @@
+{
+  "schema_version": 1,
+  "report_sha256": "284878226e7f05bf5998686e5f55a2e65612b50384b2e52fccdef67a2564cbb1",
+  "grader": "muse-wonder-1.0 (independent LLM grader)",
+  "graded_at": "2026-11-18T14:51:23.586353+00:00",
+  "cases": [
+    {
+      "case_id": "manual-hoist-3000-kg",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "No. A manually operated hoist is classified as reserved lifting equipment only if its capacity exceeds 5,000 kg; a 3,000 kg hoist does not meet that threshold.",
+          "citations": [
+            "nv-193-2022.p-3.2"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.p-3.2": "odst. 1 písm. a) – Vyhrazenými zdvihacími zařízeními jsou: jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "No. A manually operated hoist is classified as reserved lifting equipment only if its capacity exceeds 5,000 kg; a 3,000 kg hoist does not meet that threshold.",
+          "citations": [
+            "nv-193-2022.p-3.2"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.p-3.2": "odst. 1 písm. a) – Vyhrazenými zdvihacími zařízeními jsou: jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Manually operated cranes and hoists are reserved lifting equipment when their capacity exceeds 5,000 kg.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "A manually operated hoist with a 3,000 kg capacity is reserved lifting equipment.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "crane-interim-check-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Kontrola jeřábu se v mezidobí revizí a zkoušek provádí v intervalech 3 měsíců.",
+          "citations": [
+            "nv-193-2022.a2-b2.11"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.11": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Kontrola jeřábu se v mezidobí revizí a zkoušek provádí v intervalech 3 měsíců.",
+          "citations": [
+            "nv-193-2022.a2-b2.11"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.11": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Between revisions and tests a check is carried out every 3 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The check is carried out every 6 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "vessel-out-of-service-internal-revision",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Ano. Vnitřní revize tlakové nádoby se provede vždy, byla-li nádoba mimo provoz po dobu delší než 3 roky; čtyři roky mimo provoz tuto podmínku splňují.",
+          "citations": [
+            "nv-192-2022.p-14.3"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-14.3": "odst. 2 písm. a) – Vnitřní revize se provede vždy: byl-li kotel mimo provoz po dobu delší než 1 rok a tlaková nádoba po dobu delší než 3 roky."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Ano. Vnitřní revize tlakové nádoby se provede vždy, byla-li nádoba mimo provoz po dobu delší než 3 roky; čtyři roky mimo provoz tuto podmínku splňují.",
+          "citations": [
+            "nv-192-2022.p-14.3"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-14.3": "odst. 2 písm. a) – Vnitřní revize se provede vždy: byl-li kotel mimo provoz po dobu delší než 1 rok a tlaková nádoba po dobu delší než 3 roky."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "An internal revision is always carried out if a boiler was out of service for more than 1 year or a pressure vessel for more than 3 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "No internal revision is needed.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "gas-equipment-revision",
+      "claims": [],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "U kotle v kotelně je lhůta vnitřní revize jedenkrát za 1 rok; u kotlů I. a II. třídy může být termín prodloužen na 2 roky.",
+          "citations": [
+            "nv-192-2022.a4.3",
+            "nv-192-2022.a4.4"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.3": "vyhrazené tlakové zařízení: kotle; třída: I.; provozní revize: jedenkrát za 3 měsíce; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let.",
+            "nv-192-2022.a4.4": "vyhrazené tlakové zařízení: kotle; třída: II.; provozní revize: jedenkrát za 3 měsíce; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "candidate_supported": false,
+          "note": "Cited rows cover class I/II boilers only and mention neither gas equipment nor a boiler room; the claim generalises beyond its citations."
+        }
+      ],
+      "required_facts": [],
+      "forbidden_claims": [
+        {
+          "claim": "Gas equipment is revised every 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "boiler-class-3-operating-revision",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Kotel III. třídy má mít provozní revizi jedenkrát za 6 měsíců.",
+          "citations": [
+            "nv-192-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.5": "vyhrazené tlakové zařízení: kotle; třída: III.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Kotel III. třídy má mít provozní revizi jedenkrát za 6 měsíců.",
+          "citations": [
+            "nv-192-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.5": "vyhrazené tlakové zařízení: kotle; třída: III.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "For class III boilers the operating revision is once every 6 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "Class III boilers need an operating revision every 3 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "mobile-equipment-interval",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Mobile and transportable equipment must be revised every 1 year.",
+          "citations": [
+            "nv-190-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-190-2022.a4.5": "Podle objektu a prostoru: Pojízdné a převozné prostředky; Revizní lhůty: 1 rok."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Mobile and transportable equipment must be revised every 1 year.",
+          "citations": [
+            "nv-190-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-190-2022.a4.5": "Podle objektu a prostoru: Pojízdné a převozné prostředky; Revizní lhůty: 1 rok."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Mobile and transportable equipment has a periodic revision interval of 1 year.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The interval is 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "large-boiler-revisions",
+      "claims": [],
+      "candidate_claims": [],
+      "required_facts": [
+        {
+          "fact": "Steam boilers with a nominal steam output above 115 t/h are class I.",
+          "present": false
+        },
+        {
+          "fact": "For class I boilers the operating revision is once every 3 months and the internal revision once a year, which may be extended to 2 years for class I and II boilers.",
+          "present": false
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The operating revision is once every 6 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "vessel-operator-reexam-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "U stabilních tlakových nádob I. a II. třídy se provozní revize provádí jedenkrát za 1 rok a vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a4.1",
+            "nv-192-2022.a4.2"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.1": "vyhrazené tlakové zařízení: nádoby stabilní; třída: I.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.",
+            "nv-192-2022.a4.2": "vyhrazené tlakové zařízení: nádoby stabilní; třída: II.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "supported": true,
+          "note": "Own citations directly state the class I/II vessel revision intervals claimed."
+        },
+        {
+          "claim_index": 1,
+          "text": "Při provozní revizi tlakových nádob se ověřuje také odborná způsobilost obsluhy a plnění jejích povinností.",
+          "citations": [
+            "nv-192-2022.a2-b2.27"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a2-b2.27": "2.2.2. písm. f) – Náplň revizí a zkoušek vyhrazených tlakových zařízení: Revize: Provozní revize tlakových nádob se provádí za provozu tlakové nádoby, ověřuje se při ní zejména: odborná způsobilost obsluhy nádob a plnění její povinnosti."
+          },
+          "supported": true,
+          "note": "Own citation directly states operating revision checks operator competence and duties."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "U stabilních tlakových nádob I. a II. třídy se provozní revize provádí jedenkrát za 1 rok a vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a4.1",
+            "nv-192-2022.a4.2"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.1": "vyhrazené tlakové zařízení: nádoby stabilní; třída: I.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.",
+            "nv-192-2022.a4.2": "vyhrazené tlakové zařízení: nádoby stabilní; třída: II.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        },
+        {
+          "claim_index": 1,
+          "text": "Při provozní revizi tlakových nádob se ověřuje také odborná způsobilost obsluhy a plnění jejích povinností.",
+          "citations": [
+            "nv-192-2022.a2-b2.27"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a2-b2.27": "2.2.2. písm. f) – Náplň revizí a zkoušek vyhrazených tlakových zařízení: Revize: Provozní revize tlakových nádob se provádí za provozu tlakové nádoby, ověřuje se při ní zejména: odborná způsobilost obsluhy nádob a plnění její povinnosti."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The operator verifies the knowledge of employees operating pressure vessels by repeated examination at least once every 3 years.",
+          "present": false
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The examination is required every year.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "crane-group-4-intervals",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "U jeřábu skupiny 4 je lhůta revize 1 rok a lhůta zkoušky 2 roky.",
+          "citations": [
+            "nv-193-2022.a2-b2.6"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.6": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "U jeřábu skupiny 4 je lhůta revize 1 rok a lhůta zkoušky 2 roky.",
+          "citations": [
+            "nv-193-2022.a2-b2.6"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.6": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "For crane group 4 the revision interval is 1 year and the test interval is 2 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "For crane group 4 the revision interval is 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "start-warning-signal",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Pokud se obsluha nemůže přesvědčit, že v nebezpečném prostoru nikdo není, musí bezpečnostní systém před spuštěním, případně zastavením zařízení vydávat zvukový nebo i viditelný výstražný signál, aby osoby v prostoru měly dostatek času jej opustit.",
+          "citations": [
+            "nv-378-2001.p-3-2.8"
+          ],
+          "cited_sentences": {
+            "nv-378-2001.p-3-2.8": "(3) Obsluha musí mít možnost se přesvědčit, že v nebezpečných prostorech se nenachází žádný zaměstnanec; pokud nelze tento požadavek splnit, bezpečnostní systém před spuštěním, popřípadě zastavením zařízení musí vydávat zvukový nebo i viditelný výstražný signál, aby zaměstnanci zdržující se v nebezpečném prostoru měli vždy dostatek času nebezpečný prostor opustit."
+          },
+          "supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Pokud se obsluha nemůže přesvědčit, že v nebezpečném prostoru nikdo není, musí bezpečnostní systém před spuštěním, případně zastavením zařízení vydávat zvukový nebo i viditelný výstražný signál, aby osoby v prostoru měly dostatek času jej opustit.",
+          "citations": [
+            "nv-378-2001.p-3-2.8"
+          ],
+          "cited_sentences": {
+            "nv-378-2001.p-3-2.8": "(3) Obsluha musí mít možnost se přesvědčit, že v nebezpečných prostorech se nenachází žádný zaměstnanec; pokud nelze tento požadavek splnit, bezpečnostní systém před spuštěním, popřípadě zastavením zařízení musí vydávat zvukový nebo i viditelný výstražný signál, aby zaměstnanci zdržující se v nebezpečném prostoru měli vždy dostatek času nebezpečný prostor opustit."
+          },
+          "candidate_supported": true,
+          "note": "Own cited sentence(s) directly support the entire claim in the context of the question."
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "If the operator cannot make sure that nobody is in the danger zone, the safety system must give an acoustic or visual warning signal before the equipment starts.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The machine may be started without any signal.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    }
+  ]
+}

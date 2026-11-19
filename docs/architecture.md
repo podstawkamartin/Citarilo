@@ -13,7 +13,7 @@ flowchart TD
     B -->|rozpočet vyčerpán| E503[["503"]]
     B --> R
     subgraph LG ["LangGraph StateGraph"]
-        R["retrieve<br/>embedding → 5 sekcí"] --> G["generate<br/>gpt-6-luna: tvrzení + ID vět"]
+        R["retrieve<br/>embedding → 8 sekcí"] --> G["generate<br/>gpt-6-luna: tvrzení + ID vět"]
         G -->|nedostatek podkladů| X["refuse<br/>pevná odpověď"]
         G --> C["check<br/>deterministické kontroly"]
         C -->|kontrola selhala| X
@@ -39,9 +39,9 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    D["data/trailsupply/*.md"] --> ING["citarilo ingest"] --> I[("Qdrant<br/>.runtime/qdrant")]
+    D["data/trailsupply/*.md"] --> ING["citarilo ingest"] --> I[("Qdrant<br/>.runtime/index/<slug>-<path-hash>/qdrant")]
     API["citarilo serve<br/>FastAPI"] --> P["LangGraph pipeline"]
-    CASES["evals/*.jsonl"] --> EV["citarilo eval --live"] --> P
+    CASES["evals/<set>/*.jsonl"] --> EV["citarilo eval --live"] --> P
     I --> P
     P --> RUNS[("runs/*.json")]
     ING -.-> L[("spend.sqlite")]
@@ -55,9 +55,10 @@ Index, záznamy běhů i útrata leží v Gitem ignorované `.runtime/`.
 ```text
 pyproject.toml  uv.lock  .env.example  README.md
 src/citarilo/              balíček (src layout), příkaz `citarilo` přes [project.scripts]
-data/trailsupply/*.md      české fiktivní dokumenty
-evals/cases.jsonl          vývojové a odložené případy
-evals/verifier_cases.jsonl sondy pro měření ověřovače
+data/trailsupply/*.md      české fiktivní dokumenty zákaznické podpory
+data/regulations/*.md      nařízení vlády z e-Sbírky (scripts/fetch_regulations.py) a fiktivní řád dopravníku
+evals/<sada>/cases.jsonl          vývojové a odložené případy dané sady
+evals/<sada>/verifier_cases.jsonl sondy pro měření ověřovače
 tests/
 .github/workflows/ci.yml   ruff + pytest bez sítě a klíčů
 ```
@@ -122,8 +123,14 @@ tests/
 
 ## Korpus a vyhledávání
 
-- Dodávané testovací dokumenty: šest českých Markdown dokumentů fiktivního
-  e-shopu TrailSupply, každý zřetelně označený jako fiktivní.
+- Dodávané sady: šest českých Markdown dokumentů fiktivního e-shopu
+  TrailSupply, každý zřetelně označený jako fiktivní, a čtyři nařízení vlády
+  (NV 190, 192, 193/2022 a 378/2001 Sb.) převedená z veřejného API e-Sbírky
+  skriptem `scripts/fetch_regulations.py` (připnuté znění a počet fragmentů,
+  deterministický výstup). Paragraf je sekce, odstavec, písmeno a bod jsou
+  věty; položka výčtu nese svůj úvod za pomlčkou a řádek tabulky je jedna věta
+  s popisky sloupců. Server odpovídá z jedné sady (`DATA_DIR`), každá sada má
+  vlastní index i evaluační případy (`--eval-set`).
 - Sekce H2 nese explicitní anglické ID (`## Lhůta pro vrácení {#return-window}`)
   a je jednotkou vyhledávání. Jedna věta na řádek je jednotka citace:
   `returns.return-window.2`.
@@ -131,7 +138,7 @@ tests/
 - Pouze vektorové vyhledávání, 5 nejbližších sekcí. Index se staví jen
   explicitním `citarilo ingest`; manifest obsahuje model, dimenze, verzi
   dělení textu, hash korpusu, počet sekcí a kontrolní součet bodů. Nesoulad → 503.
-- Qdrant běží ve vestavěném lokálním režimu (`.runtime/qdrant`), bez samostatného
+- Qdrant běží ve vestavěném lokálním režimu (`.runtime/index/<slug>-<path-hash>/qdrant`), bez samostatného
   serveru. Kolekce `sections` používá přesné kosinové vyhledávání. Manifest v2
   obsahuje kontrolní součet textu, metadat i vektorů přečtených zpět z úložiště.
   Odhalí poškození a nekonzistentní sestavení, nechrání před útočníkem

@@ -11,18 +11,20 @@ uv run citarilo eval --probes --max-usd 0.05 --dry-run
 uv run citarilo eval --probes --max-usd 0.05
 ```
 
+`--case ID` (repeatable) runs only those cases after the split filter; a probe id or pair id selects probes (a pair selects both), an unknown id exits 2, and a filtered report lists `case_ids` and adds `-cases` before `.json`.
+
 Answers default to the 21 `dev` cases. `--split heldout` explicitly selects the
 five reserved cases and prints a warning; use it once at the end, never for tuning.
 Dry runs do not read `.env`, create clients, load the index, open the ledger or
 send requests. Their worst-case cost uses the pipeline's reservation calculation,
 including UTF-8/schema/framing bounds and output limits. The answer bound uses
-all corpus sections and four maximally escaped claims with the largest cited
+all corpus sections and twelve maximally escaped claims with the largest cited
 sentences, so it deliberately exceeds expected spend. The cap need not cover this
 whole-run bound: real sequential settlements release unused reservations. A case
 that cannot reserve stops the run and marks it incomplete; it is never retried.
 Provider/contract errors are recorded per case and later cases still run.
 
-Reports are published atomically under `Settings.runtime_dir/evals/` as
+Reports are published atomically under `Settings.runtime_dir/evals/<set>/` as
 `answers-<UTC timestamp>-<id>.json` or `probes-<UTC timestamp>-<id>.json`.
 Schema version 1 includes Git state, corpus hash, prompt version, an allowlisted
 configuration snapshot, mode (`live` or `fake`), budget group/cap, completion state
@@ -30,6 +32,11 @@ and committed ledger cost. Each answer case contains all labels, actual outcome,
 run ID, final claims/sources, every candidate, checks, verdicts, full retrieved
 sections, calls, latency, cost and safe errors. Unrun cases remain present with
 null status/run ID. The underlying answer run audits remain under `runs/`.
+`citarilo runs` lists those audits newest first and omits eval runs unless
+`--include-evals`; `--failed` prints each check failure and each rejecting verdict.
+`citarilo runs --to-case RUN_ID --eval-set SET` writes a stub a human must complete
+with expected facts; a stub that is not a valid case goes to `manual_cases.jsonl`,
+which eval does not load.
 Probe cases contain the probe label, run ID, cited claim, full sections, verdict,
 calls and errors; `pairs` groups IDs and records completeness and exact correctness.
 
@@ -51,9 +58,9 @@ uv run citarilo import examples/trailsupply-raw/* --out .runtime/imported
 DATA_DIR=.runtime/imported uv run citarilo ingest --dry-run
 # The following commands spend API credits and require explicit operator authorization:
 DATA_DIR=.runtime/imported uv run citarilo ingest
-DATA_DIR=.runtime/imported uv run citarilo eval --retrieval --max-usd 0.01
-DATA_DIR=.runtime/imported uv run citarilo eval --live --max-usd 0.05
-DATA_DIR=.runtime/imported uv run citarilo eval --probes --max-usd 0.05
+DATA_DIR=.runtime/imported uv run citarilo eval --eval-set trailsupply --retrieval --max-usd 0.01
+DATA_DIR=.runtime/imported uv run citarilo eval --eval-set trailsupply --live --max-usd 0.05
+DATA_DIR=.runtime/imported uv run citarilo eval --eval-set trailsupply --probes --max-usd 0.05
 ```
 
 Import itself is offline and never reads `.env`. Section IDs are derived from Czech
@@ -76,13 +83,13 @@ ordered sentence texts for all 146 sentences. Thus section text sent for embeddi
 and evidence text sent to generation are identical. Fake-provider regressions cover
 retrieval, answer citation mapping and rebuilding the index. These tests do not
 claim a new live-model result. The imported corpus has a different hash because its
-IDs change; switching `DATA_DIR` requires explicit ingest, and the existing manifest
+IDs change; switching `DATA_DIR` requires an index for that resolved path, and the existing manifest
 checks reject an index built for the previous corpus.
 
 ## Grading workflow
 
 ```sh
-uv run citarilo eval --grading-template .runtime/evals/answers-<timestamp>-<id>.json
+uv run citarilo eval --grading-template .runtime/evals/trailsupply/answers-<timestamp>-<id>.json
 # An independent LLM grader fills <report>.grades.json; a human spot-checks it.
 uv run citarilo eval --summarize <report>.json <report>.json.grades.json
 ```
@@ -183,3 +190,7 @@ process. It does not measure Qdrant server mode, concurrent clients, network or
 model latency, retrieval relevance, answer quality, or end-to-end HTTP startup.
 The published 2026-11-07 results used the previous in-memory store with the same
 exact cosine search; this synthetic benchmark does not replace live evaluation.
+
+Indexes are stored under `.runtime/index/<slug>-<path-hash>/`, using the resolved data directory path. Run `citarilo ingest` after upgrading or selecting a data directory without an index; earlier index locations are no longer used.
+
+The evaluation set defaults to the data directory name only when that name is a bundled set. For any other directory, specify `--eval-set`; the CLI lists available sets when the selection or required files are missing. Reports are stored under the chosen evaluation set name.

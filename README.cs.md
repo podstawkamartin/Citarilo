@@ -19,9 +19,26 @@ Citarilo odmítne místo hádání.
 
 ![Napsání a odeslání otázky; ověřená odpověď s tvrzeními propojenými s citovanými větami a vybraná věta zvýrazněná ve zdrojovém dokumentu.](docs/assets/citarilo-answer.gif)
 
-Dodává se se šesti testovacími dokumenty fiktivního outdoorového obchodu
-TrailSupply (vrácení, reklamace, doprava, platby, objednávky, půjčovna)
-v češtině.
+Dodává se se dvěma oddělenými sadami dokumentů; každá patří jiné organizaci
+a má vlastní evaluační případy:
+
+- **Zákaznická podpora** (`data/trailsupply`): šest testovacích dokumentů
+  fiktivního outdoorového obchodu TrailSupply (vrácení, reklamace, doprava,
+  platby, objednávky, půjčovna) v češtině.
+- **Předpisy pro provoz a údržbu zařízení** (`data/regulations`): čtyři
+  nařízení vlády, se kterými pracuje údržba a BOZP: vyhrazená elektrická,
+  tlaková a zdvihací zařízení (NV 190, 192 a 193/2022 Sb.) a bezpečný provoz
+  strojů (NV 378/2001 Sb.). Stahuje je z veřejného API e-Sbírky skript
+  [scripts/fetch_regulations.py](scripts/fetch_regulations.py) a převádí na
+  citovatelné věty; tabulky se mění na jednu větu za řádek a každá položka
+  výčtu nese svůj úvod, takže citovaná věta je srozumitelná sama o sobě.
+  Právní předpisy jsou úřední díla volně k užití (§ 3 písm. a) zákona
+  č. 121/2000 Sb.); text není právní poradenství. Součástí sady je i provozní
+  a údržbový řád pásového dopravníku, fiktivní testovací dokument se
+  smyšlenými hodnotami, který u lhůt revizí odkazuje na předpisy.
+
+Běžící server odpovídá z jedné sady, kterou určuje `DATA_DIR`; sady se nikdy
+nemíchají v jednom indexu ani v jedné odpovědi.
 
 ## Čím se liší
 
@@ -40,7 +57,7 @@ v češtině.
 
 ```text
 otázka (EN/CS) → validace → rezervace rozpočtu
-  → retrieve  (embedding, 5 nejbližších sekcí)
+  → retrieve  (embedding, 8 nejbližších sekcí)
   → generate  (gpt-6-luna: až 4 tvrzení s ID citovaných vět)
   → check     (kód: ID z vyhledaných vět; čísla/data/URL v citovaných větách)
   → verify    (druhé volání modelu: podporují tvrzení samotné citované věty?)
@@ -56,70 +73,97 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 - Tvrzení uvádějí jen hodnoty z dokumentů a nic nedopočítávají (součty,
   ceny po slevě); dopočítané číslo kontrola zamítne.
 - Vyhledávání je vektorové nad sekcemi dokumentů (`text-embedding-3-large`)
-  v Qdrantu ve vestavěném lokálním režimu (`.runtime/qdrant`), s manifestem
+  v Qdrantu ve vestavěném lokálním režimu (`.runtime/index/<sada>-<hash>/`,
+  jeden index na sadu dokumentů), s manifestem
   svázaným s korpusem a kontrolním součtem uložených bodů. Kontrolní součet
   odhalí poškození a nekonzistentní sestavení, nechrání před útočníkem
   s možností lokálního zápisu.
 - Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
   evaluace: [docs/evaluation.md](docs/evaluation.md) (anglicky).
 
-## Výsledky (7. a 10. 11. 2026)
+## Výsledky (18. 11. 2026)
 
-Živé běhy proti OpenAI API; konfigurace, commit a hash korpusu jsou uložené
-v každém reportu. Vyhledávání a odpovědi (prompt v4) jsou v
-[evals/results/2026-11-07](evals/results/2026-11-07). Brány přijetí byly
-stanovené před laděním. Odpovědi ze 7. 11. používaly předchozí paměťové
-úložiště se stejným přesným kosinovým vyhledáváním. Po přechodu na Qdrant se
-vyhledávání 10. 11. změřilo znovu
-([evals/results/2026-11-10](evals/results/2026-11-10)): recall@5 je opět 1,00
-a všech 21 otázek najde stejných pět sekcí jako dřív (u jedné otázky se
-prohodilo 3. a 4. místo).
+Živé běhy proti OpenAI API s promptem v5 a 8 vyhledanými sekcemi; konfigurace,
+commit a hash korpusu jsou uložené v každém reportu
+([evals/results/2026-11-18](evals/results/2026-11-18)). Brány přijetí byly
+stanovené před laděním.
 
-| Měření | Vývojové (21 případů) | Odložené (5 případů) | Brána |
-|---|---|---|---|
-| Recall@5 vyhledávání | 1,00 (17/17) | – | ≥ 0,9 |
-| Správně zodpovězené zodpověditelné | 82,4 % (14/17) | 100 % (4/4) | ≥ 80 % |
-| Zodpovězené nezodpověditelné | 0 ze 4 | 0 z 1 | 0 |
-| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | 0 |
-| Latence p50 / max | 4,0 s / 6,1 s | 4,4 s / 4,7 s | – |
-| Cena za otázku | ≈ $0.0004 | ≈ $0.0004 | – |
+| Měřítko | Zákaznická podpora, vývoj (21) | Předpisy, vývoj (40) | Předpisy, odložené (10) | Řád dopravníku, vývoj + odložené (8 + 2) | Brána |
+|---|---|---|---|---|---|
+| Recall@5 vyhledávání | 1,00 (17/17) | 0,96 (43/45), všech 48 vývojových otázek | – | (zahrnuto) | ≥ 0,9 |
+| Správně zodpovězené zodpověditelné otázky | 94,1 % (16/17) | 86,8 % (33/38) | 77,8 % (7/9) | 100 % (9/9) | ≥ 80 % |
+| Zodpovězené nezodpověditelné otázky | 0 ze 4 | 0 ze 2 | 0 z 1 | 0 z 1 | 0 |
+| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | – | – | 0 |
+| Latence p50 / max | 4,8 s / 8,7 s | 4,3 s / 8,3 s | 4,3 s / 5,4 s | 3,8 s / 5,3 s | – |
+| Cena za otázku | ≈ $0.0005 | ≈ $0.002 | ≈ $0.002 | ≈ $0.001 | – |
 
 **Jak se hodnotilo.** Stav odpovědi, recall a sondy ověřovače jsou
-deterministické. Sémantickou správnost (povinná fakta, zakázaná tvrzení,
-podpora každé citace) hodnotil offline nezávislý LLM hodnotitel se silnějším
-modelem jiného typu než aplikace (`gpt-6-astra`). Jde o hodnocení modelem, ne
-o lidskou anotaci; ruční kontrola hraničních případů zatím neproběhla.
-Odložené případy se při ladění nepoužily; spouštějí se jednou pro každou
-finální verzi promptu.
+deterministické. Věcnou správnost (povinná fakta, zakázaná tvrzení, podpora
+každé citace) hodnotil offline nezávislý LLM hodnotitel z jiné rodiny modelů
+než model aplikace (`muse-wonder-1.0`). Jde o hodnocení modelem, ne o lidskou
+anotaci.
 
-**Chyby ve vývojové sadě (3):**
-- Pozdní storno půjčovny: tvrzení o poplatku 30 % necitovalo větu se
-  sedmidenní hranicí; ověřovač ho správně zamítl a odpověď byla odmítnuta.
-- Zpětný štítek vs. reklamace: ověřovač zamítl podložené tvrzení, protože
-  neopakovalo omezení na běžný balík (příliš přísné odmítnutí).
-- Vrácení o víkendu: odpověď uvedla „osobně“ bez citace věty, která to říká,
-  a ověřovač ji propustil.
+**Co selhává.** Všech pět chyb na vývojové sadě předpisů a jedna ze dvou chyb
+na odložené sadě jsou zbytečná odmítnutí: ověřovač zamítne tvrzení, které
+citace podporuje, nebo správný závěr typu „800 kg nepřesahuje hranici
+1 000 kg“. Druhá chyba na odložené sadě odpovídá na otázku o přezkušování
+obsluhy tlakových nádob lhůtami revizí. U zákaznické podpory jedno tvrzení
+citovalo jen část své opory. Žádný běh neodpověděl na nezodpověditelnou otázku
+ani nenásledoval podstrčenou instrukci.
 
-Dvě ze tří chyb jsou zbytečná odmítnutí, jedna je odpověď s necitovaným
-detailem.
+**Ladění a odložené případy.** Sada předpisů se ladila na vývojových
+případech: převodník nově přidává k položkám výčtu jejich úvod, čímž odstranil
+nejčastější dřívější chybu (položka citovaná bez věty, která jí dává smysl).
+Varianta promptu s užšími odpověďmi nepomohla a byla vrácena. Odložené případy
+předpisů běžely jednou před touto změnou převodníku a jednou po ní; tabulka
+ukazuje druhý běh. Odložené případy zákaznické podpory (100 %, 4/4) naposledy
+běžely s promptem v4 7. 11. a znovu spuštěny nebyly, takže pozdější ladění
+neovlivnilo.
 
-**Sondy ověřovače.** Na 24 sondách (12 párů „podložené / téměř správné“
-tvrzení) měl ověřovač s promptem v4 nad aktuálními dokumenty 0 falešných
-přijetí a 0 falešných odmítnutí
-([evals/results/2026-11-10](evals/results/2026-11-10)). Přesně sedělo 23 z 24
-verdiktů; jedno téměř správné tvrzení označené jako nepodložené ověřovač
-vyhodnotil jako v rozporu, což je stále odmítnutí.
+**Řád dopravníku.** Fiktivní řád pásového dopravníku přibyl do sady předpisů
+až po výše uvedených bězích. Jeho 10 otázek, z nichž jedna potřebuje řád
+i NV 190/2022, běželo samostatně přes `eval --case` a vyhledávání se znovu
+změřilo na všech 48 vývojových otázkách; jediný nový výpadek z prvních pěti je
+právě tato kombinovaná otázka, jejíž sekce nařízení je šestá a do odpovědi se
+dostane. Jednu větu řádu jsme po upozornění hodnotitele na nejednoznačnost
+přeformulovali a 10 otázek spustili znovu; tabulka ukazuje tento běh.
 
-**Vektorové úložiště.** Offline benchmark přes produkční kód
+**Ladění promptu po tabulkách (v6–v9).** Při ručním testování končily
+odmítnutím odpovědi na vícedílné otázky a otázky k poruchovým hlášením.
+Aktuální prompt (v9) žádá jeden krok, hlášení nebo fakt na tvrzení (nejvýše
+dvanáct tvrzení), postup určený pro konkrétní situaci podává jako podmínku
+(„Pokud se objeví hlášení F02, …“) a doloženou bezpečnostní podmínku uvádí jako
+samostatné tvrzení; řád dopravníku opakuje podmínku zajištění v každém kroku
+poruchového hlášení. Vágní otázku jako „Dopravník se zastavil, co mám dělat?“
+systém zatím většinou odmítne pro nedostatek podkladů: řád dává postupy jen
+podle hlášení, a širší prompt, který na ni odpovídal, zodpověděl i dvě
+nezodpověditelné otázky zákaznické podpory, takže se nepoužil. Tabulky výše
+jsou měřené s v5.
+
+**Sondy ověřovače.** Páry podloženého tvrzení a téměř správného tvrzení:
+u zákaznické podpory (24 sond) 0 chybných přijetí a 0 chybných zamítnutí;
+u předpisů (30 sond) 1 chybné přijetí a 1 chybné zamítnutí. Chybné přijetí
+označilo kotel IV. třídy za kotel I. třídy, ačkoli vlastní zdůvodnění uvádělo
+IV. třídu. Dřívější běhy sond této sady během ladění neměly žádné chybné
+přijetí a vždy jedno chybné zamítnutí. Dva později přidané páry k řádu
+dopravníku neměly ani jedno. Sondy měří samotný ověřovač; v celém pipeline
+nově deterministická kontrola vyžaduje, aby římské číslo třídy v tvrzení
+(„class I“, „IV. třídy“) bylo i v citacích, takže tvrzení jako toto chybné
+přijetí skončí odmítnutím.
+
+**Vektorové úložiště.** Offline benchmark přes produkční cesty kódu
 ([vector-store-bench.json](evals/results/2026-11-10/vector-store-bench.json))
-ukazuje u 36 testovacích sekcí ověření při startu 24 ms a medián dotazu 1,5 ms.
-Lokální režim Qdrantu porovnává dotaz se všemi body, takže při 5 000 sekcích
-trvá start 3,4 s a medián dotazu 34 ms; větší korpus potřebuje Qdrant server.
+ukazuje validaci při startu 24 ms a medián dotazu 1,5 ms pro 36 testovacích
+sekcí. Qdrant v lokálním režimu porovnává dotaz s každým bodem, takže při
+5 000 sekcích trvá start 3,4 s a medián dotazu 34 ms; větší korpusy vyžadují
+Qdrant server.
 
-Vzorek je malý (celkem 21 zodpověditelných případů), takže čísla dokládají
-funkčnost a bezpečné chování, ne statisticky přesnou míru chybovosti. Latenci
-tvoří tři po sobě jdoucí volání poskytovatele (embedding, generování,
-ověření); většinu času zabírá generování a ověření na straně modelu.
+Vzorky jsou malé (64 zodpověditelných případů v obou sadách), takže čísla
+ukazují, že systém funguje a selhává bezpečně, ne statisticky přesnou
+chybovost. Latenci tvoří tři po sobě jdoucí volání poskytovatele (embedding,
+generování, ověření). Dřívější běhy s promptem v4 a 5 vyhledanými sekcemi jsou
+v [evals/results/2026-11-07](evals/results/2026-11-07) a
+[evals/results/2026-11-10](evals/results/2026-11-10).
 
 ## Spuštění
 
@@ -132,6 +176,15 @@ cp .env.example .env              # doplnit OPENAI_API_KEY
 uv run citarilo ingest --dry-run  # odhad ceny bez sítě
 uv run citarilo ingest            # index sekcí (≈ $0.001)
 uv run citarilo ask "Do kdy můžu vrátit zboží z výprodeje?"
+```
+
+Předpisy pro provoz a údržbu zařízení se zvolí přes `DATA_DIR` (nejdřív
+zastavit server; každá sada má vlastní index, takže ingest stačí jednou na
+sadu):
+
+```sh
+DATA_DIR=data/regulations uv run citarilo ingest   # ≈ $0.015
+DATA_DIR=data/regulations uv run citarilo ask "Jak často se reviduje elektroinstalace ve výrobní hale?"
 ```
 
 Webové rozhraní se sestaví jednou a `citarilo serve` ho pak servíruje na
@@ -147,12 +200,23 @@ zvýrazněnou vybranou větou a kontroly, kterými prošla, včetně času a cen
 Odmítnutí vysvětlí důvod. Klíč zůstává jen na serveru. Vývoj s automatickým
 obnovováním: `npm run dev` (port 5178, `/api` jde na 5177).
 
-Evaluace (každý placený běh má vlastní strop `--max-usd`):
+Evaluace (každý placený běh má vlastní strop `--max-usd`; sada případů se řídí
+`DATA_DIR`, nebo se zvolí přes `--eval-set trailsupply|regulations`):
 
 ```sh
 uv run citarilo eval --retrieval --max-usd 0.01
 uv run citarilo eval --live --max-usd 0.05
 uv run citarilo eval --probes --max-usd 0.05
+DATA_DIR=data/regulations uv run citarilo eval --live --max-usd 0.12
+```
+
+Každá otázka položená přes `ask` nebo webové rozhraní zanechá záznam běhu
+v `.runtime/runs`. U odmítnutých běhů je vidět, který krok odpověď zamítl
+a proč; z běhu lze vytvořit návrh testovacího případu ke kontrole:
+
+```sh
+uv run citarilo runs --failed --since 2026-11-19
+uv run citarilo runs --to-case RUN_ID --eval-set regulations
 ```
 
 ## Vlastní dokumenty
@@ -181,10 +245,8 @@ Testovací dokumenty jsou i ve firemních formátech v
 [examples/trailsupply-raw](examples/trailsupply-raw) (PDF, DOCX, Markdown);
 po importu dávají přesně stejné věty.
 
-**Pozor:** prompty pro odpovídání a ověřování jsou zatím napsané pro
-testovací dokumenty TrailSupply v češtině. Dokumenty jiné firmy nebo v jiném
-jazyce vyžadují úpravu promptů v `src/citarilo/prompts.py` a nové evaluační
-případy.
+Prompty nejsou svázané s konkrétní sadou dokumentů. Očekávají české zdrojové
+dokumenty; odpověď je v jazyce otázky (česky nebo anglicky).
 
 ## API
 
@@ -241,6 +303,8 @@ Actions.
   příkazy `import` a `ingest`, ne přes webové rozhraní.
 - Jednotlivé otázky bez konverzace; bez streamování, hybridního vyhledávání
   a rerankingu.
-- Prompty jsou napsané pro testovací dokumenty (viz *Vlastní dokumenty*).
+- Jedna sada dokumentů na běžící server; přepnutí sady znamená restart s jiným
+  `DATA_DIR`. Zdrojové dokumenty se očekávají v češtině.
 - Ověření kombinuje deterministické kontroly a posouzení modelem, takže není
-  důkazem pravdivosti; jeho chybovost se měří. Data jsou fiktivní.
+  důkazem pravdivosti; jeho chybovost se měří. Data zákaznické podpory jsou
+  fiktivní stejně jako řád dopravníku, předpisy jsou skutečné právní texty.

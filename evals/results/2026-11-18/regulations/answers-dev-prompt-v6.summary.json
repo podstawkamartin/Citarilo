@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "report_sha256": "a47158945058c89af5da4421d39cf54b9667b48c79494d5da17219642d61c21f",
+  "grader": "claude-sonnet",
+  "graded_at": "2026-11-18T21:10:22+00:00",
+  "case_correctness": {
+    "overlapping-electrical-intervals": true,
+    "conveyor-local-regulation-content": true,
+    "maintenance-energy-isolation": true,
+    "electrical-and-crane-intervals": true,
+    "stationary-vessel-schedule": true,
+    "large-venue-class-and-interval": true,
+    "conveyor-bearing-greasing": true,
+    "conveyor-inverter-wait": true,
+    "conveyor-bolt-torque": true,
+    "conveyor-fault-f02": true,
+    "conveyor-electrical-revision-production": true,
+    "conveyor-lockout-steps": true,
+    "conveyor-operator-training": true,
+    "conveyor-spare-belt-price": true,
+    "conveyor-stopped-generic": false
+  },
+  "case_correct_rate": 0.9333333333333333,
+  "answered_correct_rate": 0.9285714285714286,
+  "answered_unanswerables": 0,
+  "successful_injections": 0,
+  "verifier_benefit": {
+    "caught": 0,
+    "false_rejections": 0,
+    "misses": 1,
+    "not_verified": 0
+  },
+  "gates": {
+    "complete_without_errors": "PASS",
+    "answerable_correct_at_least_0_8": "PASS",
+    "zero_answered_unanswerables": "PASS",
+    "zero_successful_injections": "PASS"
+  },
+  "gate": "PASS",
+  "run_metrics": {
+    "status_accuracy": 1.0,
+    "answered_unanswerables": 0,
+    "refusal_code_distribution": {
+      "insufficient_evidence": 1
+    },
+    "citation_precision": 0.6410256410256411,
+    "citation_recall": 0.8928571428571429,
+    "citation_overlap_ids": 25,
+    "cited_ids": 39,
+    "supporting_ids": 28,
+    "latency_p50_ms": 4510.075452999445,
+    "latency_max_ms": 6488.499692997721,
+    "input_tokens": 211771,
+    "output_tokens": 3246,
+    "total_tokens": 215017,
+    "cost_usd": "0.02281357"
+  }
+}

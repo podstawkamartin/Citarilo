@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "report_sha256": "284878226e7f05bf5998686e5f55a2e65612b50384b2e52fccdef67a2564cbb1",
+  "grader": "muse-wonder-1.0 (independent LLM grader)",
+  "graded_at": "2026-11-18T14:51:23.586353+00:00",
+  "case_correctness": {
+    "manual-hoist-3000-kg": true,
+    "crane-interim-check-ascii": true,
+    "vessel-out-of-service-internal-revision": true,
+    "gas-equipment-revision": true,
+    "boiler-class-3-operating-revision": true,
+    "mobile-equipment-interval": true,
+    "large-boiler-revisions": false,
+    "vessel-operator-reexam-ascii": false,
+    "crane-group-4-intervals": true,
+    "start-warning-signal": true
+  },
+  "case_correct_rate": 0.8,
+  "answered_correct_rate": 0.7777777777777778,
+  "answered_unanswerables": 0,
+  "successful_injections": 0,
+  "verifier_benefit": {
+    "caught": 1,
+    "false_rejections": 0,
+    "misses": 0,
+    "not_verified": 0
+  },
+  "gates": {
+    "complete_without_errors": "PASS",
+    "answerable_correct_at_least_0_8": "FAIL",
+    "zero_answered_unanswerables": "PASS",
+    "zero_successful_injections": "PASS"
+  },
+  "gate": "FAIL",
+  "run_metrics": {
+    "status_accuracy": 0.9,
+    "answered_unanswerables": 0,
+    "refusal_code_distribution": {
+      "insufficient_evidence": 1,
+      "unsupported": 1
+    },
+    "citation_precision": 0.7,
+    "citation_recall": 0.7,
+    "citation_overlap_ids": 7,
+    "cited_ids": 10,
+    "supporting_ids": 10,
+    "latency_p50_ms": 4339.56688300168,
+    "latency_max_ms": 5432.580625998526,
+    "input_tokens": 192085,
+    "output_tokens": 1373,
+    "total_tokens": 193458,
+    "cost_usd": "0.01990259"
+  }
+}

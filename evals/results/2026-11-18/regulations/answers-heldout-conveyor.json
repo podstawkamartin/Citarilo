@@ -1,0 +1,1314 @@
+{
+  "schema_version": 1,
+  "kind": "answers",
+  "created_at": "2026-11-18T19:35:19.950258Z",
+  "git": {
+    "commit": "e3c2067e1aaf2fc8a385f5982674e7c509309774",
+    "dirty": true
+  },
+  "corpus_hash": "53e2525a758a9892d0a1fb5367ee02f62d79b86cbdf5fe38c91c01f0312c9084",
+  "prompt_version": "5",
+  "config": {
+    "generation_model": "gpt-6-luna",
+    "verification_model": "gpt-6-luna",
+    "embedding_model": "text-embedding-3-large",
+    "generation_reasoning_effort": "none",
+    "verification_reasoning_effort": "low",
+    "top_k": 8,
+    "call_timeout_seconds": 30.0,
+    "max_output_tokens": 2048,
+    "budget_cap_usd": "3.0",
+    "price_table_version": "2026-11-06"
+  },
+  "mode": "live",
+  "group_id": "answers-b14e01a4cd76456697336965dfe0c6f6",
+  "max_usd": "0.02",
+  "complete": true,
+  "error": null,
+  "metrics": {
+    "status_accuracy": 1.0,
+    "answered_unanswerables": 0,
+    "refusal_code_distribution": {},
+    "citation_precision": 1.0,
+    "citation_recall": 1.0,
+    "citation_overlap_ids": 2,
+    "cited_ids": 2,
+    "supporting_ids": 2,
+    "latency_p50_ms": 3676.0691269992094,
+    "latency_max_ms": 3880.630535997625,
+    "input_tokens": 21695,
+    "output_tokens": 252,
+    "total_tokens": 21947,
+    "cost_usd": "0.00229679"
+  },
+  "cost_usd": "0.002300",
+  "split": "heldout",
+  "case_ids": [
+    "conveyor-gearbox-oil-ascii",
+    "conveyor-follow-up-check"
+  ],
+  "cases": [
+    {
+      "id": "conveyor-gearbox-oil-ascii",
+      "split": "heldout",
+      "question": "Kdy se meni olej v prevodovce dopravniku?",
+      "language": "cs-ascii",
+      "expected_status": "answered",
+      "expected_refusal": null,
+      "required_facts": [
+        "The gearbox oil is changed every 2,000 operating hours, but at the latest once every 2 years."
+      ],
+      "forbidden_claims": [
+        "The oil is changed every 500 operating hours."
+      ],
+      "supporting_sentence_ids": [
+        "rad-pasoveho-dopravniku.maintenance.4"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.maintenance"
+      ],
+      "tags": [
+        "cs-ascii"
+      ],
+      "run_id": "31c5a65cb4d0462eabdd86687b0506eb",
+      "status": "answered",
+      "refusal_code": null,
+      "answer_language": "cs",
+      "claims": [
+        {
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "sentence_id": "rad-pasoveho-dopravniku.maintenance.4",
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Pravidelná údržba"
+        }
+      ],
+      "candidate_claims": [
+        {
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ]
+        }
+      ],
+      "check_results": [
+        {
+          "claim_index": 0,
+          "ok": true,
+          "reasons": []
+        }
+      ],
+      "verdicts": [
+        {
+          "claim_index": 0,
+          "verdict": "supported",
+          "reason": "The cited sentence explicitly states that gearbox oil is changed every 2,000 operating hours, and at least once every 2 years."
+        }
+      ],
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.maintenance",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Pravidelná údržba",
+          "score": 0.4753267916670877,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.1",
+              "text": "Napnutí pásu se kontroluje jednou týdně.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.2",
+              "text": "Průhyb pásu mezi nosnými válečky nesmí překročit 15 mm na jeden metr rozteče válečků.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.3",
+              "text": "Ložiska hnacího a vratného bubnu se mažou plastickým mazivem každých 500 motohodin.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.4",
+              "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.5",
+              "text": "Šrouby ložiskových domků bubnů se utahují momentem 85 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.6",
+              "text": "Svorky přívodu motoru se utahují momentem 2,5 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.7",
+              "text": "Opotřebené nosné válečky se vyměňují vždy celé, nikoli jen jejich ložiska.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.inspections",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Kontroly a revize",
+          "score": 0.37242293818520295,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.1",
+              "text": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.2",
+              "text": "Lhůty revizí elektrického zařízení dopravníku se řídí přílohou č. 4 nařízení vlády č. 190/2022 Sb. podle prostředí, ve kterém je dopravník instalován.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.3",
+              "text": "Výsledek každé kontroly a revize se zapisuje do provozního deníku dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.4",
+              "text": "Provozní deník se uchovává po celou dobu provozu dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.lockout",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Zajištění před údržbou",
+          "score": 0.3687810718680228,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.1",
+              "text": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.2",
+              "text": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.3",
+              "text": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.4",
+              "text": "Před otevřením frekvenčního měniče je nutné po vypnutí počkat nejméně 5 minut, než se vybije stejnosměrný meziobvod.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.5",
+              "text": "Varování: kondenzátory meziobvodu mohou být nebezpečně nabité i při vypnutém hlavním vypínači.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.6",
+              "text": "Zámek smí sejmout pouze ten, kdo jej nasadil.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.operators",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Obsluha a oprávnění",
+          "score": 0.3640238551137699,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.1",
+              "text": "Dopravník smí obsluhovat pouze zaměstnanec, který byl zaškolen a prokazatelně seznámen s tímto řádem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.2",
+              "text": "Školení obsluhy se opakuje nejméně jednou za 12 měsíců.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.3",
+              "text": "Údržbu elektrické výzbroje smí provádět pouze osoba s elektrotechnickou kvalifikací.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.4",
+              "text": "Před každou směnou obsluha zkontroluje funkci nouzových lanových vypínačů podél celé délky dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.scope",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Rozsah a technické údaje",
+          "score": 0.3473074204305038,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.1",
+              "text": "Tento řád platí pro pásový dopravník s označením PD-650 a jeho elektrickou výzbroj.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.2",
+              "text": "Dopravník má gumový pás šířky 650 mm a jmenovitou rychlost pásu 1,2 m/s.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.3",
+              "text": "Pás pohání třífázový asynchronní motor 7,5 kW, 400 V přes čelní převodovku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.4",
+              "text": "Otáčky motoru řídí frekvenční měnič umístěný v rozvaděči dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.5",
+              "text": "Největší dovolené zatížení pásu je 40 kg na jeden metr délky pásu.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.6",
+              "text": "Dopravník smí pracovat při teplotě okolí od 5 °C do 35 °C.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.fault-codes",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Poruchová hlášení",
+          "score": 0.3340823932338186,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.1",
+              "text": "Hlášení F01 znamená přetížení motoru; obsluha odlehčí pás a motor nechá nejméně 10 minut vychladnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.2",
+              "text": "Hlášení F02 znamená vybočení pásu ze stopy; pás se smí znovu spustit až po seřízení vratného bubnu.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.3",
+              "text": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; po odstranění příčiny se vypínač odblokuje a porucha se potvrdí tlačítkem RESET.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.4",
+              "text": "Hlášení F07 znamená přepětí meziobvodu frekvenčního měniče; obsluha přivolá osobu s elektrotechnickou kvalifikací.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.5",
+              "text": "Jiná hlášení, než jsou uvedena v tomto řádu, smí odstraňovat pouze servis výrobce.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            }
+          ]
+        },
+        {
+          "section_key": "nv-193-2022.a4-part-3",
+          "doc_id": "nv-193-2022",
+          "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+          "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)",
+          "score": 0.3293048060282919,
+          "sentences": [
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.1",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 21 Hornictví a hornická geologie, hutnictví a slévárenství; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.2",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 23 Strojírenství a strojírenská výroba; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.3",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 28 Technická chemie a chemie silikátů; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.4",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 36 Stavebnictví, geodézie a kartografie; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.5",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 37 Doprava a spoje; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.6",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 39 Speciální a interdisciplinární obory; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.7",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: 41 Zemědělství a lesnictví; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.8",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: Neobsahují-li uvedené obory požadavky na elektrotechnickou odbornou kvalifikaci, musí být doplněny profesní kvalifikací získanou podle jiného právního předpisu a zveřejněnou v Národní soustavě kvalifikací pod oborem 26 Elektrotechnika, telekomunikační a výpočetní technika; Délka odborné praxe v oboru zdvihacích zařízení v letech: 3.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.9",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: Vysokoškolské vzdělání v oboru elektrotechnickém; Délka odborné praxe v oboru zdvihacích zařízení v letech: 2.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.10",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: nebo; Délka odborné praxe v oboru zdvihacích zařízení v letech: 2.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.11",
+              "text": "Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Revize a zkoušky; Nejnižší stupeň vzdělání v oboru: v oboru strojním, stavebním, hutním nebo chemickém, je-li doplněno profesní kvalifikací získanou podle jiného právního předpisu a zveřejněnou v Národní soustavě kvalifikací pod oborem 26 Elektrotechnika, telekomunikační a výpočetní technika; Délka odborné praxe v oboru zdvihacích zařízení v letech: 2.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a4-part-3.12",
+              "text": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele: Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v § 3 odst. 1 písm. c): Činnost na vyhrazeném zdvihacím zařízení: Montáž a Opravy (Servis); Nejnižší stupeň vzdělání v oboru: Střední vzdělání s výučním listem nebo s maturitní zkouškou v skupině oborů 26 Elektrotechnika, telekomunikační a výpočetní technika nebo vysokoškolské vzdělání v oboru elektrotechnickém; Délka odborné praxe v oboru zdvihacích zařízení v letech: 1.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 4 Nejkratší doba odborné praxe požadovaná pro činnost na vyhrazených zdvihacích zařízeních ve vztahu k dosaženému stupni vzdělání žadatele (pokračování)"
+            }
+          ]
+        },
+        {
+          "section_key": "nv-193-2022.a2-b2",
+          "doc_id": "nv-193-2022",
+          "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+          "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)",
+          "score": 0.32649026816947296,
+          "sentences": [
+            {
+              "sentence_id": "nv-193-2022.a2-b2.1",
+              "text": "2. Jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene (dále jen „jeřáby a zdvihadla“)",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.2",
+              "text": "2.1 U jeřábů a zdvihadel uvedených v § 3 odst. 1 písm. a) se revize a zkoušky provádějí ve lhůtách uvedených v tabulce č. 1 a v bodech 2.2 a 2.4. Na základě průvodní dokumentace jeřábů a zdvihadel mohou být stanovené lhůty zkráceny.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.3",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 1; Součinitel spektra zatížení a třídy Q: 0,125 (Q 0 – Q2); Lhůta revize: 4 roky; Lhůta zkoušky: 8 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.4",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 2; Součinitel spektra zatížení a třídy Q: 0,25 (Q3); Lhůta revize: 3 roky; Lhůta zkoušky: 6 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.5",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 3; Součinitel spektra zatížení a třídy Q: 0,50 (Q4); Lhůta revize: 2 roky; Lhůta zkoušky: 4 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.6",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.7",
+              "text": "2.2 U věžových, mobilních, nakládacích a lanových jeřábů je lhůta revizí 1 rok a zkoušek 2 roky. U těchto jeřábů starších 14 let se provádí pouze zkouška ve lhůtě jednou za rok.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.8",
+              "text": "2.3 Lhůty revizí a zkoušek musí zohlednit prostředí, ve kterém vyhrazené zdvihací zařízení pracuje (s ohledem na protokol o určení vnějších vlivů).",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.9",
+              "text": "2.4 U stohovacích jeřábů, kde se stanoviště obsluhy pohybuje svisle spolu s břemenem, se provádějí revize jednou za rok, zkoušky jednou za 2 roky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.10",
+              "text": "2.5 Prohlídka se provádí na začátku každé pracovní směny před použitím vyhrazeného zdvihacího zařízení.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.11",
+              "text": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.12",
+              "text": "2.7 Jeřáb, který byl před přemístěním na nové pracoviště demontován, může být znovu uveden do provozu až po provedení zkoušky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.13",
+              "text": "3. Pracovní plošiny s motorickým pohonem a výškou zdvihu přesahující 1,5 m (dále jen „pracovní plošiny“)",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.14",
+              "text": "3.1 Každý den nebo na začátku každé směny před použitím pracovní plošiny obsluha před spuštěním provede vizuální prohlídku a funkční zkoušku pracovní plošiny podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.15",
+              "text": "3.2 Běžná prohlídka pracovní plošiny musí být provedena v intervalu, který nesmí překročit 3 měsíce, a musí obsahovat všechny položky specifikované výrobcem pro běžnou prohlídku a ustanoveními právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.16",
+              "text": "3.3 Zkouška se provádí jednou ročně.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.17",
+              "text": "4. Stavební výtahy pro přepravu osob a nákladu",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.18",
+              "text": "4.1 Každý den nebo na začátku každé směny před použitím stavebního výtahu provede obsluha vizuální prohlídku a funkční zkoušku podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.19",
+              "text": "4.2 Kontrola se provádí ve lhůtě závislé na požadavcích výrobce, provozních podmínkách a intenzitě používání, nesmí však překročit 3 měsíce.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.20",
+              "text": "4.3 Zkouška stavebního výtahu musí být prováděna nejméně jednou za rok v rozsahu stanoveném návodem na používání nebo místním provozním předpisem.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.21",
+              "text": "4.4 Stavební výtah, který byl před přemístěním na nové pracoviště demontován, může být tento znovu uveden do provozu až po provedení zkoušky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.22",
+              "text": "5. Regálové zakladače se svisle pohyblivými stanovišti obsluhy a jejich přesuvny",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.23",
+              "text": "5.1 Každý den nebo na začátku každé směny před použitím regálového zakladače obsluha provede vizuální prohlídku a funkční zkoušku podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.24",
+              "text": "5.2 Kontrola se provádí ve lhůtě závislé na požadavcích výrobce, provozních podmínkách a intenzitě používání, nesmí však překročit 3 měsíce.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.25",
+              "text": "5.3 Revize se provádějí v mezidobí zkoušek ve lhůtách stanovených výrobcem nejméně jednou za rok. Rozsah revize musí být stanoven v návodu výrobce nebo v místním provozním předpisu, přičemž vždy zahrnuje alespoň vizuální prohlídku zařízení a ověření funkčnosti všech mechanismů.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.26",
+              "text": "5.4 Zkouška musí být provedena nejméně jednou za 2 roky v rozsahu stanoveném návodem na používání nebo místním provozním předpisem.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "node": "retrieve",
+          "model": "text-embedding-3-large",
+          "input_tokens": 18,
+          "output_tokens": 0,
+          "cost_usd": "0.00000234",
+          "reservation_id": "fd2028196dc841d68388f65e4a04b76d",
+          "duration_ms": 563.2611490000272
+        },
+        {
+          "node": "generate",
+          "model": "gpt-6-luna",
+          "input_tokens": 6276,
+          "output_tokens": 76,
+          "cost_usd": "0.00066560",
+          "reservation_id": "5b18e649660a40e4aa5f6040f4a2886e",
+          "duration_ms": 1617.0099939990905
+        },
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 6277,
+          "output_tokens": 55,
+          "cost_usd": "0.00065520",
+          "reservation_id": "46f0f2e4b3e444cb821cf3806106cb1d",
+          "duration_ms": 1625.803987000836
+        }
+      ],
+      "latency_ms": 3880.630535997625,
+      "cost_usd": "0.00132314",
+      "error": null
+    },
+    {
+      "id": "conveyor-follow-up-check",
+      "split": "heldout",
+      "question": "Jak často se dělá následná kontrola pásového dopravníku?",
+      "language": "cs",
+      "expected_status": "answered",
+      "expected_refusal": null,
+      "required_facts": [
+        "The conveyor rules require a follow-up check of the conveyor at least once every 6 months."
+      ],
+      "forbidden_claims": [
+        "The follow-up check of the conveyor is required only once every 12 months."
+      ],
+      "supporting_sentence_ids": [
+        "rad-pasoveho-dopravniku.inspections.1"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.inspections"
+      ],
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "run_id": "f49dcf95b37b4097a13cee242f6c3627",
+      "status": "answered",
+      "refusal_code": null,
+      "answer_language": "cs",
+      "claims": [
+        {
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "sentence_id": "rad-pasoveho-dopravniku.inspections.1",
+          "text": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Kontroly a revize"
+        }
+      ],
+      "candidate_claims": [
+        {
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ]
+        }
+      ],
+      "check_results": [
+        {
+          "claim_index": 0,
+          "ok": true,
+          "reasons": []
+        }
+      ],
+      "verdicts": [
+        {
+          "claim_index": 0,
+          "verdict": "supported",
+          "reason": "The cited sentence directly states that a follow-up inspection of the conveyor is performed at least once every 6 months."
+        }
+      ],
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.inspections",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Kontroly a revize",
+          "score": 0.641499967928423,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.1",
+              "text": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.2",
+              "text": "Lhůty revizí elektrického zařízení dopravníku se řídí přílohou č. 4 nařízení vlády č. 190/2022 Sb. podle prostředí, ve kterém je dopravník instalován.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.3",
+              "text": "Výsledek každé kontroly a revize se zapisuje do provozního deníku dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.inspections.4",
+              "text": "Provozní deník se uchovává po celou dobu provozu dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Kontroly a revize"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.maintenance",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Pravidelná údržba",
+          "score": 0.6394493954007561,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.1",
+              "text": "Napnutí pásu se kontroluje jednou týdně.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.2",
+              "text": "Průhyb pásu mezi nosnými válečky nesmí překročit 15 mm na jeden metr rozteče válečků.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.3",
+              "text": "Ložiska hnacího a vratného bubnu se mažou plastickým mazivem každých 500 motohodin.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.4",
+              "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.5",
+              "text": "Šrouby ložiskových domků bubnů se utahují momentem 85 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.6",
+              "text": "Svorky přívodu motoru se utahují momentem 2,5 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.7",
+              "text": "Opotřebené nosné válečky se vyměňují vždy celé, nikoli jen jejich ložiska.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.operators",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Obsluha a oprávnění",
+          "score": 0.5581988590274202,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.1",
+              "text": "Dopravník smí obsluhovat pouze zaměstnanec, který byl zaškolen a prokazatelně seznámen s tímto řádem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.2",
+              "text": "Školení obsluhy se opakuje nejméně jednou za 12 měsíců.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.3",
+              "text": "Údržbu elektrické výzbroje smí provádět pouze osoba s elektrotechnickou kvalifikací.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.operators.4",
+              "text": "Před každou směnou obsluha zkontroluje funkci nouzových lanových vypínačů podél celé délky dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Obsluha a oprávnění"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.lockout",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Zajištění před údržbou",
+          "score": 0.5241596903852325,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.1",
+              "text": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.2",
+              "text": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.3",
+              "text": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.4",
+              "text": "Před otevřením frekvenčního měniče je nutné po vypnutí počkat nejméně 5 minut, než se vybije stejnosměrný meziobvod.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.5",
+              "text": "Varování: kondenzátory meziobvodu mohou být nebezpečně nabité i při vypnutém hlavním vypínači.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.6",
+              "text": "Zámek smí sejmout pouze ten, kdo jej nasadil.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            }
+          ]
+        },
+        {
+          "section_key": "nv-193-2022.a2-b2",
+          "doc_id": "nv-193-2022",
+          "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+          "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)",
+          "score": 0.4830643680638875,
+          "sentences": [
+            {
+              "sentence_id": "nv-193-2022.a2-b2.1",
+              "text": "2. Jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene (dále jen „jeřáby a zdvihadla“)",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.2",
+              "text": "2.1 U jeřábů a zdvihadel uvedených v § 3 odst. 1 písm. a) se revize a zkoušky provádějí ve lhůtách uvedených v tabulce č. 1 a v bodech 2.2 a 2.4. Na základě průvodní dokumentace jeřábů a zdvihadel mohou být stanovené lhůty zkráceny.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.3",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 1; Součinitel spektra zatížení a třídy Q: 0,125 (Q 0 – Q2); Lhůta revize: 4 roky; Lhůta zkoušky: 8 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.4",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 2; Součinitel spektra zatížení a třídy Q: 0,25 (Q3); Lhůta revize: 3 roky; Lhůta zkoušky: 6 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.5",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 3; Součinitel spektra zatížení a třídy Q: 0,50 (Q4); Lhůta revize: 2 roky; Lhůta zkoušky: 4 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.6",
+              "text": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.7",
+              "text": "2.2 U věžových, mobilních, nakládacích a lanových jeřábů je lhůta revizí 1 rok a zkoušek 2 roky. U těchto jeřábů starších 14 let se provádí pouze zkouška ve lhůtě jednou za rok.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.8",
+              "text": "2.3 Lhůty revizí a zkoušek musí zohlednit prostředí, ve kterém vyhrazené zdvihací zařízení pracuje (s ohledem na protokol o určení vnějších vlivů).",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.9",
+              "text": "2.4 U stohovacích jeřábů, kde se stanoviště obsluhy pohybuje svisle spolu s břemenem, se provádějí revize jednou za rok, zkoušky jednou za 2 roky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.10",
+              "text": "2.5 Prohlídka se provádí na začátku každé pracovní směny před použitím vyhrazeného zdvihacího zařízení.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.11",
+              "text": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.12",
+              "text": "2.7 Jeřáb, který byl před přemístěním na nové pracoviště demontován, může být znovu uveden do provozu až po provedení zkoušky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.13",
+              "text": "3. Pracovní plošiny s motorickým pohonem a výškou zdvihu přesahující 1,5 m (dále jen „pracovní plošiny“)",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.14",
+              "text": "3.1 Každý den nebo na začátku každé směny před použitím pracovní plošiny obsluha před spuštěním provede vizuální prohlídku a funkční zkoušku pracovní plošiny podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.15",
+              "text": "3.2 Běžná prohlídka pracovní plošiny musí být provedena v intervalu, který nesmí překročit 3 měsíce, a musí obsahovat všechny položky specifikované výrobcem pro běžnou prohlídku a ustanoveními právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.16",
+              "text": "3.3 Zkouška se provádí jednou ročně.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.17",
+              "text": "4. Stavební výtahy pro přepravu osob a nákladu",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.18",
+              "text": "4.1 Každý den nebo na začátku každé směny před použitím stavebního výtahu provede obsluha vizuální prohlídku a funkční zkoušku podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.19",
+              "text": "4.2 Kontrola se provádí ve lhůtě závislé na požadavcích výrobce, provozních podmínkách a intenzitě používání, nesmí však překročit 3 měsíce.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.20",
+              "text": "4.3 Zkouška stavebního výtahu musí být prováděna nejméně jednou za rok v rozsahu stanoveném návodem na používání nebo místním provozním předpisem.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.21",
+              "text": "4.4 Stavební výtah, který byl před přemístěním na nové pracoviště demontován, může být tento znovu uveden do provozu až po provedení zkoušky.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.22",
+              "text": "5. Regálové zakladače se svisle pohyblivými stanovišti obsluhy a jejich přesuvny",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.23",
+              "text": "5.1 Každý den nebo na začátku každé směny před použitím regálového zakladače obsluha provede vizuální prohlídku a funkční zkoušku podle podmínek výrobce a právních a ostatních předpisů k zajištění bezpečnosti a ochrany zdraví při práci.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.24",
+              "text": "5.2 Kontrola se provádí ve lhůtě závislé na požadavcích výrobce, provozních podmínkách a intenzitě používání, nesmí však překročit 3 měsíce.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.25",
+              "text": "5.3 Revize se provádějí v mezidobí zkoušek ve lhůtách stanovených výrobcem nejméně jednou za rok. Rozsah revize musí být stanoven v návodu výrobce nebo v místním provozním předpisu, přičemž vždy zahrnuje alespoň vizuální prohlídku zařízení a ověření funkčnosti všech mechanismů.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            },
+            {
+              "sentence_id": "nv-193-2022.a2-b2.26",
+              "text": "5.4 Zkouška musí být provedena nejméně jednou za 2 roky v rozsahu stanoveném návodem na používání nebo místním provozním předpisem.",
+              "doc_id": "nv-193-2022",
+              "doc_title": "Nařízení vlády č. 193/2022 Sb., o vyhrazených technických zdvihacích zařízeních a požadavcích na zajištění jejich bezpečnosti",
+              "heading": "Příloha č. 2 Lhůty ověřování způsobilosti vyhrazených zdvihacích zařízení k bezpečnému provozu (pokračování)"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.fault-codes",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Poruchová hlášení",
+          "score": 0.4823965376842515,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.1",
+              "text": "Hlášení F01 znamená přetížení motoru; obsluha odlehčí pás a motor nechá nejméně 10 minut vychladnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.2",
+              "text": "Hlášení F02 znamená vybočení pásu ze stopy; pás se smí znovu spustit až po seřízení vratného bubnu.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.3",
+              "text": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; po odstranění příčiny se vypínač odblokuje a porucha se potvrdí tlačítkem RESET.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.4",
+              "text": "Hlášení F07 znamená přepětí meziobvodu frekvenčního měniče; obsluha přivolá osobu s elektrotechnickou kvalifikací.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.fault-codes.5",
+              "text": "Jiná hlášení, než jsou uvedena v tomto řádu, smí odstraňovat pouze servis výrobce.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Poruchová hlášení"
+            }
+          ]
+        },
+        {
+          "section_key": "rad-pasoveho-dopravniku.scope",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Rozsah a technické údaje",
+          "score": 0.47767598925774774,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.1",
+              "text": "Tento řád platí pro pásový dopravník s označením PD-650 a jeho elektrickou výzbroj.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.2",
+              "text": "Dopravník má gumový pás šířky 650 mm a jmenovitou rychlost pásu 1,2 m/s.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.3",
+              "text": "Pás pohání třífázový asynchronní motor 7,5 kW, 400 V přes čelní převodovku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.4",
+              "text": "Otáčky motoru řídí frekvenční měnič umístěný v rozvaděči dopravníku.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.5",
+              "text": "Největší dovolené zatížení pásu je 40 kg na jeden metr délky pásu.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.scope.6",
+              "text": "Dopravník smí pracovat při teplotě okolí od 5 °C do 35 °C.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Rozsah a technické údaje"
+            }
+          ]
+        },
+        {
+          "section_key": "nv-378-2001.p-4",
+          "doc_id": "nv-378-2001",
+          "doc_title": "Nařízení vlády č. 378/2001 Sb., kterým se stanoví bližší požadavky na bezpečný provoz a používání strojů, technických zařízení, přístrojů a nářadí",
+          "heading": "§ 4",
+          "score": 0.44573424728671807,
+          "sentences": [
+            {
+              "sentence_id": "nv-378-2001.p-4.1",
+              "text": "(1) Kontrola bezpečnosti provozu zařízení před uvedením do provozu je prováděna podle průvodní dokumentace výrobce. Není-li výrobce znám nebo není-li průvodní dokumentace k dispozici, stanoví rozsah kontroly zařízení zaměstnavatel místním provozním bezpečnostním předpisem.",
+              "doc_id": "nv-378-2001",
+              "doc_title": "Nařízení vlády č. 378/2001 Sb., kterým se stanoví bližší požadavky na bezpečný provoz a používání strojů, technických zařízení, přístrojů a nářadí",
+              "heading": "§ 4"
+            },
+            {
+              "sentence_id": "nv-378-2001.p-4.2",
+              "text": "(2) Zařízení musí být vybaveno provozní dokumentací. Následná kontrola musí být prováděna nejméně jednou za 12 měsíců v rozsahu stanoveném místním provozním bezpečnostním předpisem, nestanoví-li zvláštní právní předpis, popřípadě průvodní dokumentace nebo normové hodnoty rozsah a četnost následných kontrol jinak.",
+              "doc_id": "nv-378-2001",
+              "doc_title": "Nařízení vlády č. 378/2001 Sb., kterým se stanoví bližší požadavky na bezpečný provoz a používání strojů, technických zařízení, přístrojů a nářadí",
+              "heading": "§ 4"
+            },
+            {
+              "sentence_id": "nv-378-2001.p-4.3",
+              "text": "(3) Provozní dokumentace musí být uchovávána po celou dobu provozu zařízení.",
+              "doc_id": "nv-378-2001",
+              "doc_title": "Nařízení vlády č. 378/2001 Sb., kterým se stanoví bližší požadavky na bezpečný provoz a používání strojů, technických zařízení, přístrojů a nářadí",
+              "heading": "§ 4"
+            }
+          ]
+        }
+      ],
+      "calls": [
+        {
+          "node": "retrieve",
+          "model": "text-embedding-3-large",
+          "input_tokens": 25,
+          "output_tokens": 0,
+          "cost_usd": "0.00000325",
+          "reservation_id": "1a878da971d242b3888c64482045091c",
+          "duration_ms": 265.4405619978206
+        },
+        {
+          "node": "generate",
+          "model": "gpt-6-luna",
+          "input_tokens": 4556,
+          "output_tokens": 70,
+          "cost_usd": "0.00049060",
+          "reservation_id": "d2994f61242b46b3bdab84931a4e8400",
+          "duration_ms": 1292.3778990007122
+        },
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 4543,
+          "output_tokens": 51,
+          "cost_usd": "0.00047980",
+          "reservation_id": "d8483e3a288e4605888e0adb7baa8f16",
+          "duration_ms": 1834.7684300024412
+        }
+      ],
+      "latency_ms": 3471.507718000794,
+      "cost_usd": "0.00097365",
+      "error": null
+    }
+  ]
+}

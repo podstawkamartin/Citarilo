@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "report_sha256": "a9716609c4bc6ec2b451e61a5115d4f3d802ec62b6bceba194c94b469d3fae00",
+  "grader": "muse-wonder-1.0",
+  "graded_at": "2026-11-18T19:37:06.081101+00:00",
+  "cases": [
+    {
+      "case_id": "conveyor-gearbox-oil-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.maintenance.4": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.maintenance.4": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The gearbox oil is changed every 2,000 operating hours, but at the latest once every 2 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The oil is changed every 500 operating hours.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "conveyor-follow-up-check",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.inspections.1": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.inspections.1": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The conveyor rules require a follow-up check of the conveyor at least once every 6 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The follow-up check of the conveyor is required only once every 12 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    }
+  ]
+}

@@ -1,0 +1,449 @@
+{
+  "schema_version": 1,
+  "kind": "probes",
+  "created_at": "2026-11-18T19:34:32.152633Z",
+  "git": {
+    "commit": "e3c2067e1aaf2fc8a385f5982674e7c509309774",
+    "dirty": true
+  },
+  "corpus_hash": "53e2525a758a9892d0a1fb5367ee02f62d79b86cbdf5fe38c91c01f0312c9084",
+  "prompt_version": "5",
+  "config": {
+    "generation_model": "gpt-6-luna",
+    "verification_model": "gpt-6-luna",
+    "embedding_model": "text-embedding-3-large",
+    "generation_reasoning_effort": "none",
+    "verification_reasoning_effort": "low",
+    "top_k": 8,
+    "call_timeout_seconds": 30.0,
+    "max_output_tokens": 2048,
+    "budget_cap_usd": "3.0",
+    "price_table_version": "2026-11-06"
+  },
+  "mode": "live",
+  "group_id": "probes-d82c6c97c8574a6abdcc65a8fc10524c",
+  "max_usd": "0.01",
+  "complete": true,
+  "error": null,
+  "metrics": {
+    "false_accepts": 0,
+    "false_rejects": 0,
+    "exact_verdict_accuracy": 1.0,
+    "latency_p50_ms": 1430.624283497309,
+    "latency_max_ms": 1792.5936839965289,
+    "input_tokens": 3228,
+    "output_tokens": 210,
+    "total_tokens": 3438,
+    "cost_usd": "0.00042780"
+  },
+  "cost_usd": "0.000430",
+  "case_ids": [
+    "conveyor-inverter-wait-supported",
+    "conveyor-inverter-wait-near-miss",
+    "conveyor-torque-association-supported",
+    "conveyor-torque-association-near-miss"
+  ],
+  "cases": [
+    {
+      "probe": {
+        "id": "conveyor-inverter-wait-supported",
+        "claim": "Before opening the frequency converter, wait at least 5 minutes after switching off.",
+        "cited_sentence_ids": [
+          "rad-pasoveho-dopravniku.lockout.4"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "conveyor-inverter-wait",
+        "note": "Same number, wrong unit."
+      },
+      "run_id": "44a8f212bd5b42fdb85d32fe620f548a",
+      "claim": {
+        "text": "Before opening the frequency converter, wait at least 5 minutes after switching off.",
+        "citations": [
+          "rad-pasoveho-dopravniku.lockout.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.lockout",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Zajištění před údržbou",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.1",
+              "text": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.2",
+              "text": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.3",
+              "text": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.4",
+              "text": "Před otevřením frekvenčního měniče je nutné po vypnutí počkat nejméně 5 minut, než se vybije stejnosměrný meziobvod.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.5",
+              "text": "Varování: kondenzátory meziobvodu mohou být nebezpečně nabité i při vypnutém hlavním vypínači.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.6",
+              "text": "Zámek smí sejmout pouze ten, kdo jej nasadil.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that before opening the frequency converter, one must wait at least five minutes after switching it off."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 786,
+          "output_tokens": 51,
+          "cost_usd": "0.00010410",
+          "reservation_id": "070f69a2c89d4d3ca7309d749def3a07",
+          "duration_ms": 1775.8589690056397
+        }
+      ],
+      "latency_ms": 1792.5936839965289,
+      "cost_usd": "0.00010410",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "conveyor-inverter-wait-near-miss",
+        "claim": "Before opening the frequency converter, wait at least 5 seconds after switching off.",
+        "cited_sentence_ids": [
+          "rad-pasoveho-dopravniku.lockout.4"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "conveyor-inverter-wait",
+        "note": "Same number, wrong unit."
+      },
+      "run_id": "378ff013a9564fd3bee4824f9d04a0e7",
+      "claim": {
+        "text": "Before opening the frequency converter, wait at least 5 seconds after switching off.",
+        "citations": [
+          "rad-pasoveho-dopravniku.lockout.4"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.lockout",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Zajištění před údržbou",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.1",
+              "text": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.2",
+              "text": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.3",
+              "text": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.4",
+              "text": "Před otevřením frekvenčního měniče je nutné po vypnutí počkat nejméně 5 minut, než se vybije stejnosměrný meziobvod.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.5",
+              "text": "Varování: kondenzátory meziobvodu mohou být nebezpečně nabité i při vypnutém hlavním vypínači.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.lockout.6",
+              "text": "Zámek smí sejmout pouze ten, kdo jej nasadil.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Zajištění před údržbou"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence requires waiting at least 5 minutes, not 5 seconds, before opening the frequency converter."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 786,
+          "output_tokens": 52,
+          "cost_usd": "0.00010460",
+          "reservation_id": "4b61df3515384766b02e26858136f037",
+          "duration_ms": 1340.6151829985902
+        }
+      ],
+      "latency_ms": 1349.0499359977548,
+      "cost_usd": "0.00010460",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "conveyor-torque-association-supported",
+        "claim": "The drum bearing housing bolts are tightened to 85 N·m.",
+        "cited_sentence_ids": [
+          "rad-pasoveho-dopravniku.maintenance.5",
+          "rad-pasoveho-dopravniku.maintenance.6"
+        ],
+        "expected_verdict": "supported",
+        "pair_id": "conveyor-torque-association",
+        "note": "Torque of the motor terminals attached to the bearing bolts."
+      },
+      "run_id": "c9fa734812464310aebc67ccdf1d4308",
+      "claim": {
+        "text": "The drum bearing housing bolts are tightened to 85 N·m.",
+        "citations": [
+          "rad-pasoveho-dopravniku.maintenance.5",
+          "rad-pasoveho-dopravniku.maintenance.6"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.maintenance",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Pravidelná údržba",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.1",
+              "text": "Napnutí pásu se kontroluje jednou týdně.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.2",
+              "text": "Průhyb pásu mezi nosnými válečky nesmí překročit 15 mm na jeden metr rozteče válečků.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.3",
+              "text": "Ložiska hnacího a vratného bubnu se mažou plastickým mazivem každých 500 motohodin.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.4",
+              "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.5",
+              "text": "Šrouby ložiskových domků bubnů se utahují momentem 85 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.6",
+              "text": "Svorky přívodu motoru se utahují momentem 2,5 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.7",
+              "text": "Opotřebené nosné válečky se vyměňují vždy celé, nikoli jen jejich ložiska.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "supported",
+        "reason": "The cited sentence states that the drum bearing housing bolts are tightened to 85 N·m."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 827,
+          "output_tokens": 47,
+          "cost_usd": "0.00010620",
+          "reservation_id": "355f3ef79a624bfcaeadbda47921b56f",
+          "duration_ms": 1417.2830730021815
+        }
+      ],
+      "latency_ms": 1426.4673679936095,
+      "cost_usd": "0.00010620",
+      "error": null
+    },
+    {
+      "probe": {
+        "id": "conveyor-torque-association-near-miss",
+        "claim": "The drum bearing housing bolts are tightened to 2.5 N·m.",
+        "cited_sentence_ids": [
+          "rad-pasoveho-dopravniku.maintenance.5",
+          "rad-pasoveho-dopravniku.maintenance.6"
+        ],
+        "expected_verdict": "contradicted",
+        "pair_id": "conveyor-torque-association",
+        "note": "Torque of the motor terminals attached to the bearing bolts."
+      },
+      "run_id": "ed2fb49880c644489b60fe6f5df93e13",
+      "claim": {
+        "text": "The drum bearing housing bolts are tightened to 2.5 N·m.",
+        "citations": [
+          "rad-pasoveho-dopravniku.maintenance.5",
+          "rad-pasoveho-dopravniku.maintenance.6"
+        ]
+      },
+      "retrieved_sections": [
+        {
+          "section_key": "rad-pasoveho-dopravniku.maintenance",
+          "doc_id": "rad-pasoveho-dopravniku",
+          "doc_title": "Provozní a údržbový řád pásového dopravníku",
+          "heading": "Pravidelná údržba",
+          "score": 0.0,
+          "sentences": [
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.1",
+              "text": "Napnutí pásu se kontroluje jednou týdně.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.2",
+              "text": "Průhyb pásu mezi nosnými válečky nesmí překročit 15 mm na jeden metr rozteče válečků.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.3",
+              "text": "Ložiska hnacího a vratného bubnu se mažou plastickým mazivem každých 500 motohodin.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.4",
+              "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.5",
+              "text": "Šrouby ložiskových domků bubnů se utahují momentem 85 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.6",
+              "text": "Svorky přívodu motoru se utahují momentem 2,5 N·m.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            },
+            {
+              "sentence_id": "rad-pasoveho-dopravniku.maintenance.7",
+              "text": "Opotřebené nosné válečky se vyměňují vždy celé, nikoli jen jejich ložiska.",
+              "doc_id": "rad-pasoveho-dopravniku",
+              "doc_title": "Provozní a údržbový řád pásového dopravníku",
+              "heading": "Pravidelná údržba"
+            }
+          ]
+        }
+      ],
+      "verdict": {
+        "claim_index": 0,
+        "verdict": "contradicted",
+        "reason": "The cited sentence specifies 85 N·m for the drum bearing housing bolts; 2.5 N·m applies to the motor supply terminals."
+      },
+      "calls": [
+        {
+          "node": "verify",
+          "model": "gpt-6-luna",
+          "input_tokens": 829,
+          "output_tokens": 60,
+          "cost_usd": "0.00011290",
+          "reservation_id": "9d1007bbb7fb4b808b4a694e9d6e60b0",
+          "duration_ms": 1426.149118997273
+        }
+      ],
+      "latency_ms": 1434.7811990010086,
+      "cost_usd": "0.00011290",
+      "error": null
+    }
+  ],
+  "pairs": {
+    "conveyor-inverter-wait": {
+      "probe_ids": [
+        "conveyor-inverter-wait-supported",
+        "conveyor-inverter-wait-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    },
+    "conveyor-torque-association": {
+      "probe_ids": [
+        "conveyor-torque-association-supported",
+        "conveyor-torque-association-near-miss"
+      ],
+      "complete": true,
+      "all_verdicts_correct": true
+    }
+  },
+  "gate": "PASS"
+}
