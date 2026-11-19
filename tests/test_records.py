@@ -122,6 +122,7 @@ def test_answered_record_and_public_projection(record_data: dict) -> None:
         "status",
         "answer_language",
         "refusal_code",
+        "refusal",
         "claims",
         "sources",
         "metrics",

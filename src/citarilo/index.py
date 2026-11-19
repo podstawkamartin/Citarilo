@@ -15,6 +15,7 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Lock
 from time import perf_counter
 from typing import Literal, Protocol
 from uuid import UUID, uuid5
@@ -403,32 +404,95 @@ def _prepare_index_dirs(settings: Settings, *, create: bool) -> None:
                 raise IndexLockedError("Cannot secure index directory permissions.") from exc
 
 
-def _acquire_index_lock(settings: Settings, *, create: bool = True) -> portalocker.Lock:
-    """Serialize Citarilo owners across the entire Qdrant close/reopen interval."""
+class _HeldIndexLock:
+    """One operating-system lock shared by every index this process has open."""
+
+    def __init__(self, lock: portalocker.Lock, *, key: str, shared: bool) -> None:
+        self.lock = lock
+        self.key = key
+        self.shared = shared
+        self.refs = 1
+
+
+class _LockHandle:
+    """One owner's reference to the process index lock. Release is idempotent."""
+
+    def __init__(self, held: _HeldIndexLock) -> None:
+        self._held = held
+        self._released = False
+
+    def release(self) -> None:
+        if self._released:
+            return
+        self._released = True
+        with _LOCKS_GUARD:
+            self._held.refs -= 1
+            if self._held.refs > 0:
+                return
+            _LOCKS.pop(self._held.key, None)
+            lock = self._held.lock
+        lock.release()
+
+    def __enter__(self) -> _LockHandle:
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self.release()
+
+
+# The file lock is per runtime directory, not per index. Qdrant local mode locks
+# each storage directory itself, so two indexes can be open here at once. A second
+# process still cannot take the file lock. An exclusive acquire (ingest, or a
+# competing owner) never joins a lock this process already holds.
+_LOCKS: dict[str, _HeldIndexLock] = {}
+_LOCKS_GUARD = Lock()
+
+
+def _acquire_index_lock(
+    settings: Settings, *, create: bool = True, share: bool = False
+) -> _LockHandle:
+    """Serialize Citarilo owners across the entire Qdrant close/reopen interval.
+
+    ``share`` lets ``load_index`` open another index while this process already
+    holds the lock for a loaded one. Exclusive callers, and a load while an
+    exclusive owner holds the lock, still fail without opening storage.
+    """
     _check_index_symlinks(settings)
     if create:
         make_private_dir(settings.runtime_dir)
-    lock = None
-    try:
-        lock = portalocker.Lock(
-            str(settings.index_lock_path),
-            mode="a" if create else "r+",
-            timeout=0,
-            flags=portalocker.LockFlags.EXCLUSIVE | portalocker.LockFlags.NON_BLOCKING,
-        )
-        lock.acquire()
-    except BaseException as exc:
-        if lock is not None:
-            with suppress(Exception):
-                lock.release()
-        if isinstance(exc, FileNotFoundError):
-            raise IndexMissingError("Index lock missing; run citarilo ingest explicitly.") from exc
-        if isinstance(exc, PermissionError):
-            raise IndexLockedError("Cannot access the index lock.") from exc
-        if isinstance(exc, portalocker.exceptions.LockException):
-            raise IndexLockedError() from exc
-        raise
-    return lock
+    key = os.path.abspath(settings.index_lock_path)
+    with _LOCKS_GUARD:
+        held = _LOCKS.get(key)
+        if held is not None:
+            if share and held.shared:
+                held.refs += 1
+                return _LockHandle(held)
+            raise IndexLockedError()
+        lock = None
+        try:
+            lock = portalocker.Lock(
+                str(settings.index_lock_path),
+                mode="a" if create else "r+",
+                timeout=0,
+                flags=portalocker.LockFlags.EXCLUSIVE | portalocker.LockFlags.NON_BLOCKING,
+            )
+            lock.acquire()
+        except BaseException as exc:
+            if lock is not None:
+                with suppress(Exception):
+                    lock.release()
+            if isinstance(exc, FileNotFoundError):
+                raise IndexMissingError(
+                    "Index lock missing; run citarilo ingest explicitly."
+                ) from exc
+            if isinstance(exc, PermissionError):
+                raise IndexLockedError("Cannot access the index lock.") from exc
+            if isinstance(exc, portalocker.exceptions.LockException):
+                raise IndexLockedError() from exc
+            raise
+        held = _HeldIndexLock(lock, key=key, shared=share)
+        _LOCKS[key] = held
+        return _LockHandle(held)
 
 
 def _open_client(settings: Settings) -> QdrantClient:
@@ -528,7 +592,7 @@ class SectionIndex:
         embeddings: Embeddings,
         dimensions: int,
         *,
-        app_lock: portalocker.Lock,
+        app_lock: _LockHandle,
     ) -> None:
         self._client = client
         self._app_lock = app_lock
@@ -606,7 +670,9 @@ def load_index(
             raise IndexMismatchError(f"Index {field} mismatch; run citarilo ingest.")
     if not settings.qdrant_path.is_dir() or not settings.index_lock_path.is_file():
         raise IndexMissingError("Index missing; run citarilo ingest explicitly.")
-    app_lock = _acquire_index_lock(settings, create=False)
+    # Join a lock this process already holds for another index. A different process,
+    # or an exclusive owner in this one, still makes this raise IndexLockedError.
+    app_lock = _acquire_index_lock(settings, create=False, share=True)
     client = None
     success = False
     try:

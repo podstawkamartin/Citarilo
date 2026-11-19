@@ -5,16 +5,17 @@ import { type DocumentView, type Source, ApiError, api } from "./api";
 const cache = new Map<string, Promise<DocumentView>>();
 let cachedRun = "";
 
-function loadDocument(runId: string, docId: string): Promise<DocumentView> {
+function loadDocument(runId: string, docId: string, setId: string | null): Promise<DocumentView> {
   if (runId !== cachedRun) {
     cache.clear();
     cachedRun = runId;
   }
-  let pending = cache.get(docId);
+  const key = `${setId ?? ""}:${docId}`;
+  let pending = cache.get(key);
   if (!pending) {
-    pending = api.document(docId);
-    pending.catch(() => cache.delete(docId));
-    cache.set(docId, pending);
+    pending = api.document(docId, setId ?? undefined);
+    pending.catch(() => cache.delete(key));
+    cache.set(key, pending);
   }
   return pending;
 }
@@ -24,28 +25,33 @@ export function DocumentPanel({
   runId,
   source,
   citedIds,
+  setId = null,
+  sectionKey = null,
 }: {
   runId: string;
   source: Source | null;
   citedIds: string[];
+  setId?: string | null;
+  sectionKey?: string | null;
 }) {
   const [doc, setDoc] = useState<{ id: string; view: DocumentView } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const body = useRef<HTMLDivElement>(null);
   const marked = useRef<HTMLElement>(null);
+  const sectionMark = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!source) return;
     let current = true;
     setError(null);
-    loadDocument(runId, source.doc_id).then(
+    loadDocument(runId, source.doc_id, setId).then(
       (view) => current && setDoc({ id: `${runId}:${source.doc_id}`, view }),
       (e) => current && setError(e instanceof ApiError ? e.message : "Dokument se nepodařilo načíst."),
     );
     return () => {
       current = false;
     };
-  }, [runId, source]);
+  }, [runId, source, setId]);
 
   // Fit the sheet into the window, so the selected sentence is never below the fold.
   // Narrow layouts, where the sheet sits below the answer, keep the CSS height.
@@ -66,11 +72,11 @@ export function DocumentPanel({
   // Scroll only inside the sheet, so choosing a citation never moves the page.
   useEffect(() => {
     const container = body.current;
-    const mark = marked.current;
+    const mark = marked.current ?? sectionMark.current;
     if (!container || !mark) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     container.scrollTo?.({ top: Math.max(0, mark.offsetTop - 48), behavior: reduced ? "auto" : "smooth" });
-  }, [doc, source]);
+  }, [doc, source, sectionKey]);
 
   if (!source) return null;
   const view = doc?.id === `${runId}:${source.doc_id}` ? doc.view : null;
@@ -90,7 +96,7 @@ export function DocumentPanel({
       {view && (
         <div className="paper-body" ref={body} tabIndex={0} role="region" aria-label="Text dokumentu">
           {view.sections.map((section) => (
-            <section key={section.key}>
+            <section key={section.key} ref={section.key === sectionKey ? sectionMark : undefined}>
               <h3>{section.heading}</h3>
               <p className="text">
                 {section.sentences.map((sentence) => {

@@ -221,12 +221,14 @@ def test_ask_answered_is_public_live_projection(client, rig, language):
     assert record.origin == "api"
     assert record.question == QUESTION
     assert body == record.to_response().model_dump(mode="json")
+    assert body["refusal"] is None
     assert set(body) == {
         "run_id",
         "mode",
         "status",
         "answer_language",
         "refusal_code",
+        "refusal",
         "claims",
         "sources",
         "metrics",
@@ -236,6 +238,7 @@ def test_ask_answered_is_public_live_projection(client, rig, language):
 
 def test_ask_refused_is_200_with_no_unverified_text(client, rig):
     rig.results["verify"]["verdicts"][0]["verdict"] = "unsupported"
+    rig.results["verify"]["verdicts"][0]["reason"] = "VERIFIER-SECRET-REASON"
     response = client.post("/api/ask", json={"question": QUESTION})
     assert response.status_code == 200
     body = response.json()
@@ -244,7 +247,18 @@ def test_ask_refused_is_200_with_no_unverified_text(client, rig):
     assert body["answer_language"] is None
     assert body["claims"] == body["sources"] == []
     assert body["mode"] == "live"
+    assert body["refusal"]["step"] == "verifier_unsupported"
+    assert body["refusal"]["rejected_claims"] == 1
+    assert body["refusal"]["failed_check"] is None
+    assert body["refusal"]["sections"]
+    section_keys = {item["section_key"] for item in body["refusal"]["sections"]}
+    assert "returns.return-window" in section_keys
     assert "within 30 days" not in response.text
+    assert "VERIFIER-SECRET-REASON" not in response.text
+    assert "Zboží můžete vrátit do 30 dnů." not in response.text
+    record = read_record(next(rig.settings.runs_dir.glob("*.json")))
+    assert record.verdicts[0].reason == "VERIFIER-SECRET-REASON"
+    assert record.document_set == rig.settings.data_dir.name
     assert_headers(response)
 
 
@@ -624,6 +638,200 @@ def test_held_local_index_is_unavailable_without_provider_calls(rig):
         assert health["status"] == "not_ready" and not health["index_ready"]
         assert_error(client.post("/api/ask", json={"question": QUESTION}), 503, "index_unavailable")
     assert rig.calls == []
+
+
+def _context_for(settings: Settings, sentence: str, section_index_factory):
+    corpus = load_corpus(settings.data_dir)
+    ledger = BudgetLedger(
+        settings.spend_db_path,
+        settings.budget_cap_usd,
+        settings.price_table_version,
+        price_table=settings.price_table,
+    )
+    fake = DeterministicFakeEmbedding(size=8)
+
+    def embed(**kwargs):
+        return SimpleNamespace(
+            data=[
+                SimpleNamespace(index=i, embedding=vector)
+                for i, vector in enumerate(fake.embed_documents(kwargs["input"]))
+            ],
+            usage=SimpleNamespace(prompt_tokens=1, total_tokens=1),
+        )
+
+    embeddings = UsageTrackingEmbeddings(
+        settings, ledger, client=SimpleNamespace(embeddings=SimpleNamespace(create=embed))
+    )
+    citation = f"{settings.data_dir.name}.rule.1"
+    generated = {
+        "status": "answered",
+        "answer_language": "en",
+        "claims": [{"text": sentence, "citations": [citation]}],
+    }
+    verified = {"verdicts": [{"claim_index": 0, "verdict": "supported", "reason": "Explicit."}]}
+
+    def invoke(node, messages):
+        result = generated if node == "generate" else verified
+        return {
+            "parsed": result,
+            "parsing_error": None,
+            "raw": AIMessage(
+                content=json.dumps(result),
+                usage_metadata={"input_tokens": 10, "output_tokens": 5, "total_tokens": 15},
+            ),
+        }
+
+    return AnswerContext(
+        settings=settings,
+        corpus=corpus,
+        ledger=ledger,
+        embeddings=embeddings,
+        store=section_index_factory(section_documents(corpus), embeddings),
+        generator=RunnableLambda(lambda messages: invoke("generate", messages)),
+        verifier=RunnableLambda(lambda messages: invoke("verify", messages)),
+    )
+
+
+def test_server_answers_each_document_set_from_its_own_index(tmp_path, section_index_factory):
+    runtime = tmp_path / "runtime"
+    names = ("alpha", "gamma", "beta")
+    sentences = {
+        "alpha": "Alpha goods are accepted.",
+        "gamma": "Gamma goods are accepted.",
+        "beta": "Beta goods are accepted.",
+    }
+    for name in names:
+        directory = tmp_path / name
+        directory.mkdir()
+        (directory / f"{name}.md").write_text(
+            f"# {name}\n\n## Rule {{#rule}}\n{sentences[name]}\n",
+            encoding="utf-8",
+        )
+        (directory / "set.json").write_text(
+            json.dumps({"title": f"Sada {name}"}),
+            encoding="utf-8",
+        )
+    settings = Settings(
+        _env_file=None,
+        openai_api_key=SecretStr(SECRET),
+        data_dir=tmp_path / "alpha",
+        data_dirs=",".join(str(tmp_path / name) for name in names),
+        runtime_dir=runtime,
+        embedding_dimensions=8,
+    )
+    contexts = {
+        name: _context_for(
+            settings.for_data_dir(tmp_path / name), sentences[name], section_index_factory
+        )
+        for name in ("alpha", "beta")
+    }
+
+    def factory(active):
+        if active.data_dir.name == "gamma":
+            raise IndexMissingError("missing index")
+        return contexts[active.data_dir.name]
+
+    with TestClient(api.create_app(settings=settings, context_factory=factory)) as client:
+        listed = client.get("/api/sets")
+        assert listed.status_code == 200
+        assert listed.json() == [
+            {"id": "alpha", "title": "Sada alpha", "document_count": 1, "ready": True},
+            {"id": "gamma", "title": "Sada gamma", "document_count": 1, "ready": False},
+            {"id": "beta", "title": "Sada beta", "document_count": 1, "ready": True},
+        ]
+        health = client.get("/api/health").json()
+        assert health["status"] == "ok"
+        assert health["index_ready"] is True
+        assert health["corpus_hash"] is None
+        assert health["document_count"] == 3
+        assert health["sentence_count"] == 3
+
+        default = client.post("/api/ask", json={"question": QUESTION})
+        assert default.status_code == 200
+        assert default.json()["claims"][0]["text"] == sentences["alpha"]
+        assert "Beta goods" not in default.text
+        alpha_record = read_record(next(settings.runs_dir.glob("*.json")))
+        assert alpha_record.document_set == "alpha"
+
+        beta = client.post("/api/ask", json={"question": QUESTION, "set": "beta"})
+        assert beta.status_code == 200
+        assert beta.json()["claims"][0]["text"] == sentences["beta"]
+        assert "Alpha goods" not in beta.text
+        beta_path = settings.runs_dir / f"{beta.json()['run_id']}.json"
+        assert read_record(beta_path).document_set == "beta"
+
+        assert client.get("/api/documents/alpha").json()["title"] == "alpha"
+        beta_doc = client.get("/api/documents/beta", params={"set": "beta"})
+        assert beta_doc.json()["file_name"] == "beta.md"
+        assert_error(
+            client.get("/api/documents/alpha", params={"set": "beta"}),
+            404,
+            "not_found",
+            ask=False,
+        )
+        refused = client.post("/api/ask", json={"question": QUESTION, "set": "gamma"})
+        assert_error(refused, 503, "index_unavailable")
+        unknown = client.post("/api/ask", json={"question": QUESTION, "set": "nope"})
+        assert_error(unknown, 422, "invalid_request")
+        bad_name = client.get("/api/documents/beta", params={"set": "Nope"})
+        assert_error(bad_name, 422, "invalid_request", ask=False)
+
+
+def test_feedback_is_private_append_only_and_validated(client, rig):
+    asked = client.post("/api/ask", json={"question": QUESTION})
+    run_id = asked.json()["run_id"]
+    record_path = rig.settings.runs_dir / f"{run_id}.json"
+    before = record_path.read_bytes()
+    saved = client.post(
+        f"/api/runs/{run_id}/feedback",
+        json={"note": "Chybí krok.", "label": "missing_step"},
+    )
+    assert saved.status_code == 200
+    assert saved.json() == {"saved": True}
+    assert record_path.read_bytes() == before
+    path = rig.settings.feedback_dir / f"{run_id}.jsonl"
+    assert path.stat().st_mode & 0o777 == 0o600
+    assert path.parent.stat().st_mode & 0o777 == 0o700
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 1
+    again = client.post(f"/api/runs/{run_id}/feedback", json={"label": "other"})
+    assert again.status_code == 200
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 2
+    assert_error(
+        client.post("/api/runs/deadbeef/feedback", json={"note": "missing"}),
+        404,
+        "not_found",
+    )
+    assert_error(
+        client.post("/api/runs/.hidden/feedback", json={"note": "bad id"}),
+        422,
+        "invalid_request",
+    )
+    assert_error(
+        client.post(f"/api/runs/{run_id}/feedback", json={"note": "x" * 1001}),
+        422,
+        "invalid_request",
+    )
+    assert_error(client.post(f"/api/runs/{run_id}/feedback", json={}), 422, "invalid_request")
+    assert len(path.read_text(encoding="utf-8").splitlines()) == 2
+
+
+def test_check_failure_names_the_check_and_hides_the_claim(client, rig):
+    rig.results["generate"]["claims"][0]["text"] = "The hidden fee is 99999 crowns."
+    response = client.post("/api/ask", json={"question": QUESTION})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["refusal_code"] == "check_failed"
+    assert body["refusal"] == {
+        "step": "deterministic_check",
+        "rejected_claims": 1,
+        "failed_check": "literal_not_in_citations",
+        "sections": body["refusal"]["sections"],
+    }
+    assert body["refusal"]["sections"]
+    assert "99999" not in response.text
+    assert "hidden fee" not in response.text
+    record = read_record(next(rig.settings.runs_dir.glob("*.json")))
+    assert record.candidate_claims[0].text == "The hidden fee is 99999 crowns."
 
 
 def test_independent_readiness_probe_releases_index_lock(rig):

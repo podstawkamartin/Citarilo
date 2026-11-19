@@ -204,6 +204,35 @@ button {
   background: var(--amber-mark);
 }
 
+.set-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--soft);
+  font: 500 11px var(--mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.set-switch select {
+  max-width: 16rem;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 400 13px/1.3 var(--sans);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.set-switch select:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
 .theme {
   display: grid;
   place-items: center;
@@ -410,6 +439,132 @@ code {
   margin: 0;
   color: var(--body);
   font-size: 16px;
+}
+
+.refusal-detail {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.refusal-detail p {
+  font-size: 14px;
+}
+
+.sections-label {
+  margin: 4px 0 0;
+  color: var(--soft);
+  font: 500 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sections {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sections button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--green-b);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 400 14px/1.4 var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.sections button[aria-pressed="true"] {
+  background: var(--green-bg);
+}
+
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 680px;
+  margin-top: 14px;
+}
+
+.examples button {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--body);
+  font: 400 13px/1.4 var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.examples button:focus-visible,
+.sections button:focus-visible,
+.note button:focus-visible,
+.note select:focus-visible,
+.note textarea:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.note {
+  max-width: 640px;
+  margin-top: 22px;
+}
+
+.note label {
+  color: var(--soft);
+  font: 500 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.note textarea,
+.note select {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 400 14px/1.45 var(--sans);
+}
+
+.note textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.note-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.note button {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.note button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.note p {
+  margin: 8px 0 0;
+  color: var(--body);
 }
 
 /* nested cards */
@@ -1037,6 +1192,21 @@ svg.threads path {
 @media (prefers-reduced-motion: reduce) {
   .send.busy svg {
     animation: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .top {
+    flex-wrap: wrap;
+  }
+
+  .set-switch {
+    flex: 1 1 100%;
+  }
+
+  .set-switch select {
+    flex: 1 1 auto;
+    max-width: none;
   }
 }
 

@@ -9,7 +9,7 @@ import { type Link, useThreads } from "./threads";
 const citeId = (sentenceId: string) => `cite-${sentenceId.replace(/[^\w-]/g, "_")}`;
 
 /** An answered question: claims, their citations, the source document and how it was checked. */
-export function Answer({ result }: { result: AskResponse }) {
+export function Answer({ result, setId = null }: { result: AskResponse; setId?: string | null }) {
   const [selected, setSelected] = useState<string | null>(result.claims[0]?.citations[0] ?? null);
   const [focused, setFocused] = useState<number | null>(null);
   const board = useRef<HTMLDivElement>(null);
@@ -108,7 +108,7 @@ export function Answer({ result }: { result: AskResponse }) {
         </section>
 
         <p className="eyebrow col-label l-soft gap">Zdrojový dokument</p>
-        <DocumentPanel runId={result.run_id} source={selectedSource} citedIds={citedIds} />
+        <DocumentPanel runId={result.run_id} source={selectedSource} citedIds={citedIds} setId={setId} />
       </div>
 
       <svg className="threads" aria-hidden="true">

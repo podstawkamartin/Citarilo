@@ -50,7 +50,7 @@ from citarilo.pipeline import (
     create_live_context,
     validate_question,
 )
-from citarilo.records import RunRecord, iter_records, read_record
+from citarilo.records import RunRecord, iter_records, read_feedback, read_record
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 _RUN_ID = r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}"
@@ -108,6 +108,9 @@ def main(
     )
     runs = commands.add_parser("runs", help="List local answer audits. Offline; no network.")
     runs.add_argument("--failed", action="store_true", help="Show only refused runs and why.")
+    runs.add_argument(
+        "--feedback", action="store_true", help="Show only runs that have an operator note."
+    )
     runs.add_argument("--since", metavar="YYYY-MM-DD", type=_utc_day)
     runs.add_argument("--limit", type=int, metavar="N", help="Show at most N runs.")
     runs.add_argument(
@@ -332,7 +335,7 @@ def _print_run(record: RunRecord, *, failed: bool) -> None:
             print(f"    reason: {verdict.reason}")
 
 
-def _case_stub(record: RunRecord) -> dict[str, object]:
+def _case_stub(record: RunRecord, *, note: str | None = None) -> dict[str, object]:
     """Empty expectations plus cited IDs. EvalCase rejects this shape on purpose."""
     cited: list[str] = []
     claims = record.claims or record.candidate_claims
@@ -340,7 +343,7 @@ def _case_stub(record: RunRecord) -> dict[str, object]:
         for citation in claim.citations:
             if citation not in cited:
                 cited.append(citation)
-    return {
+    stub: dict[str, object] = {
         "id": f"manual-{record.run_id[:8].lower()}",
         "split": "dev",
         "question": record.question,
@@ -354,6 +357,9 @@ def _case_stub(record: RunRecord) -> dict[str, object]:
         "tags": ["manual"],
         "hint_cited_ids": cited,
     }
+    if note:
+        stub["note"] = note
+    return stub
 
 
 def _jsonl_ids(path: Path) -> set[str]:
@@ -414,7 +420,17 @@ def _export_case(
     if eval_set not in available:
         names = ", ".join(available) or "none"
         parser.exit(1, f"citarilo: error: Select a valid --eval-set; available sets: {names}.\n")
-    stub = _case_stub(record)
+    notes = read_feedback(settings.feedback_dir, run_id)
+    parts: list[str] = []
+    for entry in notes:
+        text = entry.note.strip()
+        if entry.label and text:
+            parts.append(f"[{entry.label}] {text}")
+        elif entry.label:
+            parts.append(f"[{entry.label}]")
+        elif text:
+            parts.append(text)
+    stub = _case_stub(record, note="\n".join(parts) or None)
     case_id = str(stub["id"])
     set_dir = evals_dir / eval_set
     cases_path = set_dir / "cases.jsonl"
@@ -437,8 +453,23 @@ def _export_case(
     )
 
 
+def _feedback_lines(settings: Settings, record: RunRecord) -> list[str]:
+    lines: list[str] = []
+    for entry in read_feedback(settings.feedback_dir, record.run_id):
+        text = entry.note.strip()
+        label = entry.label or "-"
+        lines.append(f"  {label}  {text}".rstrip())
+    return lines
+
+
 def _runs(parser: argparse.ArgumentParser, settings: Settings, args: argparse.Namespace) -> None:
-    listing = args.failed or args.since is not None or args.limit is not None or args.include_evals
+    listing = (
+        args.failed
+        or args.feedback
+        or args.since is not None
+        or args.limit is not None
+        or args.include_evals
+    )
     if args.to_case or args.eval_set:
         if not args.to_case or not args.eval_set:
             parser.exit(1, "citarilo: error: --to-case and --eval-set are required together.\n")
@@ -462,12 +493,17 @@ def _runs(parser: argparse.ArgumentParser, settings: Settings, args: argparse.Na
             continue
         if args.failed and record.status != "refused":
             continue
+        if args.feedback and not read_feedback(settings.feedback_dir, record.run_id):
+            continue
         selected.append(record)
     selected.sort(key=lambda record: (record.created_at, record.run_id), reverse=True)
     if args.limit is not None:
         selected = selected[: args.limit]
     for record in selected:
         _print_run(record, failed=args.failed)
+        if args.feedback:
+            for line in _feedback_lines(settings, record):
+                print(line)
 
 
 def _unknown_ids(ids: list[str]) -> None:

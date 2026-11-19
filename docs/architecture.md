@@ -30,7 +30,11 @@ flowchart TD
 - Neověřený text nikdy neopustí server. Odpověď skládá kód pouze
   z tvrzení, která prošla kontrolami, proto se nestreamuje.
 - Odmítnutí znamená chybějící nebo nepodložené důkazy (HTTP 200 s kódem
-  důvodu). Technická chyba nebo vyčerpaný rozpočet je chyba (502/503).
+  důvodu). Veřejné vysvětlení říká, který krok návrh zamítl, kolik tvrzení
+  neprošlo, název neúspěšné deterministické kontroly a nalezené oddíly
+  (název dokumentu, nadpis, id). Text zamítnutých tvrzení ani volný důvod
+  ověřovače v odpovědi nejsou; zůstávají jen v záznamu běhu.
+  Technická chyba nebo vyčerpaný rozpočet je chyba (502/503).
 - Validace, limity, rozpočet a uložení záznamu jsou mimo graf. Graf řídí
   pouze rozhodování o důkazech.
 - Záznam běhu a vyúčtování se uloží i při chybě poskytovatele.
@@ -129,8 +133,12 @@ tests/
   skriptem `scripts/fetch_regulations.py` (připnuté znění a počet fragmentů,
   deterministický výstup). Paragraf je sekce, odstavec, písmeno a bod jsou
   věty; položka výčtu nese svůj úvod za pomlčkou a řádek tabulky je jedna věta
-  s popisky sloupců. Server odpovídá z jedné sady (`DATA_DIR`), každá sada má
-  vlastní index i evaluační případy (`--eval-set`).
+  s popisky sloupců. Server může najednou držet několik sad (`DATA_DIRS`,
+  čárkami oddělené adresáře; prázdné znamená jen `DATA_DIR`). Každá sada má
+  vlastní index i evaluační případy (`--eval-set`) a odpověď je nikdy nemíchá.
+  Id sady je název adresáře. Volitelný `set.json` s polem `title` dává sadě
+  název; jinak se použije název adresáře. Sada s chybějícím nebo zastaralým
+  indexem je nedostupná a ostatní sady běží dál.
 - Sekce H2 nese explicitní anglické ID (`## Lhůta pro vrácení {#return-window}`)
   a je jednotkou vyhledávání. Jedna věta na řádek je jednotka citace:
   `returns.return-window.2`.
@@ -143,14 +151,19 @@ tests/
   obsahuje kontrolní součet textu, metadat i vektorů přečtených zpět z úložiště.
   Odhalí poškození a nekonzistentní sestavení, nechrání před útočníkem
   s možností lokálního zápisu. Načtení nevolá model.
-- Aplikační výhradní zámek `.runtime/index.lock` se získává před indexací
-  a před otevřením indexu, včetně intervalu zavření a opětovného otevření
-  Qdrantu. Indexace po úspěšném embeddingu odstraní celé staré úložiště
+- Aplikační výhradní zámek `.runtime/index.lock` je jeden na celý runtime, ne
+  na každý index. Získává se před indexací a před otevřením indexu, včetně
+  intervalu zavření a opětovného otevření Qdrantu. Qdrant v lokálním režimu
+  zamyká každý adresář úložiště zvlášť, takže jeden proces může mít otevřených
+  víc indexů: další `load_index` se k už drženému zámku připojí. Výhradní
+  získání (indexace, jiný proces, nebo zámek držený výhradně) se nepřipojí
+  a skončí chybou, aniž by úložiště otevřelo. Jiný proces tedy index pořád
+  vlastnit nemůže. Indexace po úspěšném embeddingu odstraní celé staré úložiště
   a vytvoří nové, takže opraví i poškozený index bez načtení jeho obsahu.
-- Index se ověřuje při startu. Pouze připravený server drží tento stav
-  i zámek do ukončení; nepřipravený server při sondě index otevře a zavře.
-  Před `ingest`, CLI `ask` nebo `eval` server zastavte. Po indexaci ho znovu
-  spusťte. Chybějící či neplatný index zámek nedrží; serverový režim Qdrantu
+- Index se ověřuje při startu. Server drží zámek, dokud má otevřený aspoň
+  jeden index; sonda nedostupného indexu zámek neponechá. Před `ingest`,
+  CLI `ask` nebo `eval` server zastavte. Po indexaci ho znovu spusťte.
+  Chybějící či neplatný index zámek nedrží; serverový režim Qdrantu
   ani automatické přenačítání nejsou zapojené.
 - Otázky anglicky i česky (i bez diakritiky). Odpověď je v jazyce otázky
   (`answer_language`, pro atribut `lang` ve frontendu), zdroje v původní
@@ -221,9 +234,13 @@ důkazem pravdivosti. Jeho chybovost měříme (viz Evaluace).
 ## HTTP API
 
 - `POST /api/ask` → `run_id`, `mode`, `status`, kód důvodu odmítnutí,
-  tvrzení s citacemi, zdrojové věty, metriky (latence, tokeny, cena,
-  časy uzlů).
-- `GET /api/health`, `GET /api/documents/{id}`.
+  bezpečné vysvětlení odmítnutí, tvrzení s citacemi, zdrojové věty, metriky
+  (latence, tokeny, cena, časy uzlů). Volitelné pole `set` vybírá sadu.
+- `GET /api/sets`, `GET /api/health`, `GET /api/documents/{id}?set=`.
+- `POST /api/runs/{run_id}/feedback` připisuje poznámku do
+  `.runtime/feedback/<run_id>.jsonl` (append-only, práva jako ostatní stav
+  v runtime). Soubor záznamu běhu se nemění. `citarilo runs --feedback`
+  poznámky vypíše a `--to-case` je přenese do návrhu případu.
 - Chyby: `{"error": {"code", "message"}}`.
 - Frontend vykresluje pouze prostý text; citace přicházejí strukturovaně.
 

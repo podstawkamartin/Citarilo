@@ -37,9 +37,15 @@ sections, calls, latency, cost and safe errors. Unrun cases remain present with
 null status/run ID. The underlying answer run audits remain under `runs/`.
 `citarilo runs` lists those audits newest first and omits eval runs unless
 `--include-evals`; `--failed` prints each check failure and each rejecting verdict.
+`citarilo runs --feedback` lists only runs that have an operator note (question,
+status or refusal code, label, note and run id). Notes live in
+`.runtime/feedback/<run_id>.jsonl` and do not alter the run record. The public
+refusal explanation names the rejecting step, how many draft claims were rejected,
+the failed deterministic check and the retrieved sections; it never includes claim
+text or the verifier's free-text reason.
 `citarilo runs --to-case RUN_ID --eval-set SET` writes a stub a human must complete
-with expected facts; a stub that is not a valid case goes to `manual_cases.jsonl`,
-which eval does not load.
+with expected facts and copies any note onto that stub; a stub that is not a valid
+case goes to `manual_cases.jsonl`, which eval does not load.
 Probe cases contain the probe label, run ID, cited claim, full sections, verdict,
 calls and errors; `pairs` groups IDs and records completeness and exact correctness.
 

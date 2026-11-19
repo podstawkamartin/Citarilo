@@ -37,8 +37,9 @@ a má vlastní evaluační případy:
   a údržbový řád pásového dopravníku, fiktivní testovací dokument se
   smyšlenými hodnotami, který u lhůt revizí odkazuje na předpisy.
 
-Běžící server odpovídá z jedné sady, kterou určuje `DATA_DIR`; sady se nikdy
-nemíchají v jednom indexu ani v jedné odpovědi.
+Běžící server může odpovídat z několika sad najednou (`DATA_DIRS`). Každá sada
+má vlastní index a odpověď sady nikdy nemíchá. `DATA_DIR` pořád vybírá jednu
+sadu pro `ingest`, `ask` a `eval`.
 
 ## Čím se liší
 
@@ -191,7 +192,11 @@ stejné adrese jako API:
 ```sh
 cd frontend && npm ci && npm run build && cd ..
 uv run citarilo serve             # http://127.0.0.1:5177
+DATA_DIRS=data/trailsupply,data/regulations uv run citarilo serve
 ```
+
+Každou sadu je potřeba jednou zaindexovat při zastaveném serveru. Stránka pak
+nabízí přepínač sad; odpověď zůstane vždy v sadě, která byla vybraná.
 
 Rozhraní je česky. Odpověď ukáže tvrzení, citované věty, zdrojový dokument se
 zvýrazněnou vybranou větou a kontroly, kterými prošla, včetně času a ceny.
@@ -210,10 +215,13 @@ DATA_DIR=data/regulations uv run citarilo eval --live --max-usd 0.12
 
 Každá otázka položená přes `ask` nebo webové rozhraní zanechá záznam běhu
 v `.runtime/runs`. U odmítnutých běhů je vidět, který krok odpověď zamítl
-a proč; z běhu lze vytvořit návrh testovacího případu ke kontrole:
+a proč. Ve webovém rozhraní lze k odpovědi i k odmítnutí připsat poznámku;
+`citarilo runs --feedback` tyto poznámky vypíše a `--to-case` je přenese
+do návrhu případu:
 
 ```sh
 uv run citarilo runs --failed --since 2026-11-19
+uv run citarilo runs --feedback
 uv run citarilo runs --to-case RUN_ID --eval-set regulations
 ```
 
@@ -250,9 +258,11 @@ dokumenty; odpověď je v jazyce otázky (česky nebo anglicky).
 
 | Endpoint | Popis |
 |---|---|
-| `POST /api/ask` | `{"question": "..."}` → stav, kód odmítnutí, tvrzení s citacemi, zdrojové věty, jazyk odpovědi, metriky |
-| `GET /api/health` | připravenost indexu a klíče, hash korpusu, počty dokumentů a citovatelných vět (`document_count`, `sentence_count`; bez korpusu 0), zbývající rozpočet |
-| `GET /api/documents/{id}` | dokument po sekcích a větách s ID, název souboru (`file_name`, bez cesty) |
+| `POST /api/ask` | `{"question": "...", "set"?: "<id>"}` → stav, kód odmítnutí, bezpečné vysvětlení odmítnutí, tvrzení s citacemi, zdrojové věty, jazyk odpovědi, metriky. `set` je implicitně první nastavená sada |
+| `GET /api/sets` | sady dokumentů: `id`, `title`, `document_count`, `ready` |
+| `GET /api/health` | připravenost indexu a klíče, hash korpusu (jen při jedné sadě), počty dokumentů a citovatelných vět (`document_count`, `sentence_count`; bez korpusu 0), zbývající rozpočet |
+| `GET /api/documents/{id}` | dokument po sekcích a větách s ID, název souboru (`file_name`, bez cesty). Volitelný parametr `set` |
+| `POST /api/runs/{run_id}/feedback` | `{"note"?: "...", "label"?: "..."}` připíše místní poznámku (nejvýše 1000 znaků). Záznam běhu se nemění |
 
 Chyby mají jednotný tvar `{"error": {"code", "message"}}` (413, 422, 429,
 502, 503). Dotaz je omezený na 3–500 znaků a 4 KiB, zpracovává se jeden
@@ -301,8 +311,9 @@ Actions.
   příkazy `import` a `ingest`, ne přes webové rozhraní.
 - Jednotlivé otázky bez konverzace; bez streamování, hybridního vyhledávání
   a rerankingu.
-- Jedna sada dokumentů na běžící server; přepnutí sady znamená restart s jiným
-  `DATA_DIR`. Zdrojové dokumenty se očekávají v češtině.
+- Najednou lze servírovat několik sad přes `DATA_DIRS`; odpověď je nikdy nemíchá.
+  `ingest`, CLI `ask` a `eval` pořád používají jednu `DATA_DIR` a server musí
+  být nejdřív zastavený. Zdrojové dokumenty se očekávají v češtině.
 - Ověření kombinuje deterministické kontroly a posouzení modelem, takže není
   důkazem pravdivosti; jeho chybovost se měří. Data zákaznické podpory jsou
   fiktivní stejně jako řád dopravníku, předpisy jsou skutečné právní texty.

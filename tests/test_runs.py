@@ -22,6 +22,7 @@ from citarilo.records import (
     RetrievedSection,
     RunRecord,
     Source,
+    append_feedback,
     write_record,
 )
 
@@ -207,6 +208,46 @@ def test_invalid_run_file_is_skipped(
     assert record.run_id in captured.out
     assert "Skipping unreadable or invalid run file broken.json" in captured.err
     assert "notes.txt" not in captured.err
+
+
+def test_feedback_lists_the_note_and_to_case_copies_it(
+    settings: Settings, tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch
+) -> None:
+    monkeypatch.setattr(cli_module, "_REPO_ROOT", tmp_path)
+    set_dir = tmp_path / "evals" / "sample"
+    set_dir.mkdir(parents=True)
+    (set_dir / "cases.jsonl").write_text('{"id": "already"}\n', encoding="utf-8")
+    noted = _record(
+        "abcd1234abcd1234abcd1234abcd1234",
+        datetime(2026, 11, 18, tzinfo=UTC),
+        question="When can goods be returned?",
+        answer_language="en",
+    )
+    plain = _record(
+        "bbbb1234bbbb1234bbbb1234bbbb1234",
+        datetime(2026, 11, 19, tzinfo=UTC),
+    )
+    write_record(noted, settings.runs_dir)
+    write_record(plain, settings.runs_dir)
+    append_feedback(settings.feedback_dir, noted.run_id, label="other", note="Operator saw a gap.")
+    with pytest.raises(SystemExit) as conflict:
+        main(
+            ["runs", "--to-case", noted.run_id, "--eval-set", "sample", "--feedback"],
+            settings=settings,
+        )
+    assert conflict.value.code == 1
+    main(["runs", "--feedback"], settings=settings)
+    listed = capsys.readouterr().out
+    assert noted.run_id in listed
+    assert noted.question in listed
+    assert "answered" in listed
+    assert "other" in listed
+    assert "Operator saw a gap." in listed
+    assert plain.run_id not in listed
+    main(["runs", "--to-case", noted.run_id, "--eval-set", "sample"], settings=settings)
+    stub = json.loads((set_dir / "manual_cases.jsonl").read_text(encoding="utf-8"))
+    assert stub["note"] == "[other] Operator saw a gap."
+    assert stub["question"] == noted.question
 
 
 def test_to_case_writes_a_stub_outside_the_eval_loader_and_refuses_duplicates(

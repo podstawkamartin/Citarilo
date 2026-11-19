@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import tempfile
 from collections.abc import Callable, Iterator
@@ -23,13 +24,25 @@ from pydantic import (
     model_validator,
 )
 
-from citarilo.config import ReasoningEffort, Settings
+from citarilo.config import ReasoningEffort, Settings, make_private_dir
 
 SCHEMA_VERSION = 1
+MAX_FEEDBACK_NOTE = 1000
+_RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}\Z")
 
 type Mode = Literal["live", "fake", "replay"]
 type Status = Literal["answered", "refused", "error"]
 type RefusalCode = Literal["insufficient_evidence", "check_failed", "unsupported", "contradicted"]
+type RefusalStep = Literal[
+    "no_evidence", "deterministic_check", "verifier_unsupported", "verifier_contradicted"
+]
+type CheckName = Literal[
+    "invalid_citation_count",
+    "unknown_citation",
+    "literal_not_in_citations",
+    "language_mismatch",
+]
+type FeedbackLabel = Literal["wrongly_refused", "wrong_or_dangerous", "missing_step", "other"]
 type Verdict = Literal["supported", "unsupported", "contradicted"]
 type Origin = Literal["api", "eval"]
 type AnswerLanguage = Literal["en", "cs"]
@@ -217,6 +230,38 @@ def _validate_final(
         raise ValueError("sources must cover exactly the cited sentences")
 
 
+_REFUSAL_STEP: dict[RefusalCode, RefusalStep] = {
+    "insufficient_evidence": "no_evidence",
+    "check_failed": "deterministic_check",
+    "unsupported": "verifier_unsupported",
+    "contradicted": "verifier_contradicted",
+}
+_CHECK_NAMES: dict[str, CheckName] = {
+    "invalid_citation_count": "invalid_citation_count",
+    "unknown_citation": "unknown_citation",
+    "literal_not_in_citations": "literal_not_in_citations",
+    "language_mismatch": "language_mismatch",
+}
+
+
+class RefusalSection(RecordModel):
+    """A retrieved section the reader may open. No sentence or claim text."""
+
+    doc_id: Text
+    doc_title: Text
+    heading: Text
+    section_key: Text
+
+
+class RefusalExplanation(RecordModel):
+    """Why a draft was refused, without unverified claim text or verifier prose."""
+
+    step: RefusalStep
+    rejected_claims: int = Field(ge=0, strict=True)
+    failed_check: CheckName | None = None
+    sections: tuple[RefusalSection, ...] = ()
+
+
 class AskResponse(RecordModel):
     """HTTP 200 body, with no internal audit fields."""
 
@@ -225,6 +270,7 @@ class AskResponse(RecordModel):
     status: Literal["answered", "refused"]
     answer_language: AnswerLanguage | None = None
     refusal_code: RefusalCode | None = None
+    refusal: RefusalExplanation | None = None
     claims: tuple[Claim, ...] = ()
     sources: tuple[Source, ...] = ()
     metrics: Metrics
@@ -234,6 +280,19 @@ class AskResponse(RecordModel):
         _validate_final(
             self.status, self.refusal_code, self.claims, self.sources, self.answer_language
         )
+        expected = None if self.refusal_code is None else _REFUSAL_STEP[self.refusal_code]
+        if (self.refusal is None) != (expected is None):
+            raise ValueError(
+                "refused status requires a refusal explanation, and only refused may have one"
+            )
+        if self.refusal is not None and self.refusal.step != expected:
+            raise ValueError("refusal explanation does not match the refusal code")
+        if (
+            self.refusal is not None
+            and self.refusal_code != "check_failed"
+            and self.refusal.failed_check is not None
+        ):
+            raise ValueError("only a failed deterministic check names a check")
         return self
 
 
@@ -257,6 +316,7 @@ class RunRecord(RecordModel):
     eval_case_id: Text | None = None
     git: GitInfo
     corpus_hash: Text
+    document_set: Text | None = None
     prompt_version: Text
     config: ConfigSnapshot
     question: Text
@@ -334,10 +394,133 @@ class RunRecord(RecordModel):
             status=self.status,
             answer_language=self.answer_language,
             refusal_code=self.refusal_code,
+            refusal=refusal_explanation(self),
             claims=self.claims,
             sources=self.sources,
             metrics=self.metrics,
         )
+
+
+def refusal_explanation(record: RunRecord) -> RefusalExplanation | None:
+    """Project a refused audit into the public explanation.
+
+    Check names are a fixed code list. Verdict reasons and claim text stay in the audit.
+    """
+    if record.status != "refused" or record.refusal_code is None:
+        return None
+    sections = tuple(
+        RefusalSection(
+            doc_id=section.doc_id,
+            doc_title=section.doc_title,
+            heading=section.heading,
+            section_key=section.section_key,
+        )
+        for section in record.retrieved_sections
+    )
+    failed_check: CheckName | None = None
+    if record.refusal_code == "check_failed":
+        rejected = sum(1 for check in record.check_results if not check.ok)
+        for check in record.check_results:
+            if check.ok:
+                continue
+            for reason in check.reasons:
+                failed_check = _CHECK_NAMES.get(reason)
+                if failed_check is not None:
+                    break
+            if failed_check is not None:
+                break
+    elif record.refusal_code == "insufficient_evidence":
+        rejected = 0
+    else:
+        rejected = sum(1 for verdict in record.verdicts if verdict.verdict != "supported")
+    return RefusalExplanation(
+        step=_REFUSAL_STEP[record.refusal_code],
+        rejected_claims=rejected,
+        failed_check=failed_check,
+        sections=sections,
+    )
+
+
+class FeedbackEntry(RecordModel):
+    """One append-only note. It never changes the run record it refers to."""
+
+    created_at: datetime
+    label: FeedbackLabel | None = None
+    note: str = ""
+
+    @field_validator("created_at")
+    @classmethod
+    def utc_timestamp(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("created_at must be timezone-aware")
+        return value.astimezone(UTC)
+
+    @field_validator("note")
+    @classmethod
+    def bounded_note(cls, value: str) -> str:
+        if len(value) > MAX_FEEDBACK_NOTE:
+            raise ValueError("Note is too long")
+        return value
+
+    @model_validator(mode="after")
+    def not_empty(self) -> Self:
+        if self.label is None and not self.note.strip():
+            raise ValueError("A note needs text or a label")
+        return self
+
+
+def feedback_path(feedback_dir: str | Path, run_id: str) -> Path:
+    """Return the note file for a run id, rejecting anything that is not a bare id."""
+    if _RUN_ID.fullmatch(run_id) is None:
+        raise ValueError("Invalid run id")
+    directory = Path(feedback_dir)
+    path = directory / f"{run_id}.jsonl"
+    if path.parent.resolve() != directory.resolve():
+        raise ValueError("Invalid run id")
+    return path
+
+
+def append_feedback(
+    feedback_dir: str | Path,
+    run_id: str,
+    *,
+    label: FeedbackLabel | None,
+    note: str,
+) -> FeedbackEntry:
+    """Append one note. The file is private to its owner and is never rewritten."""
+    entry = FeedbackEntry(created_at=datetime.now(UTC), label=label, note=note)
+    directory = make_private_dir(Path(feedback_dir))
+    path = feedback_path(directory, run_id)
+    payload = json.dumps(entry.model_dump(mode="json"), ensure_ascii=False, sort_keys=True)
+    fd = os.open(path, os.O_APPEND | os.O_CREAT | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+    try:
+        os.chmod(path, 0o600)
+        os.write(fd, (payload + "\n").encode("utf-8"))
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    return entry
+
+
+def read_feedback(feedback_dir: str | Path, run_id: str) -> tuple[FeedbackEntry, ...]:
+    """Read valid notes for one run. A missing file is an empty tuple."""
+    try:
+        path = feedback_path(feedback_dir, run_id)
+    except ValueError:
+        return ()
+    try:
+        text = path.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        return ()
+    entries: list[FeedbackEntry] = []
+    for line in text.splitlines():
+        if not line.strip():
+            continue
+        try:
+            entries.append(FeedbackEntry.model_validate_json(line))
+        except (ValidationError, ValueError):
+            continue
+    return tuple(entries)
 
 
 def write_record(record: RunRecord, runs_dir: str | Path) -> Path:

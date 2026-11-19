@@ -8,11 +8,11 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, replace
 from pathlib import Path
 from threading import Lock
-from typing import Literal
+from typing import Annotated, Literal
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator, model_validator
 from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import MutableHeaders
 from starlette.exceptions import HTTPException
@@ -22,7 +22,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from citarilo import __version__, pipeline
 from citarilo.budget import BudgetExceeded, BudgetLedger
-from citarilo.config import Settings
+from citarilo.config import Settings, read_set_title, validate_set_name
 from citarilo.corpus import Corpus, CorpusError, load_corpus
 from citarilo.index import (
     IndexLockedError,
@@ -32,7 +32,13 @@ from citarilo.index import (
     UsageTrackingEmbeddings,
     load_index,
 )
-from citarilo.records import AskResponse
+from citarilo.records import (
+    MAX_FEEDBACK_NOTE,
+    AskResponse,
+    FeedbackLabel,
+    append_feedback,
+    read_record,
+)
 
 _MAX_BODY_BYTES = 4096
 # The web app is a static build: same-origin scripts, styles, fonts and API calls only.
@@ -85,6 +91,9 @@ class _APIGuards:
             await self.app(scope, receive, send)
             return
         response_started = False
+        # Ask and feedback are the writes. Bound both before JSON parsing.
+        # Every /api/ask response stays uncached, including a rejected GET.
+        is_write = scope.get("method") == "POST" and scope["path"].startswith("/api/")
         is_ask = scope["path"] == "/api/ask"
         host_allowed = _host_allowed(scope)
 
@@ -100,7 +109,7 @@ class _APIGuards:
                     if scope["path"].startswith("/api/") or not host_allowed
                     else _WEB_CSP
                 )
-                if is_ask:
+                if is_write or is_ask:
                     headers["Cache-Control"] = "no-store"
                 elif not scope["path"].startswith("/api/") and "Cache-Control" not in headers:
                     # Built assets have content hashes in their names and never change;
@@ -117,7 +126,7 @@ class _APIGuards:
             if not host_allowed:
                 await _error("invalid_host")(scope, receive, safe_send)
                 return
-            if is_ask:
+            if is_write:
                 body = bytearray()
                 async for chunk in Request(scope, receive).stream():
                     if len(body) + len(chunk) > _MAX_BODY_BYTES:
@@ -146,11 +155,47 @@ class AskRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", strict=True)
     question: str = Field(min_length=3, max_length=500)
+    set: str | None = None
 
     @field_validator("question")
     @classmethod
     def validate_question(cls, value: str) -> str:
         return pipeline.validate_question(value)
+
+    @field_validator("set")
+    @classmethod
+    def validate_set(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return validate_set_name(value)
+
+
+_FEEDBACK_LABELS = frozenset({"wrongly_refused", "wrong_or_dangerous", "missing_step", "other"})
+
+
+class FeedbackRequest(BaseModel):
+    """A short local note. The label is optional; the note is capped."""
+
+    model_config = ConfigDict(extra="forbid", strict=True)
+    label: FeedbackLabel | None = None
+    note: str = Field(default="", max_length=MAX_FEEDBACK_NOTE)
+
+    @field_validator("label")
+    @classmethod
+    def known_label(cls, value: FeedbackLabel | None) -> FeedbackLabel | None:
+        if value is not None and value not in _FEEDBACK_LABELS:
+            raise ValueError("Unknown label")
+        return value
+
+    @model_validator(mode="after")
+    def not_empty(self) -> FeedbackRequest:
+        if self.label is None and not self.note.strip():
+            raise ValueError("A note needs text or a label")
+        return self
+
+
+class FeedbackResponse(BaseModel):
+    saved: Literal[True] = True
 
 
 class HealthResponse(BaseModel):
@@ -184,16 +229,103 @@ class DocumentResponse(BaseModel):
     sections: list[DocumentSection]
 
 
+class DocumentSetResponse(BaseModel):
+    id: str
+    title: str
+    document_count: int
+    ready: bool
+
+
 @dataclass
-class _AppState:
+class _LoadedSet:
+    id: str
+    title: str
     corpus: Corpus | None = None
+    context: pipeline.AnswerContext | None = None
     document_count: int = 0
     sentence_count: int = 0
-    ledger: BudgetLedger | None = None
-    context: pipeline.AnswerContext | None = None
     index_ready: bool = False
+    error_code: str | None = None
+
+
+@dataclass
+class _AppState:
+    sets: tuple[_LoadedSet, ...] = ()
+    ledger: BudgetLedger | None = None
+    settings: Settings | None = None
     key_configured: bool = False
     error_code: str | None = None
+
+    @property
+    def index_ready(self) -> bool:
+        return any(item.index_ready for item in self.sets)
+
+    def counts(self) -> tuple[int, int]:
+        documents = sum(item.document_count for item in self.sets)
+        sentences = sum(item.sentence_count for item in self.sets)
+        return documents, sentences
+
+    def corpus_hash(self) -> str | None:
+        loaded = [item for item in self.sets if item.corpus is not None]
+        if len(loaded) == 1 and loaded[0].corpus is not None:
+            return loaded[0].corpus.corpus_hash
+        return None
+
+
+def _fill_counts(loaded: _LoadedSet) -> None:
+    if loaded.corpus is None:
+        return
+    loaded.document_count = len(loaded.corpus.documents)
+    loaded.sentence_count = sum(1 for _ in loaded.corpus.sentences())
+
+
+def _load_one(
+    settings: Settings,
+    context_factory: Callable[[Settings], pipeline.AnswerContext],
+    *,
+    key_configured: bool,
+) -> tuple[_LoadedSet, BudgetLedger | None]:
+    """Load one corpus. A missing index is reported on the set and does not raise."""
+    loaded = _LoadedSet(id=settings.data_dir.name, title=read_set_title(settings.data_dir))
+    ledger: BudgetLedger | None = None
+    try:
+        context = context_factory(settings)
+        loaded.context = replace(context, mode="live")
+        loaded.corpus = loaded.context.corpus
+        ledger = loaded.context.ledger
+        loaded.index_ready = True
+        _fill_counts(loaded)
+        if not key_configured:
+            loaded.error_code = "configuration_error"
+        return loaded, ledger
+    except (IndexMissingError, IndexMismatchError, IndexLockedError):
+        loaded.error_code = "index_unavailable"
+    except (MissingAPIKeyError, CorpusError, ValidationError, ValueError):
+        loaded.error_code = "configuration_error"
+    except Exception:
+        loaded.error_code = "internal_error"
+
+    # Sources stay readable without a live context. The probe never embeds.
+    try:
+        loaded.corpus = load_corpus(settings.data_dir)
+        _fill_counts(loaded)
+        ledger = BudgetLedger(
+            settings.spend_db_path,
+            settings.budget_cap_usd,
+            settings.price_table_version,
+            price_table=settings.price_table,
+        )
+        with load_index(loaded.corpus, settings, UsageTrackingEmbeddings(settings, ledger)):
+            pass
+        loaded.index_ready = True
+    except (IndexMissingError, IndexMismatchError, IndexLockedError):
+        if loaded.error_code != "configuration_error":
+            loaded.error_code = "index_unavailable"
+    except (CorpusError, ValueError):
+        loaded.error_code = "configuration_error"
+    except Exception:
+        loaded.error_code = "internal_error"
+    return loaded, ledger
 
 
 def _load_state(
@@ -202,46 +334,55 @@ def _load_state(
     state = _AppState()
     try:
         settings = settings if settings is not None else Settings()
-        key = settings.openai_api_key
-        state.key_configured = key is not None and bool(key.get_secret_value().strip())
-        context = context_factory(settings)
-        state.context = replace(context, mode="live")
-        state.corpus, state.ledger = context.corpus, context.ledger
-        state.index_ready = True
-        if not state.key_configured:
-            state.error_code = "configuration_error"
-        return state
-    except (IndexMissingError, IndexMismatchError, IndexLockedError):
-        state.error_code = "index_unavailable"
-    except (MissingAPIKeyError, CorpusError, ValidationError, ValueError):
+    except (ValidationError, ValueError):
         state.error_code = "configuration_error"
-    except Exception:
-        state.error_code = "internal_error"
-
-    # Sources and independent readiness checks remain available without a live
-    # context. Loading the persisted index never embeds or contacts a provider.
-    if settings is not None:
+        return state
+    state.settings = settings
+    key = settings.openai_api_key
+    state.key_configured = key is not None and bool(key.get_secret_value().strip())
+    try:
+        targets = tuple(settings.for_data_dir(path) for path in settings.corpus_dirs())
+    except ValueError:
+        state.error_code = "configuration_error"
+        return state
+    seen: set[str] = set()
+    loaded_sets: list[_LoadedSet] = []
+    for target in targets:
         try:
-            state.corpus = load_corpus(settings.data_dir)
-            state.ledger = BudgetLedger(
-                settings.spend_db_path,
-                settings.budget_cap_usd,
-                settings.price_table_version,
-                price_table=settings.price_table,
-            )
-            with load_index(
-                state.corpus, settings, UsageTrackingEmbeddings(settings, state.ledger)
-            ):
-                pass
-            state.index_ready = True
-        except (IndexMissingError, IndexMismatchError, IndexLockedError):
-            if state.error_code != "configuration_error":
-                state.error_code = "index_unavailable"
-        except (CorpusError, ValueError):
-            state.error_code = "configuration_error"
-        except Exception:
-            state.error_code = "internal_error"
+            set_id = validate_set_name(target.data_dir.name)
+        except ValueError:
+            continue
+        if set_id in seen:
+            continue
+        seen.add(set_id)
+        loaded, ledger = _load_one(target, context_factory, key_configured=state.key_configured)
+        loaded_sets.append(loaded)
+        if state.ledger is None and ledger is not None:
+            state.ledger = ledger
+    state.sets = tuple(loaded_sets)
+    if not state.sets:
+        state.error_code = "configuration_error"
     return state
+
+
+def _close_state(state: _AppState) -> None:
+    closed: list[int] = []
+    for item in state.sets:
+        context = item.context
+        if context is None or id(context) in closed:
+            continue
+        closed.append(id(context))
+        context.close()
+
+
+def _find_set(state: _AppState, requested: str | None) -> _LoadedSet | None:
+    if not state.sets:
+        return None
+    set_id = state.sets[0].id if requested is None else requested
+    return next((item for item in state.sets if item.id == set_id), None)
+
+
+_RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}\Z")
 
 
 def create_app(
@@ -258,15 +399,10 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.api = await run_in_threadpool(_load_state, settings, context_factory)
-        state = app.state.api
-        if state.corpus is not None:
-            state.document_count = len(state.corpus.documents)
-            state.sentence_count = sum(1 for _ in state.corpus.sentences())
         try:
             yield
         finally:
-            if app.state.api.context is not None:
-                await run_in_threadpool(app.state.api.context.close)
+            await run_in_threadpool(_close_state, app.state.api)
 
     app = FastAPI(
         title="Citarilo",
@@ -293,27 +429,47 @@ def create_app(
     def health(request: Request) -> HealthResponse:
         state: _AppState = request.app.state.api
         remaining = state.ledger.remaining_usd() if state.ledger is not None else 0
+        documents, sentences = state.counts()
+        servable = any(item.index_ready and item.error_code is None for item in state.sets)
         return HealthResponse(
-            status="ok" if state.error_code is None and remaining > 0 else "not_ready",
-            corpus_hash=state.corpus.corpus_hash if state.corpus is not None else None,
-            document_count=state.document_count,
-            sentence_count=state.sentence_count,
+            status="ok" if state.error_code is None and servable and remaining > 0 else "not_ready",
+            corpus_hash=state.corpus_hash(),
+            document_count=documents,
+            sentence_count=sentences,
             index_ready=state.index_ready,
             key_configured=state.key_configured,
             remaining_budget_usd=str(remaining),
             version=__version__,
         )
 
+    @app.get("/api/sets", response_model=list[DocumentSetResponse])
+    def sets(request: Request) -> list[DocumentSetResponse]:
+        state: _AppState = request.app.state.api
+        return [
+            DocumentSetResponse(
+                id=item.id,
+                title=item.title,
+                document_count=item.document_count,
+                ready=item.index_ready and item.error_code is None,
+            )
+            for item in state.sets
+        ]
+
     @app.post("/api/ask", response_model=AskResponse)
     async def ask(body: AskRequest, request: Request) -> AskResponse | JSONResponse:
         state: _AppState = request.app.state.api
-        if state.error_code is not None:
-            return _error(state.error_code)
+        if body.set is not None and _find_set(state, body.set) is None:
+            return _error("invalid_request")
+        chosen = _find_set(state, body.set)
+        if chosen is None:
+            return _error(state.error_code or "configuration_error")
+        if chosen.error_code is not None or chosen.context is None:
+            return _error(chosen.error_code or "index_unavailable")
         if not ask_lock.acquire(blocking=False):
             return _error("busy")
         try:
             record = await run_in_threadpool(
-                pipeline.answer, body.question, context=state.context, origin="api"
+                pipeline.answer, body.question, context=chosen.context, origin="api"
             )
             return record.to_response()
         except BudgetExceeded:
@@ -328,11 +484,23 @@ def create_app(
             ask_lock.release()
 
     @app.get("/api/documents/{doc_id}", response_model=DocumentResponse)
-    def document(doc_id: str, request: Request) -> DocumentResponse | JSONResponse:
+    def document(
+        doc_id: str,
+        request: Request,
+        document_set: Annotated[str | None, Query(alias="set")] = None,
+    ) -> DocumentResponse | JSONResponse:
         state: _AppState = request.app.state.api
-        if not _DOCUMENT_ID.fullmatch(doc_id) or state.corpus is None:
+        if document_set is not None:
+            try:
+                validate_set_name(document_set)
+            except ValueError:
+                return _error("invalid_request")
+            if _find_set(state, document_set) is None:
+                return _error("invalid_request")
+        chosen = _find_set(state, document_set)
+        if not _DOCUMENT_ID.fullmatch(doc_id) or chosen is None or chosen.corpus is None:
             return _error("not_found")
-        doc = next((doc for doc in state.corpus.documents if doc.doc_id == doc_id), None)
+        doc = next((doc for doc in chosen.corpus.documents if doc.doc_id == doc_id), None)
         if doc is None:
             return _error("not_found")
         return DocumentResponse(
@@ -350,6 +518,33 @@ def create_app(
                 for section in doc.sections
             ],
         )
+
+    @app.post("/api/runs/{run_id}/feedback", response_model=FeedbackResponse)
+    def feedback(
+        run_id: str, body: FeedbackRequest, request: Request
+    ) -> FeedbackResponse | JSONResponse:
+        state: _AppState = request.app.state.api
+        if state.settings is None:
+            return _error(state.error_code or "configuration_error")
+        if _RUN_ID.fullmatch(run_id) is None:
+            return _error("invalid_request")
+        path = state.settings.runs_dir / f"{run_id}.json"
+        if path.is_symlink() or not path.is_file():
+            return _error("not_found")
+        try:
+            read_record(path)
+        except (OSError, ValidationError, ValueError):
+            return _error("not_found")
+        try:
+            append_feedback(
+                state.settings.feedback_dir,
+                run_id,
+                label=body.label,
+                note=body.note.strip(),
+            )
+        except OSError:
+            return _error("internal_error")
+        return FeedbackResponse()
 
     if web_dir is not None and (web_dir / "index.html").is_file():
         # Mounted last so API routes win; unknown paths still get the JSON 404 envelope.

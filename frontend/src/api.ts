@@ -12,12 +12,42 @@ export type Claim = { text: string; citations: string[] };
 
 export type NodeTiming = { node: string; duration_ms: number; ok: boolean };
 
+export type RefusalSection = {
+  doc_id: string;
+  doc_title: string;
+  heading: string;
+  section_key: string;
+};
+
+export type CheckName =
+  | "invalid_citation_count"
+  | "unknown_citation"
+  | "literal_not_in_citations"
+  | "language_mismatch";
+
+export type RefusalExplanation = {
+  step: "no_evidence" | "deterministic_check" | "verifier_unsupported" | "verifier_contradicted";
+  rejected_claims: number;
+  failed_check: CheckName | null;
+  sections: RefusalSection[];
+};
+
+export type DocumentSetInfo = {
+  id: string;
+  title: string;
+  document_count: number;
+  ready: boolean;
+};
+
+export type FeedbackLabel = "wrongly_refused" | "wrong_or_dangerous" | "missing_step" | "other";
+
 export type AskResponse = {
   run_id: string;
   mode: string;
   status: "answered" | "refused";
   answer_language: "en" | "cs" | null;
   refusal_code: "insufficient_evidence" | "check_failed" | "unsupported" | "contradicted" | null;
+  refusal?: RefusalExplanation | null;
   claims: Claim[];
   sources: Source[];
   metrics: {
@@ -74,12 +104,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  ask: (question: string) =>
+  ask: (question: string, setId?: string) =>
     request<AskResponse>("/api/ask", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question }),
+      body: JSON.stringify(setId ? { question, set: setId } : { question }),
     }),
   health: () => request<Health>("/api/health"),
-  document: (docId: string) => request<DocumentView>(`/api/documents/${encodeURIComponent(docId)}`),
+  sets: () => request<DocumentSetInfo[]>("/api/sets"),
+  document: (docId: string, setId?: string) => {
+    const query = setId ? `?set=${encodeURIComponent(setId)}` : "";
+    return request<DocumentView>(`/api/documents/${encodeURIComponent(docId)}${query}`);
+  },
+  feedback: (runId: string, body: { note: string; label?: FeedbackLabel }) =>
+    request<{ saved: true }>(`/api/runs/${encodeURIComponent(runId)}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
 };

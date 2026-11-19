@@ -933,6 +933,53 @@ def test_load_refuses_missing_lock_and_symlink_paths(settings, corpus, ledger, t
         load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
 
 
+def test_two_local_indexes_stay_open_under_one_process_lock(tmp_path):
+    runtime = tmp_path / "runtime"
+    prepared = []
+    stores = []
+    try:
+        for name, sentence in (("alpha", "Alpha rule stays."), ("beta", "Beta rule stays.")):
+            data = tmp_path / name
+            data.mkdir()
+            (data / "policy.md").write_text(
+                f"# Policy\n\n## Rule {{#rule}}\n{sentence}\n",
+                encoding="utf-8",
+            )
+            configured = Settings(
+                _env_file=None,
+                data_dir=data,
+                runtime_dir=runtime,
+                embedding_dimensions=8,
+            )
+            built = load_corpus(data)
+            ledger = BudgetLedger(
+                configured.spend_db_path,
+                configured.budget_cap_usd,
+                configured.price_table_version,
+                price_table=configured.price_table,
+            )
+            build_index(built, configured, ledger, client=FakeClient())
+            prepared.append((configured, built))
+        for configured, built in prepared:
+            stores.append(load_index(built, configured, DeterministicFakeEmbedding(size=8)))
+        assert stores[0].search("Alpha rule stays.", 1)[0][0] == "policy.rule"
+        assert stores[1].search("Beta rule stays.", 1)[0][0] == "policy.rule"
+        holder = Settings(
+            _env_file=None, data_dir=tmp_path / "alpha", runtime_dir=runtime, embedding_dimensions=8
+        )
+        with pytest.raises(IndexLockedError):
+            index_module._acquire_index_lock(holder)
+        stores[0].close()
+        with pytest.raises(IndexLockedError):
+            index_module._acquire_index_lock(holder)
+        stores[1].close()
+        with index_module._acquire_index_lock(holder):
+            pass
+    finally:
+        for store in stores:
+            store.close()
+
+
 def test_load_maps_lock_disappearance_to_missing(settings, corpus, ledger, monkeypatch):
     build_index(corpus, settings, ledger, client=FakeClient())
     original = index_module.portalocker.Lock.acquire

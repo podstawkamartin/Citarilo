@@ -164,6 +164,121 @@ test("shows the server's error message", async () => {
   expect(await screen.findByRole("alert")).toHaveTextContent("Another question is being answered.");
 });
 
+test("switches document sets, clears the answer and sends the selected set", async () => {
+  localStorage.clear();
+  const sets = [
+    { id: "trailsupply", title: "Zákaznická podpora e-shopu", document_count: 6, ready: true },
+    { id: "regulations", title: "Předpisy a provozní řád výroby", document_count: 5, ready: true },
+  ];
+  const asks: { question: string; set?: string }[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      if (input === "/api/health") {
+        return Response.json({
+          status: "ok",
+          index_ready: true,
+          key_configured: true,
+          document_count: 11,
+          sentence_count: 200,
+        });
+      }
+      if (input === "/api/sets") return Response.json(sets);
+      if (input === "/api/ask") {
+        asks.push(JSON.parse(String(init?.body)));
+        return Response.json(answered);
+      }
+      if (input === "/api/documents/returns?set=trailsupply") return Response.json(documentView);
+      return Response.json({ error: { code: "not_found", message: "Not found." } }, { status: 404 });
+    }),
+  );
+  render(<App />);
+  const select = await screen.findByRole("combobox", { name: /Dokumenty/ });
+  expect(select).toHaveValue("trailsupply");
+  expect(screen.getByRole("button", { name: "Do kdy můžu vrátit zboží z výprodeje?" })).toBeInTheDocument();
+  await userEvent.type(screen.getByLabelText("Vaše otázka"), "Jaká je lhůta?{Enter}");
+  expect(await screen.findByText("Lhůta je 14 dní.")).toBeInTheDocument();
+  await userEvent.selectOptions(select, "regulations");
+  expect(localStorage.getItem("citarilo-document-set")).toBe("regulations");
+  expect(screen.queryByText("Lhůta je 14 dní.")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /reviduje elektroinstalace/ })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Do kdy můžu vrátit zboží z výprodeje?" })).not.toBeInTheDocument();
+  await userEvent.type(screen.getByLabelText("Vaše otázka"), "Jak často?{Enter}");
+  expect(asks.map((item) => item.set)).toEqual(["trailsupply", "regulations"]);
+});
+
+test("saves a note under an answer", async () => {
+  const posts: { url: string; body: unknown }[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string, init?: RequestInit) => {
+      if (input === "/api/health")
+        return Response.json({ status: "ok", index_ready: true, key_configured: true });
+      if (input === "/api/ask") return Response.json(answered);
+      if (input === "/api/documents/returns") return Response.json(documentView);
+      if (input === "/api/runs/run1/feedback" && init?.method === "POST") {
+        posts.push({ url: input, body: JSON.parse(String(init.body)) });
+        return Response.json({ saved: true });
+      }
+      return Response.json({ error: { code: "not_found", message: "Not found." } }, { status: 404 });
+    }),
+  );
+  render(<App />);
+  await userEvent.type(screen.getByLabelText("Vaše otázka"), "Jaká je lhůta?{Enter}");
+  await screen.findByText("Lhůta je 14 dní.");
+  await userEvent.type(screen.getByLabelText("Poznámka"), "Chybí výjimka.");
+  await userEvent.selectOptions(screen.getByLabelText("Štítek"), "missing_step");
+  await userEvent.click(screen.getByRole("button", { name: "Uložit poznámku" }));
+  expect(await screen.findByRole("status")).toHaveTextContent("Poznámka je uložená.");
+  expect(posts).toEqual([
+    { url: "/api/runs/run1/feedback", body: { note: "Chybí výjimka.", label: "missing_step" } },
+  ]);
+});
+
+test("explains a refusal with retrieved sections and never the rejected claim", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: string) => {
+      if (input === "/api/health")
+        return Response.json({ status: "ok", index_ready: true, key_configured: true });
+      if (input === "/api/ask") {
+        return Response.json({
+          ...answered,
+          status: "refused",
+          refusal_code: "check_failed",
+          claims: [],
+          sources: [],
+          refusal: {
+            step: "deterministic_check",
+            rejected_claims: 1,
+            failed_check: "literal_not_in_citations",
+            sections: [
+              {
+                doc_id: "returns",
+                doc_title: "Vrácení zboží",
+                heading: "Lhůty",
+                section_key: "returns.window",
+              },
+            ],
+            reason: "SECRET-CLAIM-TEXT",
+          },
+        });
+      }
+      if (input === "/api/documents/returns") return Response.json(documentView);
+      return Response.json({ error: { code: "not_found", message: "Not found." } }, { status: 404 });
+    }),
+  );
+  render(<App />);
+  await userEvent.type(screen.getByLabelText("Vaše otázka"), "Jaká je lhůta?{Enter}");
+  expect(await screen.findByText("Podívejte se do těchto oddílů")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /Lhůty/ })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByText(/mimo citace/)).toBeInTheDocument();
+  expect(screen.getByText("Zamítnutá tvrzení: 1")).toBeInTheDocument();
+  expect(screen.queryByText("SECRET-CLAIM-TEXT")).not.toBeInTheDocument();
+  expect(await screen.findByRole("article", { name: "Vrácení zboží" })).toBeInTheDocument();
+  expect(screen.getByLabelText("Poznámka")).toBeInTheDocument();
+});
+
 test("renders document text as plain text, never as HTML", async () => {
   const hostile = { ...answered, claims: [{ text: "<img src=x onerror=alert(1)>", citations: ["returns.window.2"] }] };
   mockFetch(() => Response.json(hostile));

@@ -644,6 +644,7 @@ def answer(
         eval_case_id=eval_case_id,
         git=git,
         corpus_hash=context.corpus.corpus_hash,
+        document_set=context.settings.data_dir.name or None,
         prompt_version=PROMPT_VERSION,
         config=ConfigSnapshot.from_settings(context.settings, top_k=context.settings.top_k),
         question=question,

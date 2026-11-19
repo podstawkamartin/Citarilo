@@ -39,8 +39,9 @@ organisation and each with its own evaluation cases:
   fictional test document with invented values that refers to the regulations
   where they set revision intervals.
 
-A running server answers from one set, chosen with `DATA_DIR`; the sets are
-never mixed in one index or one answer.
+A running server can answer from several sets at once (`DATA_DIRS`). Each set
+keeps its own index, and an answer never mixes sets. `DATA_DIR` still selects
+the single set used by `ingest`, `ask` and `eval`.
 
 ## What makes it different
 
@@ -192,7 +193,12 @@ address as the API:
 ```sh
 cd frontend && npm ci && npm run build && cd ..
 uv run citarilo serve             # http://127.0.0.1:5177
+DATA_DIRS=data/trailsupply,data/regulations uv run citarilo serve
 ```
+
+Ingest each set once, with the server stopped, before serving both. The page
+then offers a document-set switch; an answer always stays inside the set that
+was selected.
 
 The interface is in Czech. An answer is laid out as claims, the cited
 sentences, the source document with the selected sentence highlighted, and the
@@ -211,11 +217,14 @@ DATA_DIR=data/regulations uv run citarilo eval --live --max-usd 0.12
 ```
 
 Every question asked through `ask` or the web interface leaves a run record in
-`.runtime/runs`. Refused runs show which step rejected the answer and why; a
-run can be turned into a draft eval case to review:
+`.runtime/runs`. Refused runs show which step rejected the answer and why. In
+the web interface a note can be attached to any answer or refusal;
+`citarilo runs --feedback` lists those notes, and `--to-case` copies the note
+into the draft case:
 
 ```sh
 uv run citarilo runs --failed --since 2026-11-19
+uv run citarilo runs --feedback
 uv run citarilo runs --to-case RUN_ID --eval-set regulations
 ```
 
@@ -254,9 +263,11 @@ documents; answers follow the language of the question (Czech or English).
 
 | Endpoint | Description |
 |---|---|
-| `POST /api/ask` | `{"question": "..."}` → status, refusal code, claims with citations, source sentences, answer language, metrics |
-| `GET /api/health` | index and key readiness, corpus hash, number of documents and citable sentences (`document_count`, `sentence_count`; 0 without a corpus), remaining budget |
-| `GET /api/documents/{id}` | the document by sections and sentences with IDs, its file name (`file_name`, without a path) |
+| `POST /api/ask` | `{"question": "...", "set"?: "<id>"}` → status, refusal code, a safe refusal explanation, claims with citations, source sentences, answer language, metrics. `set` defaults to the first configured set |
+| `GET /api/sets` | document sets: `id`, `title`, `document_count`, `ready` |
+| `GET /api/health` | index and key readiness, corpus hash (one set only), number of documents and citable sentences (`document_count`, `sentence_count`; 0 without a corpus), remaining budget |
+| `GET /api/documents/{id}` | the document by sections and sentences with IDs, its file name (`file_name`, without a path). Optional `set` query |
+| `POST /api/runs/{run_id}/feedback` | `{"note"?: "...", "label"?: "..."}` appends a local note (at most 1000 characters). It does not change the run record |
 
 Errors share one shape `{"error": {"code", "message"}}` (413, 422, 429, 502,
 503). A question is limited to 3–500 characters and 4 KiB; one question is
@@ -302,8 +313,9 @@ call the paid API or read a local key. The same checks run in GitHub Actions.
 - Text only: no OCR, tables or images. Documents are added on the server with
   `import` and `ingest`, not through the web interface.
 - Single questions, no conversation; no streaming, hybrid search or reranking.
-- One document set per running server; switching sets means a restart with
-  another `DATA_DIR`. Source documents are expected in Czech.
+- Several document sets can be served at once with `DATA_DIRS`; an answer never
+  mixes them. `ingest`, CLI `ask` and `eval` still use one `DATA_DIR`, and the
+  server must be stopped first. Source documents are expected in Czech.
 - Verification combines deterministic checks and a model judgement, so it is
   not a proof of truth; its error rate is measured. The customer-support data
   and the conveyor procedure are fictional; the regulations are real legal
