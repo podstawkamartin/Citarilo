@@ -40,7 +40,7 @@ Výsledek každé kontroly a revize se zapisuje do provozního deníku dopravní
 Provozní deník se uchovává po celou dobu provozu dopravníku.
 
 ## Poruchová hlášení {#fault-codes}
-Hlášení F01 znamená přetížení motoru; pás se odlehčí teprve na dopravníku zastaveném a zajištěném podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, a motor se nechá nejméně 10 minut vychladnout.
+Hlášení F01 znamená přetížení motoru; teprve na dopravníku zastaveném a zajištěném podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, se pás odlehčí a poté se motor nechá nejméně 10 minut vychladnout.
 Hlášení F02 znamená vybočení pásu ze stopy; vratný buben se seřídí teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, a pás se smí znovu spustit až po tomto seřízení.
 Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET.
 Hlášení F07 znamená přepětí meziobvodu frekvenčního měniče; obsluha přivolá osobu s elektrotechnickou kvalifikací, která smí měnič otevřít teprve na dopravníku zajištěném podle oddílu „Zajištění před údržbou“ a nejméně 5 minut po vypnutí.

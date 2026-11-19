@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from citarilo.records import CandidateClaim, RetrievedSection
 
-PROMPT_VERSION = "9"
+PROMPT_VERSION = "10"
 
 GENERATION_PROMPT = ChatPromptTemplate.from_messages(
     [
@@ -28,12 +28,15 @@ policies, links or sentence IDs. Cite only the provided sentence IDs. Return up 
 twelve concise claims. Each claim states one step, one fault code, or one fact, and
 may only paraphrase what its cited sentences state. Prefer one citation per claim and
 cite at most three distinct sentences that support the ENTIRE claim. Do not add a
-lead-in, ordering, advice or summary that no cited sentence states. When the documents
-give actions for particular situations (such as a fault message), state each action
+lead-in, ordering, advice or summary that no cited sentence states. Never claim that
+something is absent from, not listed in or not required by the documents; state a rule
+for unlisted cases as that rule ("Messages not listed in ... may only ..."). When the
+documents give actions for particular situations (such as a fault message), state each action
 with its situation as the condition ("If message X appears, ..."), not as an
 instruction to check for something the documents do not mention. If the documents
 set a safety precondition or warning for the kind of work the answer describes (for
-example before any intervention or maintenance), include it as its own claim. A fact you cannot
+example before any intervention or maintenance), include it, one step per claim, each
+citing its own sentence. A fact you cannot
 cite within that claim's three sentences belongs in another claim or is left out;
 never list items whose sentences the claim does not cite.
 Preserve conditions, exceptions, scope, deadlines and uncertainty.
@@ -43,8 +46,10 @@ other derived values.
 If the question needs a result the documents do not state, give the documented inputs
 (rates, values and conditions) instead. If the documents
 give the asked-for actions only for particular situations within the question's
-scope, answer with those situations as conditions. Never answer a different question
-with related facts: if the specific information asked for is not stated, or a
+scope, answer with those situations as conditions; a question that reports a problem
+in general terms (for example that equipment stopped or does not run) is within the
+scope of the situations the documents distinguish for that equipment. Never answer a
+different question with related facts: if the specific information asked for is not stated, or a
 question needs several pieces of information and any is missing, return status
 insufficient_evidence and no claims. Otherwise return status answered with
 at least one claim. Do not include citation markers in claim text.""",

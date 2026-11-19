@@ -39,7 +39,7 @@ def corpus() -> Corpus:
 
 
 def test_shipped_counts_and_unique_ids(cases: list[EvalCase], probes: list[VerifierProbe]) -> None:
-    assert Counter(case.split for case in cases) == {"dev": 21, "heldout": 5}
+    assert Counter(case.split for case in cases) == {"dev": 29, "heldout": 8}
     assert len(probes) >= 20
     ids = [record.id for record in [*cases, *probes]]
     assert len(ids) == len(set(ids))
@@ -324,7 +324,7 @@ def test_regulations_cases_and_probes_resolve_offline() -> None:
     corpus = load_corpus(ROOT / "data/regulations")
     cases = load_cases(REGULATIONS / "cases.jsonl")
     probes = load_probes(REGULATIONS / "verifier_cases.jsonl")
-    assert Counter(case.split for case in cases) == {"dev": 51, "heldout": 12}
+    assert Counter(case.split for case in cases) == {"dev": 59, "heldout": 15}
     assert len({record.id for record in [*cases, *probes]}) == len(cases) + len(probes)
     for case in cases:
         assert {"en", "cs", "cs-ascii"}.intersection(case.tags) == {case.language}, case.id

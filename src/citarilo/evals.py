@@ -78,6 +78,7 @@ Tag = Literal[
     "unanswerable",
     "injection-question",
     "injection-document",
+    "vague",
 ]
 
 

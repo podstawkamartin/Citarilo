@@ -686,7 +686,7 @@ def test_prompt_values_cannot_escape_delimiters_or_become_templates(rig):
     assert "Czech without diacritics" in messages[0].content
     assert "if ambiguous, choose en" in messages[0].content
     assert "proper diacritics" in messages[0].content
-    assert PROMPT_VERSION == "9"
+    assert PROMPT_VERSION == "10"
     flat = " ".join(messages[0].content.split())
     assert (
         "State only amounts, dates, values, units and conditions exactly as documented; "
