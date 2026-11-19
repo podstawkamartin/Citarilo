@@ -18,6 +18,36 @@ const EXAMPLES: Record<string, string[]> = {
   ],
 };
 
+const SET_LABELS: Record<string, string> = {
+  trailsupply: "E-shop",
+  regulations: "Výroba",
+};
+
+function SetIcon({ id }: { id: string }) {
+  if (id === "trailsupply") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8L5 8Z" />
+        <path d="M9 10V7a3 3 0 0 1 6 0v3" />
+      </svg>
+    );
+  }
+  if (id === "regulations") {
+    return (
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 20V10l5 3V10l5 3V5h4l1 15H3Z" />
+        <path d="M3 20h18" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M7 3h7l4 4v14H7V3Z" />
+      <path d="M14 3v4h4" />
+    </svg>
+  );
+}
+
 function storedSet(): string | null {
   try {
     return localStorage.getItem(SET_KEY);
@@ -105,18 +135,24 @@ export function App() {
           </svg>
           Citarilo
         </h1>
-        {setId && sets.length > 0 && (
-          <label className="set-switch" htmlFor="document-set">
-            Dokumenty:
-            <select id="document-set" value={setId} onChange={(event) => chooseSet(event.target.value)}>
-              {sets.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.title}
-                  {item.ready ? "" : " (nedostupné)"}
-                </option>
-              ))}
-            </select>
-          </label>
+        {setId && sets.length > 1 && (
+          <fieldset className="set-switch">
+            <legend>Sada dokumentů</legend>
+            {sets.map((item) => (
+              <label key={item.id} title={item.title} className={item.ready ? undefined : "unavailable"}>
+                <input
+                  type="radio"
+                  name="document-set"
+                  value={item.id}
+                  checked={item.id === setId}
+                  onChange={() => chooseSet(item.id)}
+                />
+                <SetIcon id={item.id} />
+                <span>{SET_LABELS[item.id] ?? item.title}</span>
+                {!item.ready && <span className="sr-only"> (nedostupné)</span>}
+              </label>
+            ))}
+          </fieldset>
         )}
         <Status health={health} selected={sets.length > 1 ? selected : null} />
         <ThemeToggle />

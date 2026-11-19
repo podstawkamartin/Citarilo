@@ -193,12 +193,12 @@ test("switches document sets, clears the answer and sends the selected set", asy
     }),
   );
   render(<App />);
-  const select = await screen.findByRole("combobox", { name: /Dokumenty/ });
-  expect(select).toHaveValue("trailsupply");
+  expect(await screen.findByRole("group", { name: "Sada dokumentů" })).toBeInTheDocument();
+  expect(screen.getByRole("radio", { name: /E-shop/ })).toBeChecked();
   expect(screen.getByRole("button", { name: "Do kdy můžu vrátit zboží z výprodeje?" })).toBeInTheDocument();
   await userEvent.type(screen.getByLabelText("Vaše otázka"), "Jaká je lhůta?{Enter}");
   expect(await screen.findByText("Lhůta je 14 dní.")).toBeInTheDocument();
-  await userEvent.selectOptions(select, "regulations");
+  await userEvent.click(screen.getByRole("radio", { name: /Výroba/ }));
   expect(localStorage.getItem("citarilo-document-set")).toBe("regulations");
   expect(screen.queryByText("Lhůta je 14 dní.")).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: /reviduje elektroinstalace/ })).toBeInTheDocument();

@@ -204,33 +204,81 @@ button {
   background: var(--amber-mark);
 }
 
+/* Segmented switch between document sets; the chosen set is inked like the help mark. */
 .set-switch {
   display: flex;
-  align-items: center;
-  gap: 8px;
   min-width: 0;
-  color: var(--soft);
-  font: 500 11px var(--mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.set-switch select {
-  max-width: 16rem;
-  min-width: 0;
-  padding: 6px 10px;
+  margin: 0;
+  padding: 3px;
+  gap: 2px;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: var(--panel);
-  color: var(--ink);
-  font: 400 13px/1.3 var(--sans);
-  letter-spacing: 0;
-  text-transform: none;
 }
 
-.set-switch select:focus-visible {
+.set-switch legend,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.set-switch label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 13px 5px 10px;
+  border-radius: 999px;
+  color: var(--soft);
+  font: 500 13px/1.3 var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.set-switch label:hover {
+  color: var(--ink);
+}
+
+.set-switch label:has(input:checked) {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.set-switch label.unavailable {
+  opacity: 0.55;
+}
+
+.set-switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.set-switch label:has(input:focus-visible) {
   outline: 2px solid var(--blue);
   outline-offset: 2px;
+}
+
+.set-switch svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .theme {
@@ -1202,11 +1250,11 @@ svg.threads path {
 
   .set-switch {
     flex: 1 1 100%;
+    order: 3;
   }
 
-  .set-switch select {
-    flex: 1 1 auto;
-    max-width: none;
+  .set-switch label {
+    flex: 1 1 0;
   }
 }
 
