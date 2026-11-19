@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { type DocumentView, type Source, ApiError, api } from "./api";
 
 // Scoped to one answer: after a corpus update, a new answer must show the new text.
@@ -46,6 +46,22 @@ export function DocumentPanel({
       current = false;
     };
   }, [runId, source]);
+
+  // Fit the sheet into the window, so the selected sentence is never below the fold.
+  // Narrow layouts, where the sheet sits below the answer, keep the CSS height.
+  useLayoutEffect(() => {
+    const container = body.current;
+    if (!container) return;
+    const fit = () => {
+      container.style.maxHeight = "";
+      const top = container.getBoundingClientRect().top + window.scrollY;
+      const available = Math.floor(window.innerHeight - top - 24);
+      if (available >= 360) container.style.maxHeight = `${available}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [doc, source]);
 
   // Scroll only inside the sheet, so choosing a citation never moves the page.
   useEffect(() => {

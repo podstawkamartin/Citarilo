@@ -58,9 +58,10 @@ class IndexMismatchError(ValueError):
 class IndexLockedError(RuntimeError):
     """Another local client owns the index directory."""
 
-    def __init__(self) -> None:
+    def __init__(self, message: str | None = None) -> None:
         super().__init__(
-            "The local index is in use by another Citarilo process (for example "
+            message
+            or "The local index is in use by another Citarilo process (for example "
             "`citarilo serve`). Stop it and try again."
         )
 
@@ -288,9 +289,12 @@ def build_index(
     scroll_page_size: int = _SCROLL_PAGE_SIZE,
 ) -> IndexManifest:
     """Acquire the local lock before embedding and publish validated points atomically."""
+    _check_index_symlinks(settings)
     app_lock = _acquire_index_lock(settings)
     qdrant = None
     try:
+        _prepare_index_dirs(settings, create=True)
+        _check_index_symlinks(settings)
         embeddings = UsageTrackingEmbeddings(
             settings, ledger, group_id=group_id, client=client, operation="ingest"
         )
@@ -301,9 +305,10 @@ def build_index(
                 [document.page_content for document in documents]
             )
         ]
+        _check_index_symlinks(settings)
         # Never open or deserialize old storage: a successful embedding can repair it.
         path = settings.qdrant_path
-        if path.is_symlink() or path.is_file():
+        if path.is_file():
             path.unlink()
         elif path.exists():
             shutil.rmtree(path)
@@ -371,22 +376,57 @@ def build_index(
             app_lock.release()
 
 
-def _acquire_index_lock(settings: Settings) -> portalocker.Lock:
+def _check_index_symlinks(settings: Settings) -> None:
+    for path in (
+        settings.runtime_dir / "index",
+        settings.index_dir,
+        settings.qdrant_path,
+        settings.index_lock_path,
+    ):
+        if path.is_symlink():
+            raise IndexMismatchError(f"Index path must not be a symbolic link: {path}")
+
+
+def _prepare_index_dirs(settings: Settings, *, create: bool) -> None:
+    _check_index_symlinks(settings)
+    for path in (settings.runtime_dir, settings.runtime_dir / "index", settings.index_dir):
+        if create:
+            make_private_dir(path)
+        else:
+            try:
+                os.chmod(path, 0o700, follow_symlinks=False)
+            except FileNotFoundError as exc:
+                raise IndexMissingError(
+                    "Index directory missing; run citarilo ingest explicitly."
+                ) from exc
+            except PermissionError as exc:
+                raise IndexLockedError("Cannot secure index directory permissions.") from exc
+
+
+def _acquire_index_lock(settings: Settings, *, create: bool = True) -> portalocker.Lock:
     """Serialize Citarilo owners across the entire Qdrant close/reopen interval."""
-    make_private_dir(settings.runtime_dir)
-    lock = portalocker.Lock(
-        str(settings.index_lock_path),
-        mode="a",
-        timeout=0,
-        flags=portalocker.LockFlags.EXCLUSIVE | portalocker.LockFlags.NON_BLOCKING,
-    )
+    _check_index_symlinks(settings)
+    if create:
+        make_private_dir(settings.runtime_dir)
+    lock = None
     try:
+        lock = portalocker.Lock(
+            str(settings.index_lock_path),
+            mode="a" if create else "r+",
+            timeout=0,
+            flags=portalocker.LockFlags.EXCLUSIVE | portalocker.LockFlags.NON_BLOCKING,
+        )
         lock.acquire()
-    except portalocker.exceptions.LockException as exc:
-        lock.release()
-        raise IndexLockedError() from exc
-    except BaseException:
-        lock.release()
+    except BaseException as exc:
+        if lock is not None:
+            with suppress(Exception):
+                lock.release()
+        if isinstance(exc, FileNotFoundError):
+            raise IndexMissingError("Index lock missing; run citarilo ingest explicitly.") from exc
+        if isinstance(exc, PermissionError):
+            raise IndexLockedError("Cannot access the index lock.") from exc
+        if isinstance(exc, portalocker.exceptions.LockException):
+            raise IndexLockedError() from exc
         raise
     return lock
 
@@ -546,6 +586,8 @@ def load_index(
     scroll_page_size: int = _SCROLL_PAGE_SIZE,
 ) -> SectionIndex:
     """Check the manifest before taking the lock; validate all points without embedding."""
+    _prepare_index_dirs(settings, create=False)
+    _check_index_symlinks(settings)
     try:
         manifest = IndexManifest.model_validate_json(settings.index_manifest_path.read_bytes())
     except FileNotFoundError as exc:
@@ -562,7 +604,9 @@ def load_index(
     for field, value in expected.items():
         if getattr(manifest, field) != value:
             raise IndexMismatchError(f"Index {field} mismatch; run citarilo ingest.")
-    app_lock = _acquire_index_lock(settings)
+    if not settings.qdrant_path.is_dir() or not settings.index_lock_path.is_file():
+        raise IndexMissingError("Index missing; run citarilo ingest explicitly.")
+    app_lock = _acquire_index_lock(settings, create=False)
     client = None
     success = False
     try:

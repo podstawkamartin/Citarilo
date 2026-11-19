@@ -123,6 +123,50 @@ _CZECH_LETTER = re.compile(r"[ěščřžýáíéůúťďňĚŠČŘŽÝÁÍÉŮÚ
 _ALLOWED_CZECH = re.compile(r"\bKč\b")  # Currency symbol, not Czech prose.
 _QUOTED = re.compile(r"\"[^\"]*\"|“[^”]*”|„[^“”]*[“”]")
 _EMAIL = re.compile(r"\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b", re.I)
+# Uppercase I–X only, longest first, and only beside a class word.
+_ROMAN_NUMERAL = r"VIII|VII|III|IV|IX|VI|II|X|V|I"
+_ROMAN_VALUES = {
+    "I": 1,
+    "II": 2,
+    "III": 3,
+    "IV": 4,
+    "V": 5,
+    "VI": 6,
+    "VII": 7,
+    "VIII": 8,
+    "IX": 9,
+    "X": 10,
+}
+# Czech keeps the ordinal dot only when the numeral comes first ("IV. třídy").
+# A following numeral may be separated by a space ("třída III") or a colon
+# ("třída: III."), which is how the annex tables are written.
+_CS_CLASS = r"(?i:tříd(?:ami|ách|ám|ou|a|y|ě|u)?)"
+# Coordinated numerals share the class word: "I. a II. třídy", "I. až III. třídy",
+# "classes I and II", "classes I to III" (a range covers every class in it).
+_CS_LIST = rf"(?:(?:{_ROMAN_NUMERAL})\.\s*(?:,\s*|\s+(?:a|až|nebo)\s+))*"
+_EN_LIST = rf"(?:\s*,\s*|\s+(?:and|or|to)\s+)(?:{_ROMAN_NUMERAL})"
+_CLASS_ROMAN = re.compile(
+    rf"(?<!\w)(?P<lead>{_CS_LIST}(?:{_ROMAN_NUMERAL}))\.\s*{_CS_CLASS}\b"
+    rf"|\b{_CS_CLASS}(?:\s+|:\s*)(?P<trail>{_ROMAN_NUMERAL})\b"
+    rf"|\b(?i:class(?:es)?)[-\s]+(?P<en>(?:{_ROMAN_NUMERAL})(?:{_EN_LIST})*)\b"
+)
+_CLASS_PART = re.compile(rf"(?<![A-Za-z])(?:{_ROMAN_NUMERAL})(?![A-Za-z])|\b(?:až|to)\b")
+
+
+def _class_values(expression: str) -> list[int]:
+    values: list[int] = []
+    is_range = False
+    for part in _CLASS_PART.findall(expression):
+        if part in ("až", "to"):
+            is_range = True
+            continue
+        value = _ROMAN_VALUES[part]
+        if is_range and values and values[-1] < value:
+            values.extend(range(values[-1] + 1, value + 1))
+        else:
+            values.append(value)
+        is_range = False
+    return values
 
 
 def _number(value: str, language: AnswerLanguage) -> str:
@@ -174,8 +218,8 @@ def normalized_facts(text: str, *, language: AnswerLanguage = "en") -> frozenset
     """Extract comparable literals; mask dates/links before extracting numbers.
 
     Types stay separate: a matching day/month/year component or plain number
-    cannot satisfy a date, time, URL, email or percentage. Associations, units,
-    conditions and exceptions are left to the independent verifier.
+    cannot satisfy a date, time, URL, email, percentage or equipment class.
+    Associations, units, conditions and exceptions are left to the verifier.
     """
     text = unicodedata.normalize("NFC", text)
     facts: set[str] = set()
@@ -199,6 +243,15 @@ def normalized_facts(text: str, *, language: AnswerLanguage = "en") -> frozenset
 
     mask(_URL, "url")
     mask(_EMAIL, "email")
+
+    def replace_class(match: re.Match[str]) -> str:
+        expression = next(group for group in (match["lead"], match["trail"], match["en"]) if group)
+        facts.update(f"class:{value}" for value in _class_values(expression))
+        return " " * len(match.group())
+
+    # Mask the whole expression before case folding so the numeral cannot be
+    # read again as another fact.
+    text = _CLASS_ROMAN.sub(replace_class, text)
     text = text.lower()
     for pattern in _DATES[language]:
 

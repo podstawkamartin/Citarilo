@@ -1,8 +1,12 @@
 """Command-line entry point."""
 
 import argparse
+import json
+import re
+import sys
 from collections.abc import Sequence
 from contextlib import closing
+from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from uuid import uuid4
@@ -13,10 +17,12 @@ from pydantic import ValidationError
 from citarilo import __version__
 from citarilo.api import create_app
 from citarilo.budget import BudgetExceeded, BudgetLedger, actual_cost
-from citarilo.config import Settings
+from citarilo.config import Settings, validate_set_name
 from citarilo.corpus import CorpusError, load_corpus
 from citarilo.evals import (
+    EvalCase,
     EvidenceMappingError,
+    VerifierProbe,
     estimate_answers,
     estimate_probes,
     estimate_retrieval,
@@ -44,6 +50,18 @@ from citarilo.pipeline import (
     create_live_context,
     validate_question,
 )
+from citarilo.records import RunRecord, iter_records, read_record
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_RUN_ID = r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}"
+
+
+def _utc_day(value: str) -> datetime:
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%d")
+    except ValueError:
+        raise argparse.ArgumentTypeError("must be YYYY-MM-DD") from None
+    return parsed.replace(tzinfo=UTC)
 
 
 def main(
@@ -56,7 +74,7 @@ def main(
     """Run a subcommand; settings, embedding client and answer context are injectable."""
     parser = argparse.ArgumentParser(
         prog="citarilo",
-        description="Evidence-backed customer support for TrailSupply.",
+        description="Evidence-backed answers from company documents with verified citations.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     commands = parser.add_subparsers(dest="command")
@@ -78,9 +96,25 @@ def main(
     modes.add_argument("--probes", action="store_true")
     modes.add_argument("--grading-template", type=Path, metavar="REPORT")
     modes.add_argument("--summarize", nargs=2, type=Path, metavar=("REPORT", "GRADES"))
+    evaluate.add_argument("--eval-set")
     evaluate.add_argument("--max-usd", help="Maximum USD spend for this evaluation run.")
     evaluate.add_argument("--split", choices=("dev", "heldout"), default="dev")
     evaluate.add_argument("--dry-run", action="store_true", help="Estimate without network access.")
+    evaluate.add_argument(
+        "--case",
+        action="append",
+        metavar="ID",
+        help="Evaluate only this case (repeatable). A probe pair id selects both probes.",
+    )
+    runs = commands.add_parser("runs", help="List local answer audits. Offline; no network.")
+    runs.add_argument("--failed", action="store_true", help="Show only refused runs and why.")
+    runs.add_argument("--since", metavar="YYYY-MM-DD", type=_utc_day)
+    runs.add_argument("--limit", type=int, metavar="N", help="Show at most N runs.")
+    runs.add_argument(
+        "--include-evals", action="store_true", help="Include runs that belong to an eval case."
+    )
+    runs.add_argument("--to-case", metavar="RUN_ID", help="Write a stub eval case from this run.")
+    runs.add_argument("--eval-set", help="Evaluation set for --to-case.")
     args = parser.parse_args(argv)
     if args.command is None:
         parser.print_help()
@@ -102,7 +136,7 @@ def main(
         return
     max_usd = None
     if args.command == "eval" and (args.grading_template or args.summarize):
-        if args.dry_run or args.max_usd is not None or args.split != "dev":
+        if args.dry_run or args.max_usd is not None or args.split != "dev" or args.case:
             parser.exit(1, "citarilo: error: Grading commands do not accept run options.\n")
         try:
             if args.grading_template:
@@ -154,8 +188,35 @@ def main(
             )
     except ValidationError:
         parser.exit(1, "citarilo: error: Invalid settings; check the environment and .env file.\n")
+    if args.command == "eval":
+        root = _REPO_ROOT
+        available = sorted(
+            p.name
+            for p in (root / "evals").iterdir()
+            if p.is_dir() and (p / "cases.jsonl").is_file()
+        )
+        chosen = args.eval_set or settings.data_dir.name
+        try:
+            validate_set_name(chosen)
+        except ValueError:
+            chosen = ""
+        required = [root / "evals" / chosen / "cases.jsonl", root / "data" / chosen]
+        if args.probes:
+            required.append(root / "evals" / chosen / "verifier_cases.jsonl")
+        if (
+            chosen not in available
+            or not required[1].is_dir()
+            or any(not p.is_file() for p in required[::2] if p != required[1])
+        ):
+            names = ", ".join(available) or "none"
+            parser.exit(
+                1, f"citarilo: error: Select a valid --eval-set; available sets: {names}.\n"
+            )
+        args.eval_set = chosen
     try:
-        if args.command == "ingest":
+        if args.command == "runs":
+            _runs(parser, settings, args)
+        elif args.command == "ingest":
             _ingest(settings, dry_run=args.dry_run, client=client)
         elif args.command == "ask":
             validate_question(args.question)
@@ -176,7 +237,13 @@ def main(
             )
         elif args.retrieval:
             passed = _eval(
-                settings, dry_run=args.dry_run, max_usd=max_usd, split=args.split, client=client
+                settings,
+                dry_run=args.dry_run,
+                max_usd=max_usd,
+                split=args.split,
+                client=client,
+                eval_set=args.eval_set,
+                case_ids=args.case,
             )
             if not passed:
                 parser.exit(2)
@@ -210,6 +277,7 @@ def main(
             "ingest": "Ingest",
             "ask": "Answer",
             "serve": "Server",
+            "runs": "Run listing",
             "eval": "Retrieval evaluation"
             if args.command == "eval" and args.retrieval
             else "Evaluation",
@@ -236,6 +304,209 @@ def _ask(question: str, *, context: AnswerContext) -> None:
     )
 
 
+def _print_run(record: RunRecord, *, failed: bool) -> None:
+    label = f"{record.status}/{record.refusal_code}" if record.refusal_code else record.status
+    question = " ".join(record.question.split())
+    print(
+        f"{record.created_at.isoformat()}  {record.run_id}  {label}  "
+        f"{record.prompt_version}  {question}"
+    )
+    if not failed:
+        return
+    claims = record.candidate_claims
+    for check in record.check_results:
+        if check.ok:
+            continue
+        reasons = ", ".join(check.reasons) if check.reasons else "failed"
+        print(f"  check {check.claim_index}: {reasons}")
+    for verdict in record.verdicts:
+        if verdict.verdict == "supported":
+            continue
+        if 0 <= verdict.claim_index < len(claims):
+            claim = claims[verdict.claim_index]
+            cited = ", ".join(claim.citations)
+            print(f"  verdict {verdict.claim_index} {verdict.verdict}: {claim.text} [{cited}]")
+        else:
+            print(f"  verdict {verdict.claim_index} {verdict.verdict}:")
+        if verdict.reason:
+            print(f"    reason: {verdict.reason}")
+
+
+def _case_stub(record: RunRecord) -> dict[str, object]:
+    """Empty expectations plus cited IDs. EvalCase rejects this shape on purpose."""
+    cited: list[str] = []
+    claims = record.claims or record.candidate_claims
+    for claim in claims:
+        for citation in claim.citations:
+            if citation not in cited:
+                cited.append(citation)
+    return {
+        "id": f"manual-{record.run_id[:8].lower()}",
+        "split": "dev",
+        "question": record.question,
+        "language": record.answer_language or "cs",
+        "expected_status": "answered",
+        "expected_refusal": None,
+        "required_facts": [],
+        "forbidden_claims": [],
+        "supporting_sentence_ids": [],
+        "expected_section_keys": [],
+        "tags": ["manual"],
+        "hint_cited_ids": cited,
+    }
+
+
+def _jsonl_ids(path: Path) -> set[str]:
+    if not path.is_file():
+        return set()
+    found: set[str] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict) and isinstance(item.get("id"), str):
+            found.add(item["id"])
+    return found
+
+
+def _append_jsonl(path: Path, payload: dict[str, object]) -> None:
+    line = json.dumps(payload, ensure_ascii=False) + "\n"
+    if path.is_file():
+        existing = path.read_bytes()
+        if existing and not existing.endswith(b"\n"):
+            line = "\n" + line
+    else:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(line)
+
+
+def _export_case(
+    parser: argparse.ArgumentParser, settings: Settings, run_id: str, eval_set: str
+) -> None:
+    if re.fullmatch(_RUN_ID, run_id) is None:
+        parser.exit(1, "citarilo: error: Unknown run.\n")
+    path = settings.runs_dir / f"{run_id}.json"
+    if not path.is_file():
+        parser.exit(1, "citarilo: error: Unknown run.\n")
+    try:
+        record = read_record(path)
+    except (OSError, ValidationError, ValueError):
+        parser.exit(1, "citarilo: error: Run record is unreadable or invalid.\n")
+    try:
+        validate_set_name(eval_set)
+    except ValueError:
+        eval_set = ""
+    root = _REPO_ROOT
+    evals_dir = root / "evals"
+    available = (
+        sorted(
+            entry.name
+            for entry in evals_dir.iterdir()
+            if entry.is_dir() and (entry / "cases.jsonl").is_file()
+        )
+        if evals_dir.is_dir()
+        else []
+    )
+    if eval_set not in available:
+        names = ", ".join(available) or "none"
+        parser.exit(1, f"citarilo: error: Select a valid --eval-set; available sets: {names}.\n")
+    stub = _case_stub(record)
+    case_id = str(stub["id"])
+    set_dir = evals_dir / eval_set
+    cases_path = set_dir / "cases.jsonl"
+    # The loader accepts JSONL only. Empty facts, the manual tag and hint_cited_ids
+    # are not a valid answered EvalCase, so the stub must not join cases.jsonl.
+    try:
+        EvalCase.model_validate_json(json.dumps(stub))
+        destination = cases_path
+    except ValidationError:
+        destination = set_dir / "manual_cases.jsonl"
+    if case_id in _jsonl_ids(cases_path) or case_id in _jsonl_ids(destination):
+        parser.exit(1, f"citarilo: error: Case id {case_id} already exists.\n")
+    _append_jsonl(destination, stub)
+    print(f"Wrote {destination}")
+    if destination.name == "manual_cases.jsonl":
+        print("Eval does not load this file.")
+    print(
+        "A human must fill required_facts, supporting_sentence_ids and "
+        "expected_section_keys before this stub can be graded."
+    )
+
+
+def _runs(parser: argparse.ArgumentParser, settings: Settings, args: argparse.Namespace) -> None:
+    listing = args.failed or args.since is not None or args.limit is not None or args.include_evals
+    if args.to_case or args.eval_set:
+        if not args.to_case or not args.eval_set:
+            parser.exit(1, "citarilo: error: --to-case and --eval-set are required together.\n")
+        if listing:
+            parser.exit(1, "citarilo: error: --to-case does not accept listing options.\n")
+        _export_case(parser, settings, args.to_case, args.eval_set)
+        return
+    if args.limit is not None and args.limit < 1:
+        parser.exit(1, "citarilo: error: --limit must be a positive integer.\n")
+
+    def warn(path: Path) -> None:
+        sys.stderr.write(
+            f"citarilo: warning: Skipping unreadable or invalid run file {path.name}.\n"
+        )
+
+    selected = []
+    for record in iter_records(settings.runs_dir, on_invalid=warn):
+        if record.eval_case_id is not None and not args.include_evals:
+            continue
+        if args.since is not None and record.created_at < args.since:
+            continue
+        if args.failed and record.status != "refused":
+            continue
+        selected.append(record)
+    selected.sort(key=lambda record: (record.created_at, record.run_id), reverse=True)
+    if args.limit is not None:
+        selected = selected[: args.limit]
+    for record in selected:
+        _print_run(record, failed=args.failed)
+
+
+def _unknown_ids(ids: list[str]) -> None:
+    label = "id" if len(ids) == 1 else "ids"
+    sys.stderr.write(f"citarilo: error: Unknown evaluation {label}: {', '.join(ids)}.\n")
+    raise SystemExit(2)
+
+
+def _filter_cases(
+    cases: list[EvalCase], requested: list[str] | None
+) -> tuple[list[EvalCase], tuple[str, ...] | None]:
+    """Apply --case after the split filter. None means the whole split."""
+    if not requested:
+        return cases, None
+    known = {case.id for case in cases}
+    missing = [item for item in dict.fromkeys(requested) if item not in known]
+    if missing:
+        _unknown_ids(missing)
+    chosen = set(requested)
+    selected = [case for case in cases if case.id in chosen]
+    return selected, tuple(case.id for case in selected)
+
+
+def _filter_probes(
+    probes: list[VerifierProbe], requested: list[str] | None
+) -> tuple[list[VerifierProbe], tuple[str, ...] | None]:
+    """Select by probe id or pair id. A pair id selects both probes, in file order."""
+    if not requested:
+        return probes, None
+    ids = {probe.id for probe in probes}
+    pairs = {probe.pair_id for probe in probes}
+    missing = [item for item in dict.fromkeys(requested) if item not in ids and item not in pairs]
+    if missing:
+        _unknown_ids(missing)
+    chosen = set(requested)
+    selected = [probe for probe in probes if probe.id in chosen or probe.pair_id in chosen]
+    return selected, tuple(probe.id for probe in selected)
+
+
 def _eval(
     settings: Settings,
     *,
@@ -243,17 +514,36 @@ def _eval(
     max_usd: Decimal | None,
     split: str,
     client: EmbeddingsClient | None,
+    eval_set: str,
+    case_ids: list[str] | None = None,
 ) -> bool:
+    root = _REPO_ROOT
+    reference_dir = root / "data" / eval_set
     if split == "heldout":
         print("Warning: heldout is reserved for the final one-off run; do not use it for tuning.")
-    cases = [case for case in load_cases(Path("evals/cases.jsonl")) if case.split == split]
+    cases = [
+        case
+        for case in load_cases(root / "evals" / eval_set / "cases.jsonl")
+        if case.split == split
+    ]
+    cases, selected = _filter_cases(cases, case_ids)
     if dry_run:
         print(f"Dry run: {len(cases)} queries; split {split}; top_k {settings.top_k}.")
-        print(f"Worst-case cost: ${estimate_retrieval(cases, settings):.6f}.")
+        cost = estimate_retrieval(cases, settings, reference_dir=reference_dir)
+        print(f"Worst-case cost: ${cost:.6f}.")
         return True
     if max_usd is None:
         raise ValueError("A run budget is required")
-    report, path = evaluate_retrieval(cases, settings, max_usd, split=split, client=client)
+    report, path = evaluate_retrieval(
+        cases,
+        settings,
+        max_usd,
+        split=split,
+        client=client,
+        reference_dir=reference_dir,
+        eval_set=eval_set,
+        case_ids=selected,
+    )
     print(f"{'Case':<36} {'Hit':<5} Expected section ranks (1-based; - = missing)")
     for result in report.cases:
         hit = "n/a" if result.hit is None else "yes" if result.hit else "no"
@@ -328,19 +618,36 @@ def _eval_answers_or_probes(
     *,
     context: AnswerContext | None,
 ) -> int:
+    root = _REPO_ROOT
+    reference_dir = root / "data" / args.eval_set
     if args.live:
         if args.split == "heldout":
             print(
                 "Warning: heldout is reserved for the final one-off run; do not use it for tuning."
             )
-        cases = [c for c in load_cases(Path("evals/cases.jsonl")) if c.split == args.split]
+        cases = [
+            c
+            for c in load_cases(root / "evals" / args.eval_set / "cases.jsonl")
+            if c.split == args.split
+        ]
+        cases, selected = _filter_cases(cases, args.case)
         if args.dry_run:
             print(
                 f"Dry run: {len(cases)} answer cases; split {args.split}; top_k {settings.top_k}."
             )
-            print(f"Worst-case cost: ${estimate_answers(cases, settings):.6f}.")
+            cost = estimate_answers(cases, settings, reference_dir=reference_dir)
+            print(f"Worst-case cost: ${cost:.6f}.")
             return 0
-        report, path = evaluate_answers(cases, settings, max_usd, split=args.split, context=context)
+        report, path = evaluate_answers(
+            cases,
+            settings,
+            max_usd,
+            split=args.split,
+            context=context,
+            reference_dir=reference_dir,
+            eval_set=args.eval_set,
+            case_ids=selected,
+        )
         print(f"{'Case':<36} {'Status':<10} Error")
         for case in report.cases:
             print(
@@ -350,12 +657,21 @@ def _eval_answers_or_probes(
         print("Semantic grading required: create a template with --grading-template REPORT.")
         failed = not report.complete or any(c.error for c in report.cases)
     else:
-        probes = load_probes(Path("evals/verifier_cases.jsonl"))
+        probes = load_probes(root / "evals" / args.eval_set / "verifier_cases.jsonl")
+        probes, selected = _filter_probes(probes, args.case)
         if args.dry_run:
             print(f"Dry run: {len(probes)} verifier probes; verification only.")
-            print(f"Worst-case cost: ${estimate_probes(probes, settings):.6f}.")
+            cost = estimate_probes(probes, settings, reference_dir=reference_dir)
+            print(f"Worst-case cost: ${cost:.6f}.")
             return 0
-        report, path = evaluate_probes(probes, settings, max_usd)
+        report, path = evaluate_probes(
+            probes,
+            settings,
+            max_usd,
+            reference_dir=reference_dir,
+            eval_set=args.eval_set,
+            case_ids=selected,
+        )
         print(f"{'Probe':<48} {'Expected':<14} Actual")
         for case in report.cases:
             actual = (

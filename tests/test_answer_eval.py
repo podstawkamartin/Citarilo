@@ -1,6 +1,7 @@
 """Budgeted answer/probe runners and offline grading with fake providers only."""
 
 import json
+import shutil
 from dataclasses import replace
 from decimal import Decimal
 from pathlib import Path
@@ -20,9 +21,14 @@ from citarilo.records import read_record
 
 
 @pytest.fixture
-def rig(pipeline_rig, monkeypatch):  # noqa: F811
-    # These contracts use a separate, deliberately tiny canonical test corpus.
-    monkeypatch.setattr(ev, "_CANONICAL_DATA_DIR", pipeline_rig.context.settings.data_dir)
+def rig(pipeline_rig, monkeypatch, tmp_path):  # noqa: F811
+    root = tmp_path / "repository"
+    (root / "data").mkdir(parents=True)
+    (root / "evals").mkdir()
+    shutil.copytree(pipeline_rig.context.settings.data_dir, root / "data" / "trailsupply")
+    source = Path(__file__).resolve().parents[1] / "evals" / "trailsupply"
+    shutil.copytree(source, root / "evals" / "trailsupply")
+    monkeypatch.setattr(cli, "_REPO_ROOT", root)
     return pipeline_rig
 
 
@@ -44,7 +50,12 @@ def case(case_id="returns", *, refused=False, injection=False):
 
 def run(rig, cases=None, cap="0.05"):
     return evaluate_answers(
-        cases or [case()], rig.context.settings, Decimal(cap), context=rig.context
+        cases or [case()],
+        rig.context.settings,
+        Decimal(cap),
+        context=rig.context,
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
     )
 
 
@@ -76,8 +87,10 @@ def test_answer_report_reuses_context_preserves_evidence_and_metrics(rig):
     assert len(rig.calls["embedding"]) == len(rig.calls["verify"]) == 2
     assert rig.context.group_id == "test-ask"  # Injected context remains reusable.
     assert len(list(path.parent.glob("answers-*.json"))) == 1
+    assert not path.name.endswith("-cases.json")
     assert not list(path.parent.glob("*.tmp"))
     data = json.loads(path.read_text())
+    assert "case_ids" not in data
     assert data["kind"] == "answers" and "openai_api_key" not in path.read_text()
     for result in report.cases:
         assert result.question and result.required_facts and result.forbidden_claims
@@ -139,6 +152,20 @@ def test_contract_error_continues_and_zero_budget_stops_before_dispatch(rig):
     report, _ = run(rig, cap="0.0000001")
     assert not report.complete and not rig.calls["embedding"]
     assert report.cases[0].run_id and report.cases[0].cost_usd == 0
+
+
+def test_filtered_answer_report_names_selected_cases(rig):
+    _, path = evaluate_answers(
+        [case("returns")],
+        rig.context.settings,
+        Decimal("0.05"),
+        context=rig.context,
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
+        case_ids=("returns",),
+    )
+    assert path.name.endswith("-cases.json")
+    assert json.loads(path.read_text())["case_ids"] == ["returns"]
 
 
 def test_template_all_candidates_and_no_overwrite(rig):
@@ -305,7 +332,12 @@ def probe_context(rig, verifier=None):
 
 def test_probes_only_verify_false_accept_gate_and_full_context(rig):
     report, path = evaluate_probes(
-        probes(), rig.context.settings, Decimal("0.05"), context=probe_context(rig)
+        probes(),
+        rig.context.settings,
+        Decimal("0.05"),
+        context=probe_context(rig),
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
     )
     assert rig.calls["generate"] == rig.calls["embedding"] == []
     assert len(rig.calls["verify"]) == 2
@@ -324,19 +356,34 @@ def test_probes_only_verify_false_accept_gate_and_full_context(rig):
 def test_probes_false_rejects_errors_and_budget_stop(rig):
     rig.results["verify"]["parsed"]["verdicts"][0]["verdict"] = "contradicted"
     report, _ = evaluate_probes(
-        probes(), rig.context.settings, Decimal("0.05"), context=probe_context(rig)
+        probes(),
+        rig.context.settings,
+        Decimal("0.05"),
+        context=probe_context(rig),
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
     )
     assert report.metrics["false_rejects"] == 1 and report.gate == "PASS"
     rig.results["verify"] = RuntimeError("fake-sensitive")
     report, path = evaluate_probes(
-        probes(), rig.context.settings, Decimal("0.05"), context=probe_context(rig)
+        probes(),
+        rig.context.settings,
+        Decimal("0.05"),
+        context=probe_context(rig),
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
     )
     assert all(c.error.code == "provider_error" for c in report.cases)
     assert report.gate == "FAIL" and report.cost_usd > 0
     assert "fake-sensitive" not in path.read_text()
     rig.calls["verify"].clear()
     report, _ = evaluate_probes(
-        probes(), rig.context.settings, Decimal("0.0000001"), context=probe_context(rig)
+        probes(),
+        rig.context.settings,
+        Decimal("0.0000001"),
+        context=probe_context(rig),
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
     )
     assert not report.complete and report.error == "budget_exceeded"
     assert report.cases[0].error and report.cases[1].latency_ms is None
@@ -385,12 +432,27 @@ def test_estimate_bounds_actual_reservations(rig):
 def test_live_cli_context_once_heldout_warning_and_error_exit(rig, monkeypatch, capsys):
     heldout = case().model_copy(update={"split": "heldout"})
     monkeypatch.setattr(cli, "load_cases", lambda _: [heldout])
-    main(["eval", "--live", "--max-usd", "0.05", "--split", "heldout"], context=rig.context)
+    main(
+        ["eval", "--eval-set", "trailsupply", "--live", "--max-usd", "0.05", "--split", "heldout"],
+        context=rig.context,
+    )
     assert "heldout is reserved" in capsys.readouterr().out
     assert len(rig.calls["generate"]) == 1
     rig.results["generate"] = RuntimeError("fake-secret")
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--live", "--max-usd", "0.05", "--split", "heldout"], context=rig.context)
+        main(
+            [
+                "eval",
+                "--eval-set",
+                "trailsupply",
+                "--live",
+                "--max-usd",
+                "0.05",
+                "--split",
+                "heldout",
+            ],
+            context=rig.context,
+        )
     assert error.value.code == 1
     assert "fake-secret" not in capsys.readouterr().out
 
@@ -415,7 +477,13 @@ def test_live_factory_built_once_after_group_open(rig, monkeypatch, tracked_http
 
     monkeypatch.setattr(ev, "_ledger", lambda _: rig.context.ledger)
     monkeypatch.setattr(ev.pipeline, "create_live_context", create)
-    report, _ = evaluate_answers([case("one"), case("two")], rig.context.settings, Decimal("0.05"))
+    report, _ = evaluate_answers(
+        [case("one"), case("two")],
+        rig.context.settings,
+        Decimal("0.05"),
+        reference_dir=rig.context.settings.data_dir,
+        eval_set="trailsupply",
+    )
     assert builds == [report.group_id]
     assert len(rig.calls["generate"]) == 2
     assert tracked_http_client.is_closed
@@ -453,7 +521,7 @@ def test_probe_cli_exit_codes_with_fake_factory(
         )
 
     monkeypatch.setattr(ev.pipeline, "create_verification_context", create)
-    args = ["eval", "--probes", "--max-usd", "0.05"]
+    args = ["eval", "--eval-set", "trailsupply", "--probes", "--max-usd", "0.05"]
     if exit_code:
         with pytest.raises(SystemExit) as error:
             main(args, settings=rig.context.settings)
@@ -507,6 +575,8 @@ def test_evaluation_report_failure_closes_only_created_contexts(
             context.settings,
             Decimal("0.05"),
             context=context if injected else None,
+            reference_dir=rig.context.settings.data_dir,
+            eval_set="trailsupply",
         )
     assert tracked_http_client.is_closed is not injected
     assert tracked_http_client.close.call_count == (0 if injected else 1)
@@ -549,7 +619,7 @@ def test_estimate_uses_real_reservation_bounds_and_maximal_claims(rig, monkeypat
     sections = pipeline.evidence_sections(rig.context.corpus)
     claims = tuple(
         CandidateClaim(text="ř" * 1000, citations=("returns.window.1", "returns.window.2"))
-        for _ in range(4)
+        for _ in range(pipeline.MAX_CLAIMS)
     )
     question = "What is the return period?"
     actual_reservations = (

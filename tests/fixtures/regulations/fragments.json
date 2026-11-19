@@ -1,0 +1,156 @@
+{
+  "fragments": [
+    {
+      "kodTypuFragmentu": "Paragraf",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3",
+      "xhtml": "<var>§ 3</var>"
+    },
+    {
+      "kodTypuFragmentu": "Nadpis_pod",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/frag_9650737",
+      "xhtml": "Vyhrazená elektrická zařízení"
+    },
+    {
+      "kodTypuFragmentu": "Odstavec_Dc",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/odst_1",
+      "xhtml": "<var>(1)</var> <czechvoc-termin koncept-id=\"278981\">Vyhrazenými elektrickými zařízeními</czechvoc-termin> jsou zařízení, která představují zvýšenou míru ohrožení života, zdraví a bezpečnosti fyzických osob, a to"
+    },
+    {
+      "kodTypuFragmentu": "Pismeno_Lb",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/odst_1/pism_a",
+      "xhtml": "<var>a)</var> <czechvoc-termin koncept-id=\"278509\">elektrická zařízení</czechvoc-termin> pro výrobu, přeměnu, přenos, rozvod, distribuci a odběr elektrické energie a elektrické instalace staveb a technologií,"
+    },
+    {
+      "kodTypuFragmentu": "Odstavec_Dc",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/odst_2",
+      "xhtml": "<var>(2)</var> <czechvoc-termin koncept-id=\"278981\">Vyhrazenými elektrickými zařízeními</czechvoc-termin> nejsou"
+    },
+    {
+      "kodTypuFragmentu": "Pismeno_Lb",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/odst_2/pism_a",
+      "xhtml": "<var>a)</var> ruční elektromechanické nářadí, elektronické přístroje a elektrické spotřebiče do napětí 400 V včetně, pokud nejsou určené pro pevné připojení k elektrické síti,"
+    },
+    {
+      "kodTypuFragmentu": "Pokracovani_Text",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_3/odst_2/pism_a/continuation",
+      "xhtml": "Doplňující pokračování."
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4",
+      "kodTypuFragmentu": "Paragraf",
+      "xhtml": "<var>§ 4</var>"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/frag_9650759",
+      "kodTypuFragmentu": "Nadpis_pod",
+      "xhtml": "Zařazení vyhrazených elektrických zařízení do tříd"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1",
+      "kodTypuFragmentu": "Odstavec_Dc",
+      "xhtml": "<var>(1)</var> <czechvoc-termin koncept-id=\"278981\">Vyhrazeným elektrickým zařízením</czechvoc-termin> I. třídy je"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a",
+      "kodTypuFragmentu": "Pismeno_Lb",
+      "xhtml": "<var>a)</var> <czechvoc-termin koncept-id=\"278509\">elektrické zařízení</czechvoc-termin>"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a/bod_1",
+      "kodTypuFragmentu": "Bod_Dd",
+      "xhtml": "<var>1.</var> ve vnitřních a vnějších prostorách s extrémně vysokými teplotami okolí nad + 55 °C,"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a/bod_2",
+      "kodTypuFragmentu": "Bod_Dd",
+      "xhtml": "<var>2.</var> v prostorách s výskytem tryskající a intenzivně tryskající vody a možností ponoření,"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a/bod_3",
+      "kodTypuFragmentu": "Bod_Dd",
+      "xhtml": "<var>3.</var> v prostorách s trvalým výskytem korozivních a znečišťujících látek a"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a/bod_4",
+      "kodTypuFragmentu": "Bod_Dd",
+      "xhtml": "<var>4.</var> v prostorách s nebezpečím požáru hořlavých kapalin;"
+    },
+    {
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/norma/par_4/odst_1/pism_a/frag_9650773",
+      "kodTypuFragmentu": "Odstavec_Dc",
+      "xhtml": "nebezpečí působení vnějších vlivů musí vyplývat z projektové nebo <czechvoc-termin koncept-id=\"267227\">provozní dokumentace</czechvoc-termin>,"
+    },
+    {
+      "kodTypuFragmentu": "Hlavicka_priloha",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_3",
+      "xhtml": "<var>Příloha č. 3</var> k nařízení vlády č. 190/2022 Sb."
+    },
+    {
+      "kodTypuFragmentu": "Nadpis",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_3/frag_9651087",
+      "xhtml": "Oprávnění k montáži, opravám, revizím a zkouškám vyhrazených elektrických zařízení"
+    },
+    {
+      "kodTypuFragmentu": "Odstavec_Dc",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_3/frag_9651089",
+      "xhtml": "Oprávnění obsahuje pro daný účel tyto rozlišovací znaky:"
+    },
+    {
+      "kodTypuFragmentu": "Bod_Rd",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_3/bod_1",
+      "xhtml": "<var>I.</var> Podle rozsahu <czechvoc-termin koncept-id=\"278981\">vyhrazeného elektrického zařízení</czechvoc-termin>:"
+    },
+    {
+      "kodTypuFragmentu": "Tabulka",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_3/bod_1/frag_9651093",
+      "xhtml": "<table class=\"TABLE0\" cellspacing=\"0\" cellpadding=\"0\"><tbody><tr><td style=\"width:30px;vertical-align:top;\">a)</td><td colspan=\"2\" style=\"width:565px;vertical-align:top;\"><czechvoc-termin koncept-id=\"278509\">elektrická zařízení</czechvoc-termin> nízkého napětí a vysokého napětí s uvedením rozsahu napětí; rozsahy</td></tr><tr><td style=\"vertical-align:top;\"></td><td style=\"width:489px;vertical-align:top;\">napětí do 35 kV, do 230 kV nebo bez omezení rozsahu napětí</td><td style=\"width:76px;vertical-align:top;\">E1</td></tr><tr><td style=\"vertical-align:top;\">b)</td><td colspan=\"2\" style=\"width:565px;vertical-align:top;\"><czechvoc-termin koncept-id=\"278509\">elektrická zařízení</czechvoc-termin> nízkého napětí do 1 kV střídavého napětí nebo 1,5 kV stejnosměrného</td></tr><tr><td style=\"vertical-align:top;\"></td><td style=\"width:489px;vertical-align:top;\"> napětí</td><td style=\"width:76px;vertical-align:top;\">E2</td></tr><tr><td style=\"vertical-align:top;\">c)</td><td colspan=\"2\" style=\"width:565px;vertical-align:top;\">zařízení pro ochranu před atmosférickou elektřinou, přepětím a statickou elektřinou</td></tr><tr><td style=\"vertical-align:top;\"></td><td style=\"width:489px;vertical-align:top;\"></td><td style=\"width:76px;vertical-align:top;\">E3</td></tr></tbody></table>"
+    },
+    {
+      "kodTypuFragmentu": "Hlavicka_priloha",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_4",
+      "xhtml": "<var>Příloha č. 4</var> k nařízení vlády č. 190/2022 Sb."
+    },
+    {
+      "kodTypuFragmentu": "Nadpis",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_4/frag_9651107",
+      "xhtml": "Základní nejdelší lhůty pravidelných revizí vyhrazeného elektrického zařízení včetně zařízení pro ochranu před účinky atmosférické a statické elektřiny"
+    },
+    {
+      "kodTypuFragmentu": "Tabulka",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_4/frag_9651109",
+      "xhtml": "<table class=\"TABLE1\" style=\"width:560px;\"><tbody><tr><th style=\"width:410px;text-align:left;vertical-align:top;\">Podle objektu a prostoru:</th><th style=\"width:150px;text-align:center;vertical-align:top;\">Revizní lhůty</th></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">V objektech určených pro administrativní činnost</td><td style=\"width:200px;text-align:center;vertical-align:top;\">5 let</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">V objektech určených pro výrobu, vzdělávání (školy, mateřské školy), ubytování (hotely, ubytovny, kempy a jiná ubytovací zařízení) a lékařské účely</td><td style=\"width:200px;text-align:center;vertical-align:top;\">3 roky</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\"><czechvoc-termin koncept-id=\"278509\">Elektrické zařízení</czechvoc-termin> v objektu, který podle požárně bezpečnostního řešení umožňuje přítomnost více než 200 osob</td><td style=\"width:200px;text-align:center;vertical-align:top;\">2 roky</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">Prozatímní zařízení stavenišť</td><td style=\"width:200px;text-align:center;vertical-align:top;\">0,5 roku</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">Pojízdné a převozné prostředky</td><td style=\"width:200px;text-align:center;vertical-align:top;\">1 rok</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">Prostory s nebezpečím požáru a výbuchu</td><td style=\"width:200px;text-align:center;vertical-align:top;\">3 roky</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">Prostory mokré a s trvalým výskytem korozivních nebo znečišťujících látek</td><td style=\"width:200px;text-align:center;vertical-align:top;\">1 rok</td></tr><tr><th style=\"width:650px;text-align:left;vertical-align:top;\">Ochrana před účinky atmosférické a statické elektřiny:</th><th style=\"width:200px;text-align:center;vertical-align:top;\">Revizní lhůty</th></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">LPS chránící kritické systémy</td><td style=\"width:200px;text-align:center;vertical-align:top;\">2 roky</td></tr><tr><td style=\"width:650px;text-align:left;vertical-align:top;\">LPS chránící ostatní objekty nebo zařízení</td><td style=\"width:200px;text-align:center;vertical-align:top;\">4 roky</td></tr></tbody></table>"
+    },
+    {
+      "kodTypuFragmentu": "PPC",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/poznamkypodcarou/ppc_1",
+      "xhtml": "<var><sup>1</sup>)</var> Směrnice Evropského parlamentu a Rady <a data-odkaz-id=\"42634369\" href=\"#\" class=\"ext_odkaz\" data-eurlex=\"true\" data-celexid=\"32009L0104\" data-cellarid=\"82c0fd2c-cfad-435c-8287-6f4bda656d7d\" data-orig-href=\"http://eur-lex.europa.eu/legal-content/CS/AUTO/?uri=cellar:82c0fd2c-cfad-435c-8287-6f4bda656d7d\">2009/104/ES</a> ze dne 16. září 2009 o minimálních požadavcích na bezpečnost a ochranu zdraví pro používání pracovního zařízení zaměstnanci při práci (druhá samostatná směrnice ve smyslu čl. 16 odst. 1 směrnice <a data-odkaz-id=\"42634375\" href=\"#\" class=\"ext_odkaz\" data-eurlex=\"true\" data-celexid=\"31989L0391\" data-cellarid=\"3c966801-b944-46d2-9034-b8c9e37b86c3\" data-orig-href=\"http://eur-lex.europa.eu/legal-content/CS/AUTO/?uri=cellar:3c966801-b944-46d2-9034-b8c9e37b86c3\">89/391/EHS)</a>."
+    },
+    {
+      "kodTypuFragmentu": "Pismeno_Lb",
+      "eli": "/eli/cz/sb/2022/190/2024-07-01/dokument/prilohy/priloha_4/pism_a:2",
+      "xhtml": "<var>a)</var> Na všech zařízeních LPS je nutno provést nejméně jednou ročně vizuální kontrolu, kterou se ověří, že LPS není viditelně poškozen."
+    }
+  ],
+  "multi_header": [
+    {
+      "kodTypuFragmentu": "Nadpis",
+      "eli": "/eli/cz/sb/2022/193/2024-07-01/dokument/prilohy/priloha_2/bod_2/bod_1/frag_9653221",
+      "xhtml": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel."
+    },
+    {
+      "kodTypuFragmentu": "Tabulka",
+      "eli": "/eli/cz/sb/2022/193/2024-07-01/dokument/prilohy/priloha_2/bod_2/bod_1/frag_9653223",
+      "xhtml": "<table class=\"TABLEX\" style=\"width:600px;\"><tbody><tr><th class=\"CT CR CL\" style=\"width:80px;\">Skupina jeřábu</th><th class=\"CT CR CL\">Součinitel spektra zatížení a třídy Q<a data-odkaz-id=\"41357703\" href=\"#\" class=\"int_odkaz\"><sup>(1)</sup></a></th><th class=\"CT CR CL\" colspan=\"2\">Lhůty</th></tr><tr><th class=\"CR CB CL\"></th><th class=\"CR CB CL\"></th><th class=\"CB CL\">revize </th><th class=\"CR CB\">zkoušky</th></tr><tr><td class=\"CT CR CB CL\" style=\"text-align:center;\">1</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">0,125 (Q 0 – Q2)</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">4 roky</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">8 roků</td></tr><tr><td class=\"CT CR CB CL\" style=\"text-align:center;\">2</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">0,25 (Q3)</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">3 roky</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">6 roků</td></tr><tr><td class=\"CT CR CB CL\" style=\"text-align:center;\">3</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">0,50 (Q4)</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">2 roky</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">4 roků</td></tr><tr><td class=\"CT CR CB CL\" style=\"text-align:center;\">4</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">1,00 (Q5)</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">1 roky</td><td class=\"CT CR CB CL\" style=\"text-align:center;\">2 roků</td></tr></tbody></table>"
+    }
+  ],
+  "rowspan": {
+    "kodTypuFragmentu": "Tabulka",
+    "eli": "/eli/cz/sb/2022/192/2024-07-01/dokument/prilohy/priloha_4/frag_9652789",
+    "xhtml": "<table class=\"TABLE1\" style=\"width:480px;\"><tbody><tr><th style=\"width:80px;text-align:center;\">vyhrazené tlakové zařízení</th><th style=\"width:50px;\">třída</th><th style=\"width:150px;\">provozní revize</th><th style=\"width:130px;\">vnitřní revize</th><th style=\"width:70px;\">tlaková zkouška</th></tr><tr><td rowspan=\"2\" style=\"text-align:center;\"><czechvoc-termin koncept-id=\"262687\">nádoby</czechvoc-termin> stabilní</td><td style=\"text-align:center;\">I.</td><td style=\"text-align:center;\">jedenkrát za 1 rok</td><td rowspan=\"2\" style=\"text-align:center;\">jedenkrát za 5 let</td><td rowspan=\"6\" style=\"text-align:center;\">jedenkrát za 10 let</td></tr><tr><td style=\"text-align:center;\">II.</td><td style=\"text-align:center;\">jedenkrát za 1 rok</td></tr><tr><td rowspan=\"4\" style=\"text-align:center;\"><czechvoc-termin koncept-id=\"261221\">kotle</czechvoc-termin></td><td style=\"text-align:center;\">I.</td><td rowspan=\"2\" style=\"text-align:center;\">jedenkrát za 3 měsíce</td><td rowspan=\"4\" style=\"text-align:center;\">jedenkrát za 1 rok, <br/> u <czechvoc-termin koncept-id=\"261221\">kotlů</czechvoc-termin> I. a II. třídy může být prodloužen termín na 2 roky</td></tr><tr><td style=\"text-align:center;\">II.</td></tr><tr><td style=\"text-align:center;\">III.</td><td rowspan=\"2\" style=\"text-align:center;\">jedenkrát za 6 měsíců</td></tr><tr><td style=\"text-align:center;\">IV.</td></tr></tbody></table>"
+  },
+  "rowspan193": {
+    "kodTypuFragmentu": "Tabulka",
+    "eli": "/eli/cz/sb/2022/193/2024-07-01/dokument/prilohy/priloha_4/frag_149953801",
+    "xhtml": "<table class=\"TABLEX\" style=\"width:800px;\"><tbody><tr><th class=\"CT CR CL\" colspan=\"3\" style=\"width:100%;text-align:center;vertical-align:top;\">Vzdělání a odborná praxe pro jednotlivé úrovně odborné způsobilosti k činnostem na vyhrazených zdvihacích zařízeních uvedených v <a data-odkaz-id=\"63348335\" href=\"#\" class=\"int_odkaz\">§ 3 odst. 1 písm. c)</a></th></tr><tr><th class=\"CT CL\" style=\"text-align:center;vertical-align:top;\">Činnost na vyhrazeném zdvihacím zařízení</th><th class=\"CT CR CB CL\" style=\"text-align:center;vertical-align:middle;\">Nejnižší stupeň vzdělání v oboru</th><th class=\"CT CR CB CL\" style=\"text-align:center;vertical-align:middle;\">Délka odborné praxe v oboru zdvihacích zařízení v letech</th></tr><tr><td class=\"CT CR CL\" rowspan=\"20\" style=\"vertical-align:middle;\"><czechvoc-termin koncept-id=\"268759\">Revize</czechvoc-termin> a zkoušky</td><td class=\"CT CR CL\" style=\"vertical-align:top;\">Střední vzdělání s výučním listem ze skupiny oborů:</td><td class=\"CT CR CL\" rowspan=\"6\" style=\"text-align:center;vertical-align:middle;\">8</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">26 Elektrotechnika, telekomunikační a výpočetní technika</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">23 Strojírenství a strojírenská výroba, je-li doplněno profesní kvalifikací získanou podle jiného právního předpisu<a data-odkaz-id=\"63348337\" href=\"#\" class=\"int_odkaz\"><sup>4</sup>)</a> a zveřejněnou v Národní soustavě kvalifikací v oboru 26 Elektrotechnika, telekomunikační a výpočetní technika</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td></tr><tr><td class=\"CR CB CL\" style=\"vertical-align:top;\">úplná profesní kvalifikace získaná podle jiného právního předpisu<a data-odkaz-id=\"63348339\" href=\"#\" class=\"int_odkaz\"><sup>5</sup>)</a> a zveřejněná v Národní soustavě kvalifikací v oboru 26 Elektrotechnika, telekomunikační a výpočetní technika.</td></tr><tr><td class=\"CT CR CL\" style=\"vertical-align:middle;\">Střední vzdělání s maturitní zkouškou ze skupiny oborů:</td><td class=\"CT CR CB CL\" rowspan=\"11\" style=\"text-align:center;vertical-align:middle;\">3</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">26 Elektrotechnika, telekomunikační a výpočetní technika</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">21 Hornictví a hornická geologie, hutnictví a slévárenství,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">23 Strojírenství a strojírenská výroba,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">28 Technická chemie a chemie silikátů,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">36 Stavebnictví, geodézie a kartografie,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">37 Doprava a spoje,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">39 Speciální a interdisciplinární obory,</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">41 Zemědělství a lesnictví.</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CB CL\" style=\"vertical-align:top;\">Neobsahují-li uvedené obory požadavky na elektrotechnickou odbornou kvalifikaci, musí být doplněny profesní kvalifikací získanou podle jiného právního předpisu<a data-odkaz-id=\"63348341\" href=\"#\" class=\"int_odkaz\"><sup>4</sup>)</a> a zveřejněnou v Národní soustavě kvalifikací pod oborem 26 Elektrotechnika, telekomunikační a výpočetní technika.</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CT CR CL\" style=\"vertical-align:top;\">Vysokoškolské vzdělání v oboru elektrotechnickém</td><td class=\"CT CR CB CL\" rowspan=\"3\" style=\"text-align:center;vertical-align:middle;\">2</td><td style=\"vertical-align:middle;\"></td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CR CB CL\" style=\"vertical-align:top;\">v oboru strojním, stavebním, hutním nebo chemickém, je-li doplněno profesní kvalifikací získanou podle jiného právního předpisu<a data-odkaz-id=\"63348343\" href=\"#\" class=\"int_odkaz\"><sup>4</sup>)</a> a zveřejněnou v Národní soustavě kvalifikací pod oborem 26 Elektrotechnika, telekomunikační a výpočetní technika.</td><td style=\"vertical-align:top;\"></td></tr><tr><td class=\"CT CR CB CL\" rowspan=\"6\" style=\"vertical-align:middle;\"><czechvoc-termin koncept-id=\"262575\">Montáž</czechvoc-termin> a <czechvoc-termin koncept-id=\"264495\">Opravy</czechvoc-termin> (Servis)</td><td class=\"CT CR CL\" rowspan=\"2\" style=\"vertical-align:top;\">Střední vzdělání s výučním listem nebo s maturitní zkouškou v skupině oborů 26 Elektrotechnika, telekomunikační a výpočetní technika nebo vysokoškolské vzdělání v oboru elektrotechnickém</td><td class=\"CT CR CB CL\" rowspan=\"6\" style=\"text-align:center;vertical-align:middle;\">1</td><td class=\"CT CR CB CL\" style=\"vertical-align:middle;\"></td></tr><tr></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">střední vzdělání s výučním listem nebo s maturitní zkouškou nebo vysokoškolské vzdělání v oboru strojním, stavebním, hutním nebo chemickém, je-li doplněno profesní kvalifikací získanou podle jiného právního předpisu<a data-odkaz-id=\"63348345\" href=\"#\" class=\"int_odkaz\"><sup>4</sup>)</a> a zveřejněnou v Národní soustavě kvalifikací pod oborem 26 Elektrotechnika, telekomunikační a výpočetní technika</td></tr><tr><td class=\"CR CL\" style=\"vertical-align:top;\">nebo</td></tr><tr><td class=\"CR CB CL\" style=\"vertical-align:top;\">úplná profesní kvalifikace získaná podle jiného právního předpisu<a data-odkaz-id=\"63348347\" href=\"#\" class=\"int_odkaz\"><sup>5</sup>)</a> a zveřejněná v Národní soustavě kvalifikací v oboru 26 Elektrotechnika, telekomunikační a výpočetní technika.</td></tr></tbody></table>"
+  }
+}

@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import tempfile
+from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -17,6 +18,7 @@ from pydantic import (
     ConfigDict,
     Field,
     StringConstraints,
+    ValidationError,
     field_validator,
     model_validator,
 )
@@ -360,3 +362,30 @@ def write_record(record: RunRecord, runs_dir: str | Path) -> Path:
 def read_record(path: str | Path) -> RunRecord:
     """Read and validate an audit record, including its schema version."""
     return RunRecord.model_validate_json(Path(path).read_text(encoding="utf-8"))
+
+
+def iter_records(
+    runs_dir: str | Path,
+    *,
+    on_invalid: Callable[[Path], None] | None = None,
+) -> Iterator[RunRecord]:
+    """Yield valid ``*.json`` audits in ``runs_dir``.
+
+    A missing directory yields nothing. Unreadable or invalid files are skipped,
+    and ``on_invalid`` is called with their path when given.
+    """
+    directory = Path(runs_dir)
+    try:
+        paths = [path for path in directory.iterdir() if path.is_file() and path.suffix == ".json"]
+    except FileNotFoundError:
+        return
+    except OSError:
+        if on_invalid is not None:
+            on_invalid(directory)
+        return
+    for path in sorted(paths):
+        try:
+            yield read_record(path)
+        except (OSError, ValidationError, ValueError):
+            if on_invalid is not None:
+                on_invalid(path)

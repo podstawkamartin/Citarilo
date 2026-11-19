@@ -32,7 +32,7 @@ from pydantic import (
 
 from citarilo import pipeline
 from citarilo.budget import BudgetExceeded, BudgetLedger, max_cost
-from citarilo.config import Settings
+from citarilo.config import Settings, validate_set_name
 from citarilo.corpus import Corpus, load_corpus
 from citarilo.index import (
     EmbeddingsClient,
@@ -180,13 +180,10 @@ class EvidenceMappingError(ValueError):
     """Evaluation evidence cannot be identified exactly in the selected corpus."""
 
 
-_CANONICAL_DATA_DIR = Path(__file__).resolve().parents[2] / "data/trailsupply"
-
-
 class _EvidenceResolver:
-    def __init__(self, corpus: Corpus) -> None:
+    def __init__(self, corpus: Corpus, *, reference_dir: Path) -> None:
         self.corpus = corpus
-        self.reference = load_corpus(_CANONICAL_DATA_DIR)
+        self.reference = load_corpus(reference_dir)
         self.by_text: dict[str, list[str]] = {}
         for sentence in corpus.sentences():
             self.by_text.setdefault(sentence.text, []).append(sentence.id)
@@ -226,9 +223,9 @@ class _EvidenceResolver:
         return targets.pop()
 
 
-def resolve_cases(cases: list[EvalCase], corpus: Corpus) -> list[EvalCase]:
+def resolve_cases(cases: list[EvalCase], corpus: Corpus, *, reference_dir: Path) -> list[EvalCase]:
     """Resolve every evidence reference through verified, unique canonical sentence text."""
-    resolver = _EvidenceResolver(corpus)
+    resolver = _EvidenceResolver(corpus, reference_dir=reference_dir)
     return [
         EvalCase.model_validate(
             case.model_dump()
@@ -245,8 +242,10 @@ def resolve_cases(cases: list[EvalCase], corpus: Corpus) -> list[EvalCase]:
     ]
 
 
-def resolve_probes(probes: list[VerifierProbe], corpus: Corpus) -> list[VerifierProbe]:
-    resolver = _EvidenceResolver(corpus)
+def resolve_probes(
+    probes: list[VerifierProbe], corpus: Corpus, *, reference_dir: Path
+) -> list[VerifierProbe]:
+    resolver = _EvidenceResolver(corpus, reference_dir=reference_dir)
     return [
         probe.model_copy(
             update={
@@ -302,6 +301,7 @@ class RetrievalReport(BaseModel):
     price_table_version: str
     top_k: int
     split: Literal["dev", "heldout"]
+    case_ids: tuple[str, ...] | None = None
     cases: list[RetrievalResult]
     metrics: RetrievalMetrics
     usage: dict[str, int | Decimal | str]
@@ -310,7 +310,9 @@ class RetrievalReport(BaseModel):
     error: Literal["budget_exceeded", "retrieval_failed"] | None = None
 
 
-def estimate_retrieval(cases: list[EvalCase], settings: Settings) -> Decimal:
+def estimate_retrieval(
+    cases: list[EvalCase], settings: Settings, *, reference_dir: Path
+) -> Decimal:
     """Upper-bound one embedding request per question, including ledger rounding."""
     total = Decimal(0)
     for case in cases:
@@ -321,14 +323,26 @@ def estimate_retrieval(cases: list[EvalCase], settings: Settings) -> Decimal:
     return total
 
 
+def _cases_suffix(report: BaseModel) -> str:
+    """Mark a partial run so its file cannot be read as a full-split report."""
+    return "-cases" if getattr(report, "case_ids", None) is not None else ""
+
+
+def _report_payload(report: BaseModel) -> dict:
+    payload = report.model_dump(mode="json")
+    if payload.get("case_ids") is None:
+        payload.pop("case_ids", None)
+    return payload
+
+
 def _write_retrieval_report(report: RetrievalReport, directory: Path, short_id: str) -> Path:
     directory.mkdir(parents=True, exist_ok=True)
     timestamp = report.created_at.strftime("%Y%m%dT%H%M%S%fZ")
-    destination = directory / f"retrieval-{timestamp}-{short_id}.json"
+    destination = directory / f"retrieval-{timestamp}-{short_id}{_cases_suffix(report)}.json"
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", dir=directory, prefix=".retrieval-", suffix=".tmp"
     ) as stream:
-        stream.write(json.dumps(report.model_dump(mode="json"), ensure_ascii=False, indent=2))
+        stream.write(json.dumps(_report_payload(report), ensure_ascii=False, indent=2))
         stream.write("\n")
         stream.flush()
         os.fsync(stream.fileno())
@@ -343,17 +357,23 @@ def evaluate_retrieval(
     *,
     split: Literal["dev", "heldout"] = "dev",
     client: EmbeddingsClient | None = None,
+    reference_dir: Path,
+    eval_set: str,
+    case_ids: tuple[str, ...] | None = None,
 ) -> tuple[RetrievalReport, Path]:
     """Load once and evaluate; persist partial usage on errors before re-raising.
 
     The approved gate always measures recall@5. If top_k is overridden, search
     enough sections for both metrics in the same call, reporting only top_k hits.
     """
+    validate_set_name(eval_set)
     if not cases or any(case.split != split for case in cases):
         raise ValueError("Expected nonempty evaluation cases from the selected split")
-    estimate_retrieval(cases, settings)  # Validate all inputs before any paid request.
+    estimate_retrieval(
+        cases, settings, reference_dir=reference_dir
+    )  # Validate all inputs before any paid request.
     corpus = load_corpus(settings.data_dir)
-    cases = resolve_cases(cases, corpus)
+    cases = resolve_cases(cases, corpus, reference_dir=reference_dir)
     ledger = BudgetLedger(
         settings.spend_db_path,
         settings.budget_cap_usd,
@@ -418,6 +438,7 @@ def evaluate_retrieval(
                 price_table_version=settings.price_table_version,
                 top_k=settings.top_k,
                 split=split,
+                case_ids=case_ids,
                 cases=results,
                 metrics=RetrievalMetrics(
                     answerable_cases=count,
@@ -445,7 +466,11 @@ def evaluate_retrieval(
                 else "FAIL",
                 error=error,
             )
-            path = _write_retrieval_report(report, settings.runtime_dir / "evals", run_id[:8])
+            path = _write_retrieval_report(
+                report,
+                settings.runtime_dir / "evals" / eval_set,
+                run_id[:8],
+            )
         return report, path
 
 
@@ -490,6 +515,7 @@ class EvaluationReport(RecordModel):
 class AnswerReport(EvaluationReport):
     kind: Literal["answers"] = "answers"
     split: Literal["dev", "heldout"]
+    case_ids: tuple[str, ...] | None = None
     cases: tuple[AnswerResult, ...]
 
 
@@ -513,6 +539,7 @@ class ProbePair(RecordModel):
 
 class ProbeReport(EvaluationReport):
     kind: Literal["probes"] = "probes"
+    case_ids: tuple[str, ...] | None = None
     cases: tuple[ProbeResult, ...]
     pairs: dict[str, ProbePair]
     gate: Literal["PASS", "FAIL"]
@@ -532,10 +559,15 @@ def write_json(payload: dict, destination: Path) -> Path:
     return destination
 
 
-def _save_evaluation(report: EvaluationReport, settings: Settings) -> Path:
+def _save_evaluation(report: EvaluationReport, settings: Settings, eval_set: str) -> Path:
     timestamp = report.created_at.strftime("%Y%m%dT%H%M%S%fZ")
-    path = settings.runtime_dir / "evals" / f"{report.kind}-{timestamp}-{uuid4().hex[:8]}.json"
-    return write_json(report.model_dump(mode="json"), path)
+    path = (
+        settings.runtime_dir
+        / "evals"
+        / eval_set
+        / f"{report.kind}-{timestamp}-{uuid4().hex[:8]}{_cases_suffix(report)}.json"
+    )
+    return write_json(_report_payload(report), path)
 
 
 def _ledger(settings: Settings) -> BudgetLedger:
@@ -552,9 +584,9 @@ def _validate_cap(max_usd: Decimal) -> None:
         raise ValueError("max_usd must be finite and positive")
 
 
-def estimate_answers(cases: list[EvalCase], settings: Settings) -> Decimal:
+def estimate_answers(cases: list[EvalCase], settings: Settings, *, reference_dir: Path) -> Decimal:
     corpus = load_corpus(settings.data_dir)
-    cases = resolve_cases(cases, corpus)
+    cases = resolve_cases(cases, corpus, reference_dir=reference_dir)
     return sum(
         (pipeline.estimate_answer(case.question, corpus, settings) for case in cases), Decimal(0)
     )
@@ -635,8 +667,12 @@ def evaluate_answers(
     *,
     split: Literal["dev", "heldout"] = "dev",
     context: pipeline.AnswerContext | None = None,
+    reference_dir: Path,
+    eval_set: str,
+    case_ids: tuple[str, ...] | None = None,
 ) -> tuple[AnswerReport, Path]:
     """Run sequentially in one capped group; errors continue, budget exhaustion stops."""
+    validate_set_name(eval_set)
     _validate_cap(max_usd)
     if (
         not cases
@@ -646,7 +682,11 @@ def evaluate_answers(
         raise ValueError("Expected unique, nonempty cases from the selected split")
     for case in cases:
         pipeline.validate_question(case.question)
-    cases = resolve_cases(cases, context.corpus if context else load_corpus(settings.data_dir))
+    cases = resolve_cases(
+        cases,
+        context.corpus if context else load_corpus(settings.data_dir),
+        reference_dir=reference_dir,
+    )
     group_id = f"answers-{uuid4().hex}"
     ledger = context.ledger if context else _ledger(settings)
     ledger.open_group(group_id, max_usd)
@@ -692,13 +732,14 @@ def evaluate_answers(
                 group_id=group_id,
                 max_usd=max_usd,
                 split=split,
+                case_ids=case_ids,
                 cases=tuple(results),
                 complete=run_error is None,
                 error=run_error,
                 metrics=answer_metrics(results),
                 cost_usd=ledger.group_spent_usd(group_id),
             )
-            path = _save_evaluation(report, settings)
+            path = _save_evaluation(report, settings, eval_set)
         return report, path
 
 
@@ -717,9 +758,11 @@ def _probe_input(
     )
 
 
-def estimate_probes(probes: list[VerifierProbe], settings: Settings) -> Decimal:
+def estimate_probes(
+    probes: list[VerifierProbe], settings: Settings, *, reference_dir: Path
+) -> Decimal:
     corpus = load_corpus(settings.data_dir)
-    probes = resolve_probes(probes, corpus)
+    probes = resolve_probes(probes, corpus, reference_dir=reference_dir)
     return sum(
         (
             pipeline.reservation_cost(
@@ -741,12 +784,16 @@ def evaluate_probes(
     max_usd: Decimal,
     *,
     context: pipeline.VerificationContext | None = None,
+    reference_dir: Path,
+    eval_set: str,
+    case_ids: tuple[str, ...] | None = None,
 ) -> tuple[ProbeReport, Path]:
+    validate_set_name(eval_set)
     _validate_cap(max_usd)
     if not probes or len({p.id for p in probes}) != len(probes):
         raise ValueError("Expected unique, nonempty probes")
     corpus = load_corpus(settings.data_dir)
-    probes = resolve_probes(probes, corpus)
+    probes = resolve_probes(probes, corpus, reference_dir=reference_dir)
     inputs = [_probe_input(p, corpus) for p in probes]
     group_id = f"probes-{uuid4().hex}"
     ledger = context.ledger if context else _ledger(settings)
@@ -844,6 +891,7 @@ def evaluate_probes(
                 max_usd=max_usd,
                 complete=error is None,
                 error=error,
+                case_ids=case_ids,
                 cases=tuple(results),
                 pairs=pairs,
                 metrics=metrics,
@@ -852,5 +900,5 @@ def evaluate_probes(
                 if not error and len(judged) == len(results) and false_accepts == 0
                 else "FAIL",
             )
-            path = _save_evaluation(report, settings)
+            path = _save_evaluation(report, settings, eval_set)
         return report, path

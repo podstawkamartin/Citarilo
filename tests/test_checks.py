@@ -101,7 +101,7 @@ def test_invalid_citation_counts(citations: tuple[str, ...]) -> None:
 def test_all_answered_eval_facts_pass_with_their_supporting_evidence() -> None:
     # Offline contract check over BOTH splits; no retrieval/model tuning or live eval.
     corpus = load_corpus(Path("data/trailsupply"))
-    for case in load_cases(Path("evals/cases.jsonl")):
+    for case in load_cases(Path("evals/trailsupply/cases.jsonl")):
         if case.expected_status != "answered":
             continue
         sentences = {sid: corpus.sentence(sid).text for sid in case.supporting_sentence_ids}
@@ -221,6 +221,61 @@ def test_czech_claims_have_no_heuristic_language_check() -> None:
     # The generator judges language; the literal filter deliberately cannot do so.
     claim = CandidateClaim(text="Returns are accepted.", citations=("x",))
     assert check_claim(claim, {"x": "Zboží lze vrátit."}, answer_language="cs").ok
+
+
+@pytest.mark.parametrize(
+    ("text", "language", "expected"),
+    [
+        ("I. třídy", "cs", {"class:1"}),
+        ("IV. třídy", "cs", {"class:4"}),
+        ("do II. třídy", "cs", {"class:2"}),
+        ("třídy IV", "cs", {"class:4"}),
+        ("třída III", "cs", {"class:3"}),
+        ("třída: III.", "cs", {"class:3"}),
+        ("třída: I.", "cs", {"class:1"}),
+        ("třídě V", "cs", {"class:5"}),
+        ("třídu VI", "cs", {"class:6"}),
+        ("třídou VII", "cs", {"class:7"}),
+        ("class I", "en", {"class:1"}),
+        ("class IV", "en", {"class:4"}),
+        ("Class II", "en", {"class:2"}),
+        ("class-IV", "en", {"class:4"}),
+        ("class VIII", "en", {"class:8"}),
+        ("class IX", "en", {"class:9"}),
+        ("class X", "en", {"class:10"}),
+        ("I. a II. třídy", "cs", {"class:1", "class:2"}),
+        ("I., II. nebo IV. třídy", "cs", {"class:1", "class:2", "class:4"}),
+        ("I. až III. třídy", "cs", {"class:1", "class:2", "class:3"}),
+        ("classes I and II", "en", {"class:1", "class:2"}),
+        ("classes I to III", "en", {"class:1", "class:2", "class:3"}),
+        ("class 2", "en", {"number:2"}),
+        ("skupina 2", "cs", {"number:2"}),
+        ("2. třídy", "cs", {"number:2"}),
+        ("category III", "en", frozenset()),
+        ("class iv", "en", frozenset()),
+        ("II třídy", "cs", frozenset()),
+        ("I třída", "cs", frozenset()),
+        ("I když kotel stojí.", "cs", frozenset()),
+        ("I think so.", "en", frozenset()),
+        ("I class", "en", frozenset()),
+    ],
+)
+def test_roman_class_facts(text: str, language: str, expected: set[str]) -> None:
+    assert normalized_facts(text, language=language) == expected
+
+
+def test_roman_class_mismatch_fails_and_matching_class_passes() -> None:
+    evidence = "Parní kotle s výkonem do 8 t/h jsou zařazeny do IV. třídy."
+    sentences = {"x": evidence}
+    wrong = "Steam boilers up to 8 t/h are class I."
+    right = "Steam boilers up to 8 t/h are class IV."
+    result = check_claim(CandidateClaim(text=wrong, citations=("x",)), sentences)
+    assert result.reasons == ("literal_not_in_citations",)
+    assert normalized_facts(wrong) == {"number:8", "class:1"}
+    assert normalized_facts(evidence, language="cs") == {"number:8", "class:4"}
+    assert check_claim(CandidateClaim(text=right, citations=("x",)), sentences).ok
+    czech = CandidateClaim(text="jsou kotle IV. třídy", citations=("x",))
+    assert check_claim(czech, sentences, answer_language="cs").ok
 
 
 def test_literals_echoed_from_the_question_are_allowed() -> None:

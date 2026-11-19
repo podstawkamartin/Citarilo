@@ -99,7 +99,7 @@ export function App() {
             value={question}
             maxLength={500}
             rows={1}
-            placeholder="Na co se chcete zeptat? Třeba: Do kdy můžu vrátit zboží z výprodeje?"
+            placeholder="Na co se chcete zeptat?"
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {

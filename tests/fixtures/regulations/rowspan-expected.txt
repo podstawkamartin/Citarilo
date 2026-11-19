@@ -1,0 +1,6 @@
+vyhrazené tlakové zařízení: nádoby stabilní; třída: I.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.
+vyhrazené tlakové zařízení: nádoby stabilní; třída: II.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.
+vyhrazené tlakové zařízení: kotle; třída: I.; provozní revize: jedenkrát za 3 měsíce; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let.
+vyhrazené tlakové zařízení: kotle; třída: II.; provozní revize: jedenkrát za 3 měsíce; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let.
+vyhrazené tlakové zařízení: kotle; třída: III.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let.
+vyhrazené tlakové zařízení: kotle; třída: IV.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let.

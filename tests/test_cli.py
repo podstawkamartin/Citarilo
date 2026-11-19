@@ -192,3 +192,200 @@ def test_ingest_locked_index_has_clear_error_and_no_reservation(settings, capsys
         settings.spend_db_path, settings.budget_cap_usd, settings.price_table_version
     )
     assert ledger.spent_usd() == 0 and ledger.summary()["reserved"] == 0
+
+
+def test_eval_requires_bundled_set_for_custom_data(settings, capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["eval", "--retrieval", "--dry-run"], settings=settings)
+    assert exc.value.code == 1
+    message = capsys.readouterr().err
+    assert "--eval-set" in message and "trailsupply" in message and "regulations" in message
+    assert not settings.runtime_dir.exists()
+
+
+@pytest.mark.parametrize("selected", ["unknown", "../escape", "Bad_Name"])
+def test_invalid_eval_set_lists_available_sets(settings, capsys, selected):
+    with pytest.raises(SystemExit) as exc:
+        main(["eval", "--eval-set", selected, "--probes", "--dry-run"], settings=settings)
+    assert exc.value.code == 1
+    assert "available sets" in capsys.readouterr().err
+    assert not settings.runtime_dir.exists()
+
+
+def test_missing_probe_file_lists_sets_without_provider(settings, capsys, monkeypatch, tmp_path):
+    root = tmp_path / "repository"
+    evaluation = root / "evals" / "trailsupply"
+    evaluation.mkdir(parents=True)
+    (evaluation / "cases.jsonl").write_text("{}\n")
+    (root / "data" / "trailsupply").mkdir(parents=True)
+    monkeypatch.setattr(cli_module, "_REPO_ROOT", root)
+    with pytest.raises(SystemExit) as exc:
+        main(["eval", "--eval-set", "trailsupply", "--probes", "--dry-run"], settings=settings)
+    assert exc.value.code == 1
+    assert "available sets: trailsupply" in capsys.readouterr().err
+    assert not settings.runtime_dir.exists()
+
+
+def test_case_filter_dry_run_reduces_count(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    settings = Settings(_env_file=None, runtime_dir=tmp_path / "runtime")
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--retrieval",
+            "--dry-run",
+            "--case",
+            "clearance-return-window",
+            "--case",
+            "standard-shipping-threshold",
+            "--case",
+            "standard-shipping-threshold",
+        ],
+        settings=settings,
+    )
+    assert "Dry run: 2 queries; split dev; top_k 8." in capsys.readouterr().out
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--live",
+            "--dry-run",
+            "--case",
+            "standard-shipping-threshold",
+        ],
+        settings=settings,
+    )
+    assert "Dry run: 1 answer cases; split dev; top_k 8." in capsys.readouterr().out
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--retrieval",
+            "--dry-run",
+            "--split",
+            "heldout",
+            "--case",
+            "rental-fault-reporting",
+        ],
+        settings=settings,
+    )
+    output = capsys.readouterr().out
+    assert "Dry run: 1 queries; split heldout; top_k 8." in output
+    assert not settings.runtime_dir.exists()
+
+
+def test_probe_pair_id_selects_both_probes(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    settings = Settings(_env_file=None, runtime_dir=tmp_path / "runtime")
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--probes",
+            "--dry-run",
+            "--case",
+            "shipping-price-destination",
+            "--case",
+            "shipping-price-destination",
+        ],
+        settings=settings,
+    )
+    assert "Dry run: 2 verifier probes" in capsys.readouterr().out
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--probes",
+            "--dry-run",
+            "--case",
+            "shipping-price-destination-supported",
+        ],
+        settings=settings,
+    )
+    assert "Dry run: 1 verifier probes" in capsys.readouterr().out
+    assert not settings.runtime_dir.exists()
+
+
+def test_unknown_probe_exits_before_estimate(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def forbidden(*args, **kwargs):
+        pytest.fail("Unknown probe must fail before estimation or a run")
+
+    monkeypatch.setattr(cli_module, "estimate_probes", forbidden)
+    monkeypatch.setattr(cli_module, "evaluate_probes", forbidden)
+    settings = Settings(_env_file=None, runtime_dir=tmp_path / "runtime")
+    with pytest.raises(SystemExit) as error:
+        main(
+            ["eval", "--eval-set", "trailsupply", "--probes", "--dry-run", "--case", "not-a-probe"],
+            settings=settings,
+        )
+    assert error.value.code == 2
+    assert "not-a-probe" in capsys.readouterr().err
+    assert not settings.runtime_dir.exists()
+
+
+@pytest.mark.parametrize("case_id", ["missing-case", "rental-fault-reporting"])
+def test_unknown_case_exits_before_estimate(
+    case_id: str,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden(*args, **kwargs):
+        pytest.fail("Unknown id must fail before estimation or a run")
+
+    monkeypatch.setattr(cli_module, "estimate_retrieval", forbidden)
+    monkeypatch.setattr(cli_module, "evaluate_retrieval", forbidden)
+    settings = Settings(_env_file=None, runtime_dir=tmp_path / "runtime")
+    with pytest.raises(SystemExit) as error:
+        main(
+            [
+                "eval",
+                "--eval-set",
+                "trailsupply",
+                "--retrieval",
+                "--dry-run",
+                "--case",
+                "standard-shipping-threshold",
+                "--case",
+                case_id,
+            ],
+            settings=settings,
+        )
+    assert error.value.code == 2
+    output = capsys.readouterr()
+    assert case_id in output.err
+    assert "Worst-case" not in output.out
+    assert not settings.runtime_dir.exists()
+
+
+@pytest.mark.parametrize(
+    "argv",
+    [
+        [
+            "eval",
+            "--summarize",
+            "report.json",
+            "grades.json",
+            "--case",
+            "standard-shipping-threshold",
+        ],
+        ["eval", "--grading-template", "report.json", "--case", "standard-shipping-threshold"],
+    ],
+)
+def test_case_filter_rejected_with_grading_commands(
+    argv: list[str], capsys: pytest.CaptureFixture[str]
+) -> None:
+    with pytest.raises(SystemExit) as error:
+        main(argv)
+    assert error.value.code == 1
+    assert "do not accept run options" in capsys.readouterr().err

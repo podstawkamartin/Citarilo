@@ -1,6 +1,8 @@
 """Typed configuration for local Citarilo runs."""
 
+import hashlib
 import os
+import re
 from decimal import Decimal
 from pathlib import Path
 from typing import Literal
@@ -20,6 +22,12 @@ def make_private_dir(path: Path) -> Path:
     path.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(path, 0o700)
     return path
+
+
+def validate_set_name(name: str) -> str:
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
+        raise ValueError("Invalid document set name")
+    return name
 
 
 class TokenPrice(BaseModel):
@@ -45,7 +53,7 @@ class Settings(BaseSettings):
     embedding_model: str = "text-embedding-3-large"
     embedding_dimensions: int = Field(default=3072, gt=0)
     embedding_batch_size: int = Field(default=2048, gt=0, le=2048)
-    top_k: int = Field(default=5, gt=0)
+    top_k: int = Field(default=8, gt=0)
     generation_reasoning_effort: ReasoningEffort = "none"
     verification_reasoning_effort: ReasoningEffort = "low"
     call_timeout_seconds: float = Field(default=30.0, gt=0)
@@ -74,8 +82,15 @@ class Settings(BaseSettings):
     api_port: int = Field(default=5177, ge=5174, le=5199)
 
     @property
+    def index_dir(self) -> Path:
+        resolved = self.data_dir.resolve()
+        slug = re.sub(r"[^a-z0-9]+", "-", resolved.name.lower()).strip("-") or "corpus"
+        digest = hashlib.sha256(os.fsencode(resolved)).hexdigest()[:8]
+        return self.runtime_dir / "index" / f"{slug}-{digest}"
+
+    @property
     def qdrant_path(self) -> Path:
-        return self.runtime_dir / "qdrant"
+        return self.index_dir / "qdrant"
 
     @property
     def index_lock_path(self) -> Path:
@@ -83,7 +98,7 @@ class Settings(BaseSettings):
 
     @property
     def index_manifest_path(self) -> Path:
-        return self.runtime_dir / "index.manifest.json"
+        return self.index_dir / "manifest.json"
 
     @property
     def runs_dir(self) -> Path:

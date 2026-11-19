@@ -32,7 +32,9 @@ class RankedClient:
             document.page_content: self.vector([key])
             for key, document in zip(self.keys, documents, strict=True)
         }
-        self.cases = {case.question: case for case in load_cases(ROOT / "evals/cases.jsonl")}
+        self.cases = {
+            case.question: case for case in load_cases(ROOT / "evals/trailsupply/cases.jsonl")
+        }
 
     def vector(self, keys: list[str] | tuple[str, ...]) -> list[float]:
         return [float(len(keys) - keys.index(key)) if key in keys else 0.0 for key in self.keys]
@@ -79,9 +81,9 @@ def setup(tmp_path: Path) -> tuple[Settings, RankedClient]:
 
 
 def read_report(settings: Settings) -> dict:
-    paths = list((settings.runtime_dir / "evals").glob("retrieval-*.json"))
+    paths = list((settings.runtime_dir / "evals" / "trailsupply").glob("retrieval-*.json"))
     assert len(paths) == 1
-    assert list((settings.runtime_dir / "evals").glob("*.tmp")) == []
+    assert list((settings.runtime_dir / "evals" / "trailsupply").glob("*.tmp")) == []
     return json.loads(paths[0].read_text())
 
 
@@ -112,10 +114,18 @@ def test_eval_pass_fail_reports_and_metrics(
     monkeypatch.setattr(evals_module, "load_index", counted_load)
     if exit_code:
         with pytest.raises(SystemExit) as error:
-            main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+            main(
+                ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+                settings=settings,
+                client=client,
+            )
         assert error.value.code == exit_code
     else:
-        main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+            settings=settings,
+            client=client,
+        )
     assert loads == [1]
     assert len(client.calls) == 21
     report = read_report(settings)
@@ -125,8 +135,9 @@ def test_eval_pass_fail_reports_and_metrics(
     assert report["corpus_hash"] == load_corpus(settings.data_dir).corpus_hash
     assert report["embedding_model"] == settings.embedding_model
     assert report["embedding_dimensions"] == settings.embedding_dimensions
-    assert report["top_k"] == 5
+    assert report["top_k"] == 8
     assert report["split"] == "dev"
+    assert "case_ids" not in report
     assert report["metrics"]["answerable_cases"] == 17
     assert report["metrics"]["unanswerable_cases"] == 4
     assert report["metrics"]["recall_at_k"] == pytest.approx((17 - len(misses)) / 17)
@@ -146,7 +157,7 @@ def test_eval_pass_fail_reports_and_metrics(
     assert usage["prompt_tokens"] == usage["total_tokens"] == 168
     assert Decimal(usage["remaining_usd"]) == Decimal("0.009958")
     for case in report["cases"]:
-        assert len(case["retrieved"]) == 5
+        assert len(case["retrieved"]) == settings.top_k
         assert case["latency_ms"] >= case["usage"][0]["duration_ms"] >= 0
         assert case["usage"][0]["reservation_id"]
         assert Decimal(case["usage"][0]["cost_usd"]) == Decimal("0.00000104")
@@ -168,6 +179,36 @@ def test_eval_pass_fail_reports_and_metrics(
     assert output.err == ""
 
 
+def test_case_filter_report_records_ids_and_suffix(
+    setup: tuple[Settings, RankedClient],
+) -> None:
+    settings, client = setup
+    main(
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--retrieval",
+            "--max-usd",
+            "0.01",
+            "--case",
+            "clearance-return-window",
+            "--case",
+            "standard-shipping-threshold",
+        ],
+        settings=settings,
+        client=client,
+    )
+    directory = settings.runtime_dir / "evals" / "trailsupply"
+    paths = list(directory.glob("retrieval-*.json"))
+    assert len(paths) == 1
+    assert paths[0].name.endswith("-cases.json")
+    report = json.loads(paths[0].read_text())
+    assert report["case_ids"] == ["standard-shipping-threshold", "clearance-return-window"]
+    assert [case["id"] for case in report["cases"]] == report["case_ids"]
+    assert len(client.calls) == 2
+
+
 def test_eval_requires_max_usd_before_settings_or_io(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as error:
         main(["eval", "--retrieval"])
@@ -178,7 +219,7 @@ def test_eval_requires_max_usd_before_settings_or_io(capsys: pytest.CaptureFixtu
 @pytest.mark.parametrize("cap", ["0", "-1", "NaN", "Infinity", "nonsense"])
 def test_eval_invalid_cap(cap: str, capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--retrieval", "--max-usd", cap])
+        main(["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", cap])
     assert error.value.code == 1
     assert "finite positive" in capsys.readouterr().err
 
@@ -195,9 +236,11 @@ def test_eval_dry_run_no_index_ledger_or_secret(
     monkeypatch.setattr(evals_module, "load_index", forbidden)
     monkeypatch.setattr(SecretStr, "get_secret_value", forbidden)
     settings = Settings(runtime_dir=tmp_path / "runtime")
-    main(["eval", "--retrieval", "--dry-run"], settings=settings)
+    main(["eval", "--eval-set", "trailsupply", "--retrieval", "--dry-run"], settings=settings)
     output = capsys.readouterr()
-    cases = [case for case in load_cases(ROOT / "evals/cases.jsonl") if case.split == "dev"]
+    cases = [
+        case for case in load_cases(ROOT / "evals/trailsupply/cases.jsonl") if case.split == "dev"
+    ]
     expected = sum(
         max_cost(
             settings.embedding_model,
@@ -207,10 +250,10 @@ def test_eval_dry_run_no_index_ledger_or_secret(
         )
         for case in cases
     )
-    assert estimate_retrieval(cases, settings) == expected
+    assert estimate_retrieval(cases, settings, reference_dir=ROOT / "data/trailsupply") == expected
     assert (
         output.out
-        == f"Dry run: 21 queries; split dev; top_k 5.\nWorst-case cost: ${expected:.6f}.\n"
+        == f"Dry run: 21 queries; split dev; top_k 8.\nWorst-case cost: ${expected:.6f}.\n"
     )
     assert not settings.runtime_dir.exists()
 
@@ -220,7 +263,11 @@ def test_group_cap_stops_run_and_saves_partial_report(
 ) -> None:
     settings, client = setup
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--retrieval", "--max-usd", "0.000025"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.000025"],
+            settings=settings,
+            client=client,
+        )
     assert error.value.code == 1
     assert 0 < len(client.calls) < 21
     report = read_report(settings)
@@ -236,7 +283,11 @@ def test_zero_available_group_budget_prevents_first_request(
 ) -> None:
     settings, client = setup
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--retrieval", "--max-usd", "0.0000001"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.0000001"],
+            settings=settings,
+            client=client,
+        )
     assert error.value.code == 1
     assert client.calls == []
     report = read_report(settings)
@@ -251,7 +302,16 @@ def test_heldout_only_when_requested(
 ) -> None:
     settings, client = setup
     main(
-        ["eval", "--retrieval", "--max-usd", "0.01", "--split", "heldout"],
+        [
+            "eval",
+            "--eval-set",
+            "trailsupply",
+            "--retrieval",
+            "--max-usd",
+            "0.01",
+            "--split",
+            "heldout",
+        ],
         settings=settings,
         client=client,
     )
@@ -271,7 +331,11 @@ def test_invalid_index_fails_before_requests(
     else:
         settings.embedding_dimensions += 1
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+            settings=settings,
+            client=client,
+        )
     assert error.value.code == 1
     assert client.calls == []
     output = capsys.readouterr()
@@ -285,7 +349,11 @@ def test_provider_error_is_sanitized_and_spend_preserved(
     settings, client = setup
     client.error = RuntimeError("provider echoed fake-sensitive-key")
     with pytest.raises(SystemExit) as error:
-        main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+            settings=settings,
+            client=client,
+        )
     assert error.value.code == 1
     output = capsys.readouterr()
     assert "Retrieval evaluation failed" in output.err
@@ -301,7 +369,11 @@ def test_overridden_top_k_keeps_approved_recall_at_5_gate(
 ) -> None:
     settings, client = setup
     settings.top_k = 1
-    main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+    main(
+        ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+        settings=settings,
+        client=client,
+    )
     report = read_report(settings)
     assert report["metrics"]["recall_at_k"] < 0.9
     assert report["metrics"]["recall_at_5"] == 1
@@ -320,7 +392,11 @@ def test_interrupted_run_never_records_pass(setup: tuple[Settings, RankedClient]
 
     client.create = interrupted
     with pytest.raises(KeyboardInterrupt):
-        main(["eval", "--retrieval", "--max-usd", "0.01"], settings=settings, client=client)
+        main(
+            ["eval", "--eval-set", "trailsupply", "--retrieval", "--max-usd", "0.01"],
+            settings=settings,
+            client=client,
+        )
     report = read_report(settings)
     assert len(report["cases"]) == 1
     assert report["metrics"]["recall_at_5"] == 1

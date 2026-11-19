@@ -73,10 +73,14 @@ class GeneratedClaim(OutputModel):
         return self
 
 
+# One cap for generation, verification and the verification cost bound.
+MAX_CLAIMS = 12
+
+
 class GenerationOutput(OutputModel):
     status: Literal["answered", "insufficient_evidence"]
     answer_language: AnswerLanguage
-    claims: list[GeneratedClaim] = Field(max_length=4)
+    claims: list[GeneratedClaim] = Field(max_length=MAX_CLAIMS)
 
     @model_validator(mode="after")
     def validate_status(self) -> Self:
@@ -92,7 +96,7 @@ class VerificationVerdict(OutputModel):
 
 
 class VerificationOutput(OutputModel):
-    verdicts: list[VerificationVerdict] = Field(min_length=1, max_length=4)
+    verdicts: list[VerificationVerdict] = Field(min_length=1, max_length=MAX_CLAIMS)
 
 
 class InvalidQuestionError(ValueError):
@@ -256,8 +260,8 @@ def estimate_answer(question: str, corpus: Corpus, settings: Settings) -> Decima
     """Bound retrieve/generate/verify without models, index or ledger.
 
     All corpus sections conservatively cover every possible top-k retrieval.
-    Four maximal JSON-escaped 1000-character claims and three largest rendered cited sentences
-    bound every candidate that can reach verification after deterministic checks.
+    Twelve maximal JSON-escaped 1000-character claims and three largest rendered cited
+    sentences bound every candidate that can reach verification after deterministic checks.
     """
     question = validate_question(question)
     sections = evidence_sections(corpus)
@@ -271,7 +275,9 @@ def estimate_answer(question: str, corpus: Corpus, settings: Settings) -> Decima
             reverse=True,
         )[:3]
     ]
-    claims = tuple(CandidateClaim(text="\x00" * 1000, citations=tuple(ids)) for _ in range(4))
+    claims = tuple(
+        CandidateClaim(text="\x00" * 1000, citations=tuple(ids)) for _ in range(MAX_CLAIMS)
+    )
     return (
         max_cost(
             settings.embedding_model,

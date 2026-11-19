@@ -41,7 +41,12 @@ from citarilo.importer import (
     normalize,
     split_sentences,
 )
-from citarilo.index import IndexMismatchError, UsageTrackingEmbeddings, build_index, load_index
+from citarilo.index import (
+    IndexMissingError,
+    UsageTrackingEmbeddings,
+    build_index,
+    load_index,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "examples/trailsupply-raw"
@@ -372,8 +377,8 @@ def test_import_cli_never_loads_settings(tmp_path, monkeypatch, capsys):
 def test_all_evaluation_labels_map_to_imported_evidence(imported):
     _, corpus, _ = imported
     canonical = load_corpus(ROOT / "data/trailsupply")
-    original = load_cases(ROOT / "evals/cases.jsonl")
-    cases = resolve_cases(original, corpus)
+    original = load_cases(ROOT / "evals/trailsupply/cases.jsonl")
+    cases = resolve_cases(original, corpus, reference_dir=ROOT / "data/trailsupply")
     for a, b in zip(original, cases, strict=True):
         assert [canonical.sentence(s).text for s in a.supporting_sentence_ids] == [
             corpus.sentence(s).text for s in b.supporting_sentence_ids
@@ -381,12 +386,14 @@ def test_all_evaluation_labels_map_to_imported_evidence(imported):
         assert [canonical.section(s).heading for s in a.expected_section_keys] == [
             corpus.section(s).heading for s in b.expected_section_keys
         ]
-    probes = load_probes(ROOT / "evals/verifier_cases.jsonl")
-    for a, b in zip(probes, resolve_probes(probes, corpus), strict=True):
+    probes = load_probes(ROOT / "evals/trailsupply/verifier_cases.jsonl")
+    for a, b in zip(
+        probes, resolve_probes(probes, corpus, reference_dir=ROOT / "data/trailsupply"), strict=True
+    ):
         assert [canonical.sentence(s).text for s in a.cited_sentence_ids] == [
             corpus.sentence(s).text for s in b.cited_sentence_ids
         ]
-    assert resolve_cases(original, canonical) == original
+    assert resolve_cases(original, canonical, reference_dir=ROOT / "data/trailsupply") == original
 
 
 @pytest.mark.parametrize("duplicate", [False, True])
@@ -397,14 +404,20 @@ def test_missing_or_ambiguous_exact_mapping_fails_before_provider(tmp_path, dupl
         (tmp_path / f"{name}.md").write_text(f"# Policy\n\n## Costs {{#costs}}\n{text}\n")
     corpus = load_corpus(tmp_path)
     with pytest.raises(EvidenceMappingError, match="expected one exact sentence text match"):
-        resolve_cases(load_cases(ROOT / "evals/cases.jsonl")[:1], corpus)
+        resolve_cases(
+            load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1],
+            corpus,
+            reference_dir=ROOT / "data/trailsupply",
+        )
 
 
 def test_cli_explains_missing_evaluation_evidence(tmp_path, capsys):
-    (tmp_path / "policy.md").write_text("# Policy\n## Costs {#costs}\nDifferent text.\n")
-    settings = Settings(_env_file=None, data_dir=tmp_path, runtime_dir=tmp_path / "runtime")
+    data_dir = tmp_path / "imported"
+    data_dir.mkdir()
+    (data_dir / "policy.md").write_text("# Policy\n## Costs {#costs}\nDifferent text.\n")
+    settings = Settings(_env_file=None, data_dir=data_dir, runtime_dir=tmp_path / "runtime")
     with pytest.raises(SystemExit) as failure:
-        cli.main(["eval", "--live", "--dry-run"], settings=settings)
+        cli.main(["eval", "--eval-set", "trailsupply", "--live", "--dry-run"], settings=settings)
     assert failure.value.code == 1
     assert "Cannot map evaluation ID shipping.standard-prices.3" in capsys.readouterr().err
     assert not settings.runtime_dir.exists()
@@ -416,8 +429,10 @@ def test_fake_retrieval_evaluation_uses_imported_section_ids(imported, tmp_path)
         _env_file=None, data_dir=directory, runtime_dir=tmp_path, embedding_dimensions=36
     )
     client = RankedClient(settings)
-    cases = load_cases(ROOT / "evals/cases.jsonl")
-    client.cases = {c.question: c for c in resolve_cases(cases, corpus)}
+    cases = load_cases(ROOT / "evals/trailsupply/cases.jsonl")
+    client.cases = {
+        c.question: c for c in resolve_cases(cases, corpus, reference_dir=ROOT / "data/trailsupply")
+    }
     ledger = BudgetLedger(
         settings.spend_db_path,
         settings.budget_cap_usd,
@@ -426,7 +441,12 @@ def test_fake_retrieval_evaluation_uses_imported_section_ids(imported, tmp_path)
     )
     build_index(corpus, settings, ledger, client=client)
     report, _ = evaluate_retrieval(
-        [c for c in cases if c.split == "dev"], settings, Decimal("0.01"), client=client
+        [c for c in cases if c.split == "dev"],
+        settings,
+        Decimal("0.01"),
+        client=client,
+        reference_dir=ROOT / "data/trailsupply",
+        eval_set="trailsupply",
     )
     assert report.gate == "PASS" and report.metrics.recall_at_5 == 1
     assert report.cases[0].expected_section_keys == ("shipping.ceny-beznych-zasilek",)
@@ -451,11 +471,15 @@ def test_switching_corpora_requires_ingest_and_new_manifest(imported, tmp_path):
     build_index(canonical, settings, ledger, client=client)
     settings.data_dir = directory
     embeddings = UsageTrackingEmbeddings(settings, ledger, group_id="load", client=client)
-    with pytest.raises(IndexMismatchError):
+    with pytest.raises(IndexMissingError):
         load_index(corpus, settings, embeddings)
+    assert not settings.index_dir.exists()
     manifest = build_index(corpus, settings, ledger, client=client)
     assert manifest.corpus_hash == corpus.corpus_hash
     with load_index(corpus, settings, embeddings):
+        pass
+    settings.data_dir = ROOT / "data/trailsupply"
+    with load_index(canonical, settings, embeddings):
         pass
 
 
@@ -487,7 +511,12 @@ def test_fake_answer_evaluation_uses_imported_citations(imported, rig, section_i
         }
     )
     report, _ = evaluate_answers(
-        load_cases(ROOT / "evals/cases.jsonl")[:1], settings, Decimal("0.05"), context=context
+        load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1],
+        settings,
+        Decimal("0.05"),
+        context=context,
+        reference_dir=ROOT / "data/trailsupply",
+        eval_set="trailsupply",
     )
     assert report.complete and report.cases[0].status == "answered"
     assert report.cases[0].claims[0].citations == (sid,)
@@ -867,12 +896,12 @@ def test_evaluation_existing_ids_are_resolved_by_canonical_text(kind):
         {first: canonical.sentence(second).text, second: canonical.sentence(first).text},
     )
     if kind == "case":
-        original = load_cases(ROOT / "evals/cases.jsonl")[:1]
-        mapped = resolve_cases(original, active)
+        original = load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1]
+        mapped = resolve_cases(original, active, reference_dir=ROOT / "data/trailsupply")
         assert mapped[0].supporting_sentence_ids == (first, "shipping.standard-prices.4")
     else:
-        original = load_probes(ROOT / "evals/verifier_cases.jsonl")[:1]
-        mapped = resolve_probes(original, active)
+        original = load_probes(ROOT / "evals/trailsupply/verifier_cases.jsonl")[:1]
+        mapped = resolve_probes(original, active, reference_dir=ROOT / "data/trailsupply")
         assert mapped[0].cited_sentence_ids == (second, "shipping.standard-prices.2")
 
 
@@ -888,14 +917,14 @@ def test_evaluation_existing_id_with_missing_or_duplicate_text_fails(kind, dupli
     )
     active = _corpus_with_replaced_text(canonical, replacements)
     resolver, records = (
-        (resolve_cases, load_cases(ROOT / "evals/cases.jsonl")[:1])
+        (resolve_cases, load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1])
         if kind == "case"
-        else (resolve_probes, load_probes(ROOT / "evals/verifier_cases.jsonl")[:1])
+        else (resolve_probes, load_probes(ROOT / "evals/trailsupply/verifier_cases.jsonl")[:1])
     )
     with pytest.raises(
         EvidenceMappingError, match=f"exact sentence text match, found {2 if duplicate else 0}"
     ):
-        resolver(records, active)
+        resolver(records, active, reference_dir=ROOT / "data/trailsupply")
 
 
 def test_evaluation_canonical_hash_still_requires_identical_id_text():
@@ -904,7 +933,11 @@ def test_evaluation_canonical_hash_still_requires_identical_id_text():
         canonical, {"shipping.standard-prices.3": "Wrong evidence."}, keep_hash=True
     )
     with pytest.raises(EvidenceMappingError, match="standard-prices.3: text mismatch"):
-        resolve_cases(load_cases(ROOT / "evals/cases.jsonl")[:1], active)
+        resolve_cases(
+            load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1],
+            active,
+            reference_dir=ROOT / "data/trailsupply",
+        )
 
 
 def test_evaluation_existing_section_key_is_verified_through_all_sentence_texts():
@@ -919,7 +952,11 @@ def test_evaluation_existing_section_key_is_verified_through_all_sentence_texts(
         for target, source in zip(targets, sources, strict=True)
     }
     active = _corpus_with_replaced_text(canonical, replacements)
-    mapped = resolve_cases(load_cases(ROOT / "evals/cases.jsonl")[:1], active)
+    mapped = resolve_cases(
+        load_cases(ROOT / "evals/trailsupply/cases.jsonl")[:1],
+        active,
+        reference_dir=ROOT / "data/trailsupply",
+    )
     assert mapped[0].supporting_sentence_ids == (
         "shipping.delivery-area.3",
         "shipping.delivery-area.4",

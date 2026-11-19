@@ -870,7 +870,7 @@ def test_ingest_repairs_corrupt_storage_without_opening_it(
 def test_ingest_replaces_storage_path_that_is_not_a_directory(
     settings, corpus, ledger, tmp_path, kind
 ):
-    settings.runtime_dir.mkdir(parents=True, exist_ok=True)
+    settings.index_dir.mkdir(parents=True, exist_ok=True)
     if kind == "file":
         settings.qdrant_path.write_bytes(b"not a directory")
     else:
@@ -878,10 +878,13 @@ def test_ingest_replaces_storage_path_that_is_not_a_directory(
         target.mkdir()
         (target / "keep.txt").write_text("untouched")
         settings.qdrant_path.symlink_to(target, target_is_directory=True)
+    if kind == "symlink":
+        with pytest.raises(IndexMismatchError, match="symbolic link"):
+            build_index(corpus, settings, ledger, client=FakeClient())
+        assert (target / "keep.txt").read_text() == "untouched"
+        return
     build_index(corpus, settings, ledger, client=FakeClient())
     assert settings.qdrant_path.is_dir() and not settings.qdrant_path.is_symlink()
-    if kind == "symlink":
-        assert (target / "keep.txt").read_text() == "untouched"
     with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)) as store:
         assert store.search(section_documents(corpus)[0].page_content, 1)[0][1] == pytest.approx(1)
 
@@ -902,3 +905,42 @@ def test_section_index_releases_app_lock_even_if_client_close_raises(
         store.close()
     with index_module._acquire_index_lock(settings):
         pass
+
+
+def test_load_tightens_all_index_directories(settings, corpus, ledger):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    directories = (settings.runtime_dir, settings.runtime_dir / "index", settings.index_dir)
+    for directory in directories:
+        directory.chmod(0o755)
+    with load_index(corpus, settings, DeterministicFakeEmbedding(size=8)):
+        pass
+    assert all(directory.stat().st_mode & 0o777 == 0o700 for directory in directories)
+
+
+@pytest.mark.parametrize("kind", ["missing-lock", "symlink-lock", "symlink-index"])
+def test_load_refuses_missing_lock_and_symlink_paths(settings, corpus, ledger, tmp_path, kind):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    if kind == "symlink-index":
+        real = tmp_path / "moved-index"
+        settings.index_dir.rename(real)
+        settings.index_dir.symlink_to(real, target_is_directory=True)
+    else:
+        settings.index_lock_path.unlink()
+        if kind == "symlink-lock":
+            settings.index_lock_path.symlink_to(tmp_path / "missing")
+    expected = IndexMissingError if kind == "missing-lock" else IndexMismatchError
+    with pytest.raises(expected):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+
+
+def test_load_maps_lock_disappearance_to_missing(settings, corpus, ledger, monkeypatch):
+    build_index(corpus, settings, ledger, client=FakeClient())
+    original = index_module.portalocker.Lock.acquire
+
+    def missing(lock):
+        raise FileNotFoundError("lock disappeared")
+
+    monkeypatch.setattr(index_module.portalocker.Lock, "acquire", missing)
+    with pytest.raises(IndexMissingError, match="lock missing"):
+        load_index(corpus, settings, DeterministicFakeEmbedding(size=8))
+    monkeypatch.setattr(index_module.portalocker.Lock, "acquire", original)

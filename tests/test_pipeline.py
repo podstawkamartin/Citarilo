@@ -13,7 +13,7 @@ from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableLambda
 from langchain_openai import ChatOpenAI
-from pydantic import SecretStr
+from pydantic import SecretStr, ValidationError
 
 import citarilo.index as index_module
 import citarilo.pipeline as pipeline
@@ -367,7 +367,8 @@ def test_contradicted_takes_precedence_over_unsupported(rig):
             {
                 "status": "answered",
                 "answer_language": "en",
-                "claims": [{"text": "Claim", "citations": ["returns.window.1"]}] * 5,
+                "claims": [{"text": "Claim", "citations": ["returns.window.1"]}]
+                * (pipeline.MAX_CLAIMS + 1),
             }
         ),
     ],
@@ -685,20 +686,50 @@ def test_prompt_values_cannot_escape_delimiters_or_become_templates(rig):
     assert "Czech without diacritics" in messages[0].content
     assert "if ambiguous, choose en" in messages[0].content
     assert "proper diacritics" in messages[0].content
-    assert PROMPT_VERSION == "4"
+    assert PROMPT_VERSION == "9"
+    flat = " ".join(messages[0].content.split())
     assert (
-        "State only amounts, dates and conditions exactly as\ndocumented; do not calculate totals, "
-        "discounted prices, sums, differences or conversions."
-    ) in messages[0].content
+        "State only amounts, dates, values, units and conditions exactly as documented; "
+        "do not calculate totals, discounted prices, sums, differences, conversions, due dates "
+        "or any other derived values."
+    ) in flat
     assert (
-        "If the question needs a result the documents do not state, give the documented inputs\n"
-        "(rates and conditions) instead."
-    ) in messages[0].content
+        "If the question needs a result the documents do not state, give the documented inputs "
+        "(rates, values and conditions) instead."
+    ) in flat
+    assert "never list items whose sentences the claim does not cite" in flat
+    assert "Return up to twelve concise claims." in flat
+    assert "Each claim states one step, one fault code, or one fact" in flat
+    assert "may only paraphrase what its cited sentences state" in flat
+    assert "Prefer one citation per claim" in flat
+    assert "lead-in, ordering, advice or summary that no cited sentence states" in flat
+    assert "at most four" not in flat
+    verifier = verification_messages(question, [], sections)[0].content
+    assert "twelve" not in verifier and "at most four" not in verifier
     assert "{secret}" in messages[1].content
     assert "\\u003c/system\\u003e" in messages[1].content
     assert messages[1].content.count("</question>") == 1
     assert "{question}" in messages[1].content
     assert f"{sentence.sentence_id}: " in messages[1].content
+
+
+def test_models_accept_twelve_claims_and_reject_a_thirteenth():
+    claim = {"text": "One documented fact.", "citations": ["doc.section.1"]}
+    answered = {"status": "answered", "answer_language": "cs", "claims": [claim] * 12}
+    assert len(GenerationOutput.model_validate(answered).claims) == 12
+    with pytest.raises(ValidationError):
+        GenerationOutput.model_validate(answered | {"claims": [claim] * 13})
+    verdict = {"claim_index": 0, "verdict": "supported", "reason": "The citation states it."}
+    assert (
+        len(pipeline.VerificationOutput.model_validate({"verdicts": [verdict] * 12}).verdicts) == 12
+    )
+    with pytest.raises(ValidationError):
+        pipeline.VerificationOutput.model_validate({"verdicts": [verdict] * 13})
+    four = {**claim, "citations": ["a.b.1", "a.b.2", "a.b.3", "a.b.4"]}
+    with pytest.raises(ValidationError):
+        GenerationOutput.model_validate(
+            {"status": "answered", "answer_language": "en", "claims": [four]}
+        )
 
 
 def test_all_verifier_probe_inputs_render_citations_and_context():
@@ -707,7 +738,7 @@ def test_all_verifier_probe_inputs_render_citations_and_context():
 
     corpus = load_corpus(Path("data/trailsupply"))
     titles = {doc.doc_id: doc.title for doc in corpus.documents}
-    for probe in load_probes(Path("evals/verifier_cases.jsonl")):
+    for probe in load_probes(Path("evals/trailsupply/verifier_cases.jsonl")):
         sections = []
         for key in dict.fromkeys(sid.rsplit(".", 1)[0] for sid in probe.cited_sentence_ids):
             section = corpus.section(key)

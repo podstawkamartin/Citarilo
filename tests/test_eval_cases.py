@@ -9,11 +9,18 @@ import pytest
 from pydantic import ValidationError
 
 from citarilo.corpus import Corpus, load_corpus
-from citarilo.evals import EvalCase, VerifierProbe, load_cases, load_probes
+from citarilo.evals import (
+    EvalCase,
+    VerifierProbe,
+    load_cases,
+    load_probes,
+    resolve_cases,
+    resolve_probes,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
-CASES_PATH = ROOT / "evals/cases.jsonl"
-PROBES_PATH = ROOT / "evals/verifier_cases.jsonl"
+CASES_PATH = ROOT / "evals/trailsupply/cases.jsonl"
+PROBES_PATH = ROOT / "evals/trailsupply/verifier_cases.jsonl"
 
 
 @pytest.fixture(scope="module")
@@ -289,3 +296,50 @@ def test_loaders_reject_empty_or_missing_files(
     with pytest.raises(ValueError) as exc_info:
         loader(path)
     assert str(exc_info.value) == f"{path}:1: expected at least one JSON object"
+
+
+@pytest.mark.parametrize("name", ["trailsupply", "regulations"])
+def test_bundled_evaluation_references(name: str) -> None:
+    directory = ROOT / "evals" / name
+    if (
+        not (directory / "cases.jsonl").exists()
+        or not (directory / "verifier_cases.jsonl").exists()
+    ):
+        pytest.skip("Evaluation files have not been supplied")
+    corpus = load_corpus(ROOT / "data" / name)
+    for case in load_cases(directory / "cases.jsonl"):
+        for sentence_id in case.supporting_sentence_ids:
+            corpus.sentence(sentence_id)
+        for section_key in case.expected_section_keys:
+            corpus.section(section_key)
+    for probe in load_probes(directory / "verifier_cases.jsonl"):
+        for sentence_id in probe.cited_sentence_ids:
+            corpus.sentence(sentence_id)
+
+
+REGULATIONS = ROOT / "evals/regulations"
+
+
+def test_regulations_cases_and_probes_resolve_offline() -> None:
+    corpus = load_corpus(ROOT / "data/regulations")
+    cases = load_cases(REGULATIONS / "cases.jsonl")
+    probes = load_probes(REGULATIONS / "verifier_cases.jsonl")
+    assert Counter(case.split for case in cases) == {"dev": 51, "heldout": 12}
+    assert len({record.id for record in [*cases, *probes]}) == len(cases) + len(probes)
+    for case in cases:
+        assert {"en", "cs", "cs-ascii"}.intersection(case.tags) == {case.language}, case.id
+        assert (len(case.expected_section_keys) > 1) == ("multi-section" in case.tags), case.id
+        assert (case.expected_status == "refused") == ("unanswerable" in case.tags), case.id
+        for sentence_id in case.supporting_sentence_ids:
+            assert corpus.sentence(sentence_id).id == sentence_id, case.id
+        for section_key in case.expected_section_keys:
+            assert corpus.section(section_key).key == section_key, case.id
+    pairs: dict[str, list[VerifierProbe]] = defaultdict(list)
+    for probe in probes:
+        pairs[probe.pair_id].append(probe)
+    assert len(pairs) >= 10
+    for pair_id, members in pairs.items():
+        assert sum(probe.expected_verdict == "supported" for probe in members) == 1, pair_id
+        assert len({probe.cited_sentence_ids for probe in members}) == 1, pair_id
+    resolve_cases(cases, corpus, reference_dir=ROOT / "data/regulations")
+    resolve_probes(probes, corpus, reference_dir=ROOT / "data/regulations")
