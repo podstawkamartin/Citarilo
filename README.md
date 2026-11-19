@@ -84,76 +84,71 @@ question (EN/CS) → validation → budget reservation
 - Design details: [docs/architecture.md](docs/architecture.md) (Czech),
   evaluation method: [docs/evaluation.md](docs/evaluation.md).
 
-## Results (18 Nov 2026)
+## Results (19 Nov 2026)
 
-Live runs against the OpenAI API with prompt v5 and 8 retrieved sections;
-configuration, commit and corpus hash are stored in every report
-([evals/results/2026-11-18](evals/results/2026-11-18)). Acceptance gates were set
-before tuning.
+Live runs against the OpenAI API with prompt v10 and 8 retrieved sections, on a
+clean commit; configuration, commit and corpus hash are stored in every report
+([evals/results/2026-11-19](evals/results/2026-11-19)). Acceptance gates were set
+before tuning. Each set has a development split used for tuning and a held-out
+split run once at the end.
 
-| Measure | Customer support, dev (21) | Regulations, dev (40) | Regulations, held-out (10) | Conveyor procedure, dev + held-out (8 + 2) | Gate |
+| Measure | Customer support, dev (29) | Customer support, held-out (8) | Regulations, dev (59) | Regulations, held-out (15) | Gate |
 |---|---|---|---|---|---|
-| Retrieval recall@5 | 1.00 (17/17) | 0.96 (43/45), all 48 dev questions | – | (included) | ≥ 0.9 |
-| Answerable questions answered correctly | 94.1 % (16/17) | 86.8 % (33/38) | 77.8 % (7/9) | 100 % (9/9) | ≥ 80 % |
-| Unanswerable questions answered | 0 of 4 | 0 of 2 | 0 of 1 | 0 of 1 | 0 |
-| Successful prompt injections | 0 of 3 | 0 of 1 | – | – | 0 |
-| Latency p50 / max | 4.8 s / 8.7 s | 4.3 s / 8.3 s | 4.3 s / 5.4 s | 3.8 s / 5.3 s | – |
-| Cost per question | ≈ $0.0005 | ≈ $0.002 | ≈ $0.002 | ≈ $0.001 | – |
+| Retrieval recall@5 | 0.96 (23/24) | 1.00 (6/6) | 0.95 (52/55) | 0.85 (11/13) | ≥ 0.9 |
+| Answerable questions answered correctly | 95.8 % (23/24) | 100 % (6/6) | 83.6 % (46/55) | 84.6 % (11/13) | ≥ 80 % |
+| of which general questions | 7/7 | 2/2 | 7/9 | 2/2 | – |
+| Unanswerable questions answered | 0 of 5 | 0 of 2 | 0 of 4 | 0 of 2 | 0 |
+| Successful prompt injections | 0 of 3 | 0 of 1 | 0 of 1 | – | 0 |
+| Latency p50 / max | 4.0 s / 8.1 s | 3.5 s / 4.3 s | 4.1 s / 10.5 s | 3.4 s / 5.1 s | – |
+| Cost per question | ≈ $0.0005 | ≈ $0.0005 | ≈ $0.0018 | ≈ $0.0017 | – |
+
+**General questions.** Each set includes short, loosely worded questions as
+customers and operators actually ask them, tagged `vague`: "Chci něco vrátit,
+jak na to?", "Kolik stojí doprava?", "Pás stojí a nejede. Jak mám postupovat?",
+"Svítí tam F01, co s tím?", "Hlásí to chybu E12, co s tím?". Some have no answer
+in the documents ("Jak vyměním pás na dopravníku?") and must be refused.
 
 **How it was graded.** Answer status, recall and the verifier probes are
 deterministic. Semantic correctness (required facts, forbidden claims, support
 for each citation) was graded offline by an independent LLM grader of a
-different family than the app's model (`muse-wonder-1.0`). This is model
-grading, not human annotation.
+different family than the app's model (Claude Sonnet). This is model grading,
+not human annotation.
 
-**What fails.** All five errors on the regulations development set and one of
-the two held-out errors are unnecessary refusals: the verifier rejects a claim
-whose citation does support it, or a correct conclusion such as "800 kg does
-not exceed the 1,000 kg threshold". The other held-out error answers a
-question about re-examining pressure-vessel operators with revision intervals.
-On customer support, one claim cited only part of its support. No run
-answered an unanswerable question or followed an injected instruction.
+**What fails.** Every error is a refusal or an incomplete answer; no run
+answered an unanswerable question, followed an injected instruction or kept an
+unsupported claim. On the regulations development set, eight of the nine errors
+are unnecessary refusals: three answers were rejected by the verifier and one by
+a deterministic check although the grader found every claim supported; twice
+the model found no evidence; twice a claim went beyond its citations (a lockout
+step it did not cite, "repair" where the procedure says maintenance), which the
+verifier rightly rejected. The ninth answer gives
+the class III range for a steam boiler without saying that a 6 t/h boiler is
+class IV. The two held-out errors follow the two retrieval misses: the
+section on re-examining pressure-vessel operators and part of the large-boiler
+revision rules did not reach the top five. On customer support, one answer gave
+the return-label price without saying it is deducted from the refund.
 
-**Tuning and held-out use.** The regulations set was tuned on the development
-split: the converter now adds the lead-in to list items, which removed the most
-common earlier error (a list item cited without the sentence that gives it
-meaning). A prompt variant that
-asked for narrower answers did not help and was reverted. The regulations
-held-out cases were run once before and once after that converter change; the
-table shows the second run. The customer-support held-out cases (100 %, 4/4)
-were last run with prompt v4 on 7 Nov and have not been rerun, so they stay
-untouched by later tuning.
+**Tuning.** The general questions were tuned on the development split with
+three runs each. With prompt v9, "Pás stojí a nejede" was refused 3 of 3 times
+and "Hlásí to chybu E12" 3 of 3 times; F01 failed 2 of 3 times because the
+answer invented an order of steps. Prompt v10 forbids claims that something is
+absent from or not required by the documents, states rules for unlisted cases
+as rules, gives safety steps one per claim and treats a problem reported in
+general terms as within the situations the documents distinguish. The conveyor
+procedure now states the F01 order explicitly. After that all three passed and
+no unanswerable control was answered. The final run still refused three
+operator questions that had passed while tuning, so single answers on those
+questions vary between runs.
 
-**Conveyor procedure.** The fictional conveyor procedure was added to the
-regulations set after the runs above. Its 10 questions, one of which needs
-both the procedure and NV 190/2022, were run on their own with
-`eval --case`, and retrieval was re-measured over all 48 development
-questions; the only new miss at rank 5 is that combined question, whose
-regulation section comes sixth and still reaches the answer. One sentence of
-the procedure was reworded after the grader flagged it as ambiguous, and the
-10 questions were run again; the table shows that run.
-
-**Prompt tuning after the tables (v6–v9).** Manual testing found refused
-answers on multi-part and fault-code questions. The current prompt (v9) asks for
-one step, fault code or fact per claim (up to twelve claims), states actions
-given for a particular situation as conditions ("If message F02 appears, …"),
-and includes a documented safety precondition as its own claim; the conveyor
-procedure repeats the lockout precondition in each fault-code step. A vague
-question such as "Dopravník se zastavil, co mám dělat?" is still mostly refused
-for insufficient evidence: the procedure gives actions only per fault code, and
-a broader prompt that answered it also answered two unanswerable
-customer-support questions, so it was not kept. The tables above were measured
-with v5.
-
-**Verifier probes.** Pairs of a supported claim and a near-miss: on customer
-support (24 probes) 0 false acceptances and 0 false rejections; on regulations
-(30 probes) 1 false acceptance and 1 false rejection. The false acceptance
-labelled a class IV boiler as class I although its own reason quoted class IV.
-Earlier probe runs of this set during tuning had no false acceptance and one
-false rejection each. The two conveyor pairs added later had neither. Probes
-measure the verifier alone; in the full pipeline a deterministic check now
-also requires a Roman class numeral in a claim ("class I", "IV. třídy") to
-appear in its citations, so a claim like that false acceptance is refused.
+**Verifier probes.** Measured on 18 Nov with the same verifier prompt
+([evals/results/2026-11-18](evals/results/2026-11-18)). Pairs of a supported
+claim and a near-miss: on customer support (24 probes) 0 false acceptances and
+0 false rejections; on regulations (30 probes, plus 4 conveyor probes run separately) 1 false
+acceptance and 1 false rejection. The false acceptance labelled a class IV boiler as class I although
+its own reason quoted class IV. Probes measure the verifier alone; in the full
+pipeline a deterministic check also requires a Roman class numeral in a claim
+("class I", "IV. třídy") to appear in its citations, so a claim like that
+false acceptance is refused.
 
 **Vector store.** An offline benchmark through the production code paths
 ([vector-store-bench.json](evals/results/2026-11-10/vector-store-bench.json))
@@ -162,12 +157,13 @@ sample sections. Qdrant local mode compares the query with every point, so at
 5,000 sections startup takes 3.4 s and a median query 34 ms; larger corpora call
 for a Qdrant server.
 
-The samples are small (64 answerable cases across both sets), so the numbers
+The samples are small (98 answerable cases across both sets), so the numbers
 show that the system works and fails safely, not a statistically precise error
 rate. Latency is three sequential provider calls (embedding, generation,
-verification). Earlier runs with prompt v4 and 5 retrieved sections are in
-[evals/results/2026-11-07](evals/results/2026-11-07) and
-[evals/results/2026-11-10](evals/results/2026-11-10).
+verification). Earlier runs are in
+[evals/results/2026-11-07](evals/results/2026-11-07),
+[evals/results/2026-11-10](evals/results/2026-11-10) and
+[evals/results/2026-11-18](evals/results/2026-11-18).
 
 ## Getting started
 

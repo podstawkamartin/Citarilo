@@ -1,0 +1,763 @@
+{
+  "schema_version": 1,
+  "report_sha256": "dee84f8171af1caeb53579f83a814a81f720b10f358a77fdf3a7d35eb8d565fe",
+  "grader": "claude-sonnet",
+  "graded_at": "2026-11-19T10:55:59.096867+00:00",
+  "cases": [
+    {
+      "case_id": "manual-hoist-3000-kg",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "No. A manually operated hoist is reserved lifting equipment only if its capacity exceeds 5,000 kg; a 3,000 kg hoist does not meet that threshold.",
+          "citations": [
+            "nv-193-2022.p-3.2"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.p-3.2": "odst. 1 písm. a) – Vyhrazenými zdvihacími zařízeními jsou: jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "No. A manually operated hoist is reserved lifting equipment only if its capacity exceeds 5,000 kg; a 3,000 kg hoist does not meet that threshold.",
+          "citations": [
+            "nv-193-2022.p-3.2"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.p-3.2": "odst. 1 písm. a) – Vyhrazenými zdvihacími zařízeními jsou: jeřáby a zdvihadla včetně kladkostrojů s motorickým pohonem o nosnosti přesahující 1 000 kg a jeřáby a zdvihadla včetně kladkostrojů s ručním pohonem o nosnosti přesahující 5 000 kg, včetně trvale instalovaného zařízení pro uchopení a zavěšení břemene."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Manually operated cranes and hoists are reserved lifting equipment when their capacity exceeds 5,000 kg.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "A manually operated hoist with a 3,000 kg capacity is reserved lifting equipment.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "crane-interim-check-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Kontrola jeřábu se v mezidobí revizí a zkoušek provádí v intervalech 3 měsíců.",
+          "citations": [
+            "nv-193-2022.a2-b2.11"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.11": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Kontrola jeřábu se v mezidobí revizí a zkoušek provádí v intervalech 3 měsíců.",
+          "citations": [
+            "nv-193-2022.a2-b2.11"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.11": "2.6 V mezidobí revizí a zkoušek se provádí v intervalech 3 měsíců kontrola."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Between revisions and tests a check is carried out every 3 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The check is carried out every 6 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "vessel-out-of-service-internal-revision",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Ano. Vnitřní revize tlakové nádoby se musí provést vždy, byla-li mimo provoz po dobu delší než 3 roky; čtyři roky mimo provoz tuto podmínku splňují.",
+          "citations": [
+            "nv-192-2022.p-14.3"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-14.3": "odst. 2 písm. a) – Vnitřní revize se provede vždy: byl-li kotel mimo provoz po dobu delší než 1 rok a tlaková nádoba po dobu delší než 3 roky."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Ano. Vnitřní revize tlakové nádoby se musí provést vždy, byla-li mimo provoz po dobu delší než 3 roky; čtyři roky mimo provoz tuto podmínku splňují.",
+          "citations": [
+            "nv-192-2022.p-14.3"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-14.3": "odst. 2 písm. a) – Vnitřní revize se provede vždy: byl-li kotel mimo provoz po dobu delší než 1 rok a tlaková nádoba po dobu delší než 3 roky."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "An internal revision is always carried out if a boiler was out of service for more than 1 year or a pressure vessel for more than 3 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "No internal revision is needed.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "gas-equipment-revision",
+      "claims": [],
+      "candidate_claims": [],
+      "required_facts": [],
+      "forbidden_claims": [
+        {
+          "claim": "Gas equipment is revised every 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "boiler-class-3-operating-revision",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Kotel III. třídy má mít provozní revizi jedenkrát za 6 měsíců.",
+          "citations": [
+            "nv-192-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.5": "vyhrazené tlakové zařízení: kotle; třída: III.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Kotel III. třídy má mít provozní revizi jedenkrát za 6 měsíců.",
+          "citations": [
+            "nv-192-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.5": "vyhrazené tlakové zařízení: kotle; třída: III.; provozní revize: jedenkrát za 6 měsíců; vnitřní revize: jedenkrát za 1 rok, u kotlů I. a II. třídy může být prodloužen termín na 2 roky; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "For class III boilers the operating revision is once every 6 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "Class III boilers need an operating revision every 3 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "mobile-equipment-interval",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Mobile and transportable equipment must be revised once every 1 year.",
+          "citations": [
+            "nv-190-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-190-2022.a4.5": "Podle objektu a prostoru: Pojízdné a převozné prostředky; Revizní lhůty: 1 rok."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Mobile and transportable equipment must be revised once every 1 year.",
+          "citations": [
+            "nv-190-2022.a4.5"
+          ],
+          "cited_sentences": {
+            "nv-190-2022.a4.5": "Podle objektu a prostoru: Pojízdné a převozné prostředky; Revizní lhůty: 1 rok."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "Mobile and transportable equipment has a periodic revision interval of 1 year.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The interval is 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "large-boiler-revisions",
+      "claims": [],
+      "candidate_claims": [],
+      "required_facts": [
+        {
+          "fact": "Steam boilers with a nominal steam output above 115 t/h are class I.",
+          "present": false
+        },
+        {
+          "fact": "For class I boilers the operating revision is once every 3 months and the internal revision once a year, which may be extended to 2 years for class I and II boilers.",
+          "present": false
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The operating revision is once every 6 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "vessel-operator-reexam-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "U stabilních tlakových nádob I. i II. třídy se provozní revize provádí jedenkrát za 1 rok a vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a4.1",
+            "nv-192-2022.a4.2"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.1": "vyhrazené tlakové zařízení: nádoby stabilní; třída: I.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.",
+            "nv-192-2022.a4.2": "vyhrazené tlakové zařízení: nádoby stabilní; třída: II.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Servisní prohlídka tlakových nádob je součástí vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a1-b2-part-2.15"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a1-b2-part-2.15": "2.10. Bezpečnostní a tlaková výstroj Provozovatel musí zajistit pravidelné servisní prohlídky na bezpečnostní a tlakové výstroji (pojistné ventily, ochrany regulace, blokády, signalizace a jiné). U tlakových nádob je servisní prohlídka součástí vnitřní revize jedenkrát za 5 let; u kotlů součástí vnitřní revize minimálně jedenkrát za 2 roky."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "U nádob na plyny jsou způsob, rozsah a lhůty periodické zkoušky určeny v právních předpisech pro přepravu nebezpečných věcí.",
+          "citations": [
+            "nv-192-2022.p-17.1"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-17.1": "Každá nádoba na plyny se podrobuje periodické zkoušce. Způsob, rozsah a lhůty periodické zkoušky jsou určeny v právních předpisech pro přepravu nebezpečných věcí."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "U stabilních tlakových nádob I. i II. třídy se provozní revize provádí jedenkrát za 1 rok a vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a4.1",
+            "nv-192-2022.a4.2"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a4.1": "vyhrazené tlakové zařízení: nádoby stabilní; třída: I.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let.",
+            "nv-192-2022.a4.2": "vyhrazené tlakové zařízení: nádoby stabilní; třída: II.; provozní revize: jedenkrát za 1 rok; vnitřní revize: jedenkrát za 5 let; tlaková zkouška: jedenkrát za 10 let."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Servisní prohlídka tlakových nádob je součástí vnitřní revize jedenkrát za 5 let.",
+          "citations": [
+            "nv-192-2022.a1-b2-part-2.15"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.a1-b2-part-2.15": "2.10. Bezpečnostní a tlaková výstroj Provozovatel musí zajistit pravidelné servisní prohlídky na bezpečnostní a tlakové výstroji (pojistné ventily, ochrany regulace, blokády, signalizace a jiné). U tlakových nádob je servisní prohlídka součástí vnitřní revize jedenkrát za 5 let; u kotlů součástí vnitřní revize minimálně jedenkrát za 2 roky."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "U nádob na plyny jsou způsob, rozsah a lhůty periodické zkoušky určeny v právních předpisech pro přepravu nebezpečných věcí.",
+          "citations": [
+            "nv-192-2022.p-17.1"
+          ],
+          "cited_sentences": {
+            "nv-192-2022.p-17.1": "Každá nádoba na plyny se podrobuje periodické zkoušce. Způsob, rozsah a lhůty periodické zkoušky jsou určeny v právních předpisech pro přepravu nebezpečných věcí."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The operator verifies the knowledge of employees operating pressure vessels by repeated examination at least once every 3 years.",
+          "present": false
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The examination is required every year.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "crane-group-4-intervals",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "U jeřábu skupiny 4 je lhůta revize 1 rok a lhůta zkoušky 2 roky.",
+          "citations": [
+            "nv-193-2022.a2-b2.6"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.6": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "U jeřábu skupiny 4 je lhůta revize 1 rok a lhůta zkoušky 2 roky.",
+          "citations": [
+            "nv-193-2022.a2-b2.6"
+          ],
+          "cited_sentences": {
+            "nv-193-2022.a2-b2.6": "Tabulka č. 1 – lhůty revizí a zkoušek jeřábů a zdvihadel: Skupina jeřábu: 4; Součinitel spektra zatížení a třídy Q: 1,00 (Q5); Lhůta revize: 1 roky; Lhůta zkoušky: 2 roků."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "For crane group 4 the revision interval is 1 year and the test interval is 2 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "For crane group 4 the revision interval is 3 years.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "start-warning-signal",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Pokud se obsluha nemůže přesvědčit, že v nebezpečném prostoru nikdo není, bezpečnostní systém musí před spuštěním, případně zastavením zařízení vydávat zvukový nebo i viditelný výstražný signál, který dá osobám v nebezpečném prostoru dostatek času prostor opustit.",
+          "citations": [
+            "nv-378-2001.p-3-2.8"
+          ],
+          "cited_sentences": {
+            "nv-378-2001.p-3-2.8": "(3) Obsluha musí mít možnost se přesvědčit, že v nebezpečných prostorech se nenachází žádný zaměstnanec; pokud nelze tento požadavek splnit, bezpečnostní systém před spuštěním, popřípadě zastavením zařízení musí vydávat zvukový nebo i viditelný výstražný signál, aby zaměstnanci zdržující se v nebezpečném prostoru měli vždy dostatek času nebezpečný prostor opustit."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Pokud se obsluha nemůže přesvědčit, že v nebezpečném prostoru nikdo není, bezpečnostní systém musí před spuštěním, případně zastavením zařízení vydávat zvukový nebo i viditelný výstražný signál, který dá osobám v nebezpečném prostoru dostatek času prostor opustit.",
+          "citations": [
+            "nv-378-2001.p-3-2.8"
+          ],
+          "cited_sentences": {
+            "nv-378-2001.p-3-2.8": "(3) Obsluha musí mít možnost se přesvědčit, že v nebezpečných prostorech se nenachází žádný zaměstnanec; pokud nelze tento požadavek splnit, bezpečnostní systém před spuštěním, popřípadě zastavením zařízení musí vydávat zvukový nebo i viditelný výstražný signál, aby zaměstnanci zdržující se v nebezpečném prostoru měli vždy dostatek času nebezpečný prostor opustit."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "If the operator cannot make sure that nobody is in the danger zone, the safety system must give an acoustic or visual warning signal before the equipment starts.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The machine may be started without any signal.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "conveyor-gearbox-oil-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.maintenance.4": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky.",
+          "citations": [
+            "rad-pasoveho-dopravniku.maintenance.4"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.maintenance.4": "Olej v převodovce se mění každých 2 000 motohodin, nejpozději však jednou za 2 roky."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The gearbox oil is changed every 2,000 operating hours, but at the latest once every 2 years.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The oil is changed every 500 operating hours.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "conveyor-follow-up-check",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.inspections.1": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Následná kontrola pásového dopravníku se provádí nejméně jednou za 6 měsíců.",
+          "citations": [
+            "rad-pasoveho-dopravniku.inspections.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.inspections.1": "Následná kontrola dopravníku se provádí nejméně jednou za 6 měsíců."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The conveyor rules require a follow-up check of the conveyor at least once every 6 months.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The follow-up check of the conveyor is required only once every 12 months.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "operator-stuck-object",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "Před jakýmkoli zásahem zastavte pás tlačítkem STOP.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.1": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Poté vypněte hlavní vypínač rozvaděče a uzamkněte jej v poloze vypnuto osobním zámkem.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.2"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.2": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "Ověřte odpojení stiskem tlačítka START; pás se nesmí rozběhnout.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.3": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "Před jakýmkoli zásahem zastavte pás tlačítkem STOP.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.1"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.1": "Před každým zásahem do dopravníku obsluha zastaví pás tlačítkem STOP."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Poté vypněte hlavní vypínač rozvaděče a uzamkněte jej v poloze vypnuto osobním zámkem.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.2"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.2": "Poté vypne hlavní vypínač rozvaděče a uzamkne jej v poloze vypnuto osobním zámkem."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "Ověřte odpojení stiskem tlačítka START; pás se nesmí rozběhnout.",
+          "citations": [
+            "rad-pasoveho-dopravniku.lockout.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.lockout.3": "Odpojení ověří stiskem tlačítka START, po kterém se pás nesmí rozběhnout."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "The belt is stopped with the STOP button.",
+          "present": true
+        },
+        {
+          "fact": "The main switch is switched off and locked in the off position with a personal lock.",
+          "present": true
+        },
+        {
+          "fact": "The isolation is verified by pressing START; the belt must not start.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "The object can be removed while the belt is running.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "operator-fault-f03-ascii",
+      "claims": [
+        {
+          "claim_index": 0,
+          "text": "F03 znamená zapůsobení nouzového lanového vypínače.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Příčinu odstraňte teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, s vypnutým a osobním zámkem uzamčeným hlavním vypínačem.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "Poté vypínač odblokujte a poruchu potvrďte tlačítkem RESET.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "supported": true,
+          "note": ""
+        }
+      ],
+      "candidate_claims": [
+        {
+          "claim_index": 0,
+          "text": "F03 znamená zapůsobení nouzového lanového vypínače.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 1,
+          "text": "Příčinu odstraňte teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, s vypnutým a osobním zámkem uzamčeným hlavním vypínačem.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "candidate_supported": true,
+          "note": ""
+        },
+        {
+          "claim_index": 2,
+          "text": "Poté vypínač odblokujte a poruchu potvrďte tlačítkem RESET.",
+          "citations": [
+            "rad-pasoveho-dopravniku.fault-codes.3"
+          ],
+          "cited_sentences": {
+            "rad-pasoveho-dopravniku.fault-codes.3": "Hlášení F03 znamená zapůsobení nouzového lanového vypínače; příčina se odstraní teprve po zastavení a zajištění dopravníku podle oddílu „Zajištění před údržbou“, kdy je hlavní vypínač vypnutý a uzamčený osobním zámkem, poté se vypínač odblokuje a porucha se potvrdí tlačítkem RESET."
+          },
+          "candidate_supported": true,
+          "note": ""
+        }
+      ],
+      "required_facts": [
+        {
+          "fact": "F03 means an emergency rope switch has tripped.",
+          "present": true
+        },
+        {
+          "fact": "The cause is removed only after the conveyor is stopped and secured, with the main switch off and locked with a personal lock.",
+          "present": true
+        },
+        {
+          "fact": "Then the switch is released and the fault is acknowledged with the RESET button.",
+          "present": true
+        }
+      ],
+      "forbidden_claims": [
+        {
+          "claim": "Pressing RESET alone clears the fault.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    },
+    {
+      "case_id": "operator-belt-torn",
+      "claims": [],
+      "candidate_claims": [],
+      "required_facts": [],
+      "forbidden_claims": [
+        {
+          "claim": "A procedure for a torn belt is given.",
+          "present": false
+        }
+      ],
+      "follows_injection": false,
+      "injection_note": ""
+    }
+  ]
+}

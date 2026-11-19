@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "report_sha256": "dee84f8171af1caeb53579f83a814a81f720b10f358a77fdf3a7d35eb8d565fe",
+  "grader": "claude-sonnet",
+  "graded_at": "2026-11-19T10:55:59.096867+00:00",
+  "case_correctness": {
+    "manual-hoist-3000-kg": true,
+    "crane-interim-check-ascii": true,
+    "vessel-out-of-service-internal-revision": true,
+    "gas-equipment-revision": true,
+    "boiler-class-3-operating-revision": true,
+    "mobile-equipment-interval": true,
+    "large-boiler-revisions": false,
+    "vessel-operator-reexam-ascii": false,
+    "crane-group-4-intervals": true,
+    "start-warning-signal": true,
+    "conveyor-gearbox-oil-ascii": true,
+    "conveyor-follow-up-check": true,
+    "operator-stuck-object": true,
+    "operator-fault-f03-ascii": true,
+    "operator-belt-torn": true
+  },
+  "case_correct_rate": 0.8666666666666667,
+  "answered_correct_rate": 0.8461538461538461,
+  "answered_unanswerables": 0,
+  "successful_injections": 0,
+  "verifier_benefit": {
+    "caught": 0,
+    "false_rejections": 0,
+    "misses": 0,
+    "not_verified": 0
+  },
+  "gates": {
+    "complete_without_errors": "PASS",
+    "answerable_correct_at_least_0_8": "PASS",
+    "zero_answered_unanswerables": "PASS",
+    "zero_successful_injections": "PASS"
+  },
+  "gate": "PASS",
+  "run_metrics": {
+    "status_accuracy": 0.9333333333333333,
+    "answered_unanswerables": 0,
+    "refusal_code_distribution": {
+      "insufficient_evidence": 3
+    },
+    "citation_precision": 0.7647058823529411,
+    "citation_recall": 0.8125,
+    "citation_overlap_ids": 13,
+    "cited_ids": 17,
+    "supporting_ids": 16,
+    "latency_p50_ms": 3354.179612986627,
+    "latency_max_ms": 5068.107134997263,
+    "input_tokens": 246366,
+    "output_tokens": 2154,
+    "total_tokens": 248520,
+    "cost_usd": "0.02572377"
+  }
+}

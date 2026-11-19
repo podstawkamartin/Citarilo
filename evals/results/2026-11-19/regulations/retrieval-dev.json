@@ -1,0 +1,3458 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-11-19T10:45:32.968717Z",
+  "git": {
+    "commit": "f49250109f68ac216e53cc1862bca707d2fcb0c3",
+    "dirty": false
+  },
+  "corpus_hash": "7bdd83d8f0671863f64b3afeea4c2ba53eb02ac7d8277e7b07c4e30aca8eda39",
+  "embedding_model": "text-embedding-3-large",
+  "embedding_dimensions": 3072,
+  "price_table_version": "2026-11-06",
+  "top_k": 8,
+  "split": "dev",
+  "cases": [
+    {
+      "id": "production-hall-electrical-interval",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5875750349577775
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5171109997336416
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.49215655373274575
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.49054307848064893
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.4862018401174498
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.48388333001530504
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.47657928682147954
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.4487018910100659
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 513.8278599915793,
+      "usage": [
+        {
+          "reservation_id": "1b174946040b4fc9b73e74552847e2bf",
+          "prompt_tokens": 28,
+          "total_tokens": 28,
+          "cost_usd": "0.00000364",
+          "duration_ms": 285.68086300219875
+        }
+      ]
+    },
+    {
+      "id": "overlapping-electrical-intervals",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5716971645754454
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.4892049298549087
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.47891191847321557
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4698940725477521
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4581080472215141
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.45770620435263576
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.4299655230088638
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.42944347797950977
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 311.35212499066256,
+      "usage": [
+        {
+          "reservation_id": "f8dc062e75e44e6d95e31cd427843c17",
+          "prompt_tokens": 37,
+          "total_tokens": 37,
+          "cost_usd": "0.00000481",
+          "duration_ms": 272.4198000069009
+        }
+      ]
+    },
+    {
+      "id": "revision-interval-doubling",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5966615897678184
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5617019188565734
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.5301998511520553
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.527830186642549
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.5132767662000264
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.4933458049345658
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.492608475824671
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.48660366727797144
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 237.2364769980777,
+      "usage": [
+        {
+          "reservation_id": "2e1865f268f34b1c8243099a97f8ccc9",
+          "prompt_tokens": 37,
+          "total_tokens": 37,
+          "cost_usd": "0.00000481",
+          "duration_ms": 210.1283490046626
+        }
+      ]
+    },
+    {
+      "id": "lightning-protection-visual-check",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5311380734053667
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4618050128603849
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.4588880755806101
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.4458308744989371
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4456020309706
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.43209557976797675
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.424752528783938
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.41857447587635116
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 255.92021099873818,
+      "usage": [
+        {
+          "reservation_id": "add9260ee63548459c3d76ea98d963e2",
+          "prompt_tokens": 24,
+          "total_tokens": 24,
+          "cost_usd": "0.00000312",
+          "duration_ms": 224.50594800466206
+        }
+      ]
+    },
+    {
+      "id": "manufacturer-shorter-interval",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-7"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.578833558644515
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.5341319784160943
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5327225281009722
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5316183572046962
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.519383930097394
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.517022114282448
+        },
+        {
+          "key": "nv-192-2022.a2",
+          "score": 0.5167637865750776
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.5134443382987
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-7": 5
+      },
+      "latency_ms": 280.41649000078905,
+      "usage": [
+        {
+          "reservation_id": "9a1682c4583445e9bbeab02529cdda74",
+          "prompt_tokens": 52,
+          "total_tokens": 52,
+          "cost_usd": "0.00000676",
+          "duration_ms": 252.4232919968199
+        }
+      ]
+    },
+    {
+      "id": "dangerous-electrical-state",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-7"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-3",
+          "score": 0.6183423454637555
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.58375243499672
+        },
+        {
+          "key": "nv-190-2022.p-1",
+          "score": 0.5760417548798233
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.5496279315506652
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.5282784956277102
+        },
+        {
+          "key": "nv-190-2022.p-8",
+          "score": 0.5125960060508146
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5093950883207273
+        },
+        {
+          "key": "nv-190-2022.p-11",
+          "score": 0.503587192561754
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-7": 2
+      },
+      "latency_ms": 279.4259609945584,
+      "usage": [
+        {
+          "reservation_id": "e3c6cc0e76b34a768fdc0d9b3fe2b385",
+          "prompt_tokens": 42,
+          "total_tokens": 42,
+          "cost_usd": "0.00000546",
+          "duration_ms": 249.0328620042419
+        }
+      ]
+    },
+    {
+      "id": "motor-hoist-800-kg",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.p-3"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.p-4",
+          "score": 0.539682468217684
+        },
+        {
+          "key": "nv-193-2022.p-3",
+          "score": 0.5393291621195626
+        },
+        {
+          "key": "nv-193-2022.a3-b4",
+          "score": 0.5163480331509201
+        },
+        {
+          "key": "nv-193-2022.a3-b1",
+          "score": 0.5099862540608677
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5093761838846937
+        },
+        {
+          "key": "nv-193-2022.a3",
+          "score": 0.4875267692589668
+        },
+        {
+          "key": "nv-193-2022.a2",
+          "score": 0.4827229400373764
+        },
+        {
+          "key": "nv-378-2001.a1",
+          "score": 0.4799837880888999
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.p-3": 2
+      },
+      "latency_ms": 276.61584099405445,
+      "usage": [
+        {
+          "reservation_id": "26996ebb15984aa596ff86b4090af1c6",
+          "prompt_tokens": 33,
+          "total_tokens": 33,
+          "cost_usd": "0.00000429",
+          "duration_ms": 247.5538989965571
+        }
+      ]
+    },
+    {
+      "id": "crane-class-by-capacity",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.p-4",
+          "score": 0.5599365693846997
+        },
+        {
+          "key": "nv-193-2022.p-3",
+          "score": 0.48296692819127446
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.4708594632916943
+        },
+        {
+          "key": "nv-193-2022.a3",
+          "score": 0.4514614181493586
+        },
+        {
+          "key": "nv-193-2022.a3-b1",
+          "score": 0.44050528822883184
+        },
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.41868470598053237
+        },
+        {
+          "key": "nv-193-2022.p-2",
+          "score": 0.4142854449808794
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.3929930305628723
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.p-4": 1
+      },
+      "latency_ms": 282.5767710019136,
+      "usage": [
+        {
+          "reservation_id": "29823265fd5c4b86b708a055a19e5534",
+          "prompt_tokens": 31,
+          "total_tokens": 31,
+          "cost_usd": "0.00000403",
+          "duration_ms": 251.58324600488413
+        }
+      ]
+    },
+    {
+      "id": "crane-group-2-intervals",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.a2-b2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.658623724463639
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.5523203248615061
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.5489321691915896
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.5353623943853494
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.5279826285416702
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.5260975334348582
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.5236207771601786
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5228919984029909
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.a2-b2": 1
+      },
+      "latency_ms": 258.4433239971986,
+      "usage": [
+        {
+          "reservation_id": "e4f5012238ba4bbcbdb033148285dde5",
+          "prompt_tokens": 25,
+          "total_tokens": 25,
+          "cost_usd": "0.00000325",
+          "duration_ms": 235.69488499197178
+        }
+      ]
+    },
+    {
+      "id": "crane-checks-between-revisions",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.a2-b2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5382339044593604
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.5340824692029421
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.524651083549247
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.5052740881072978
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.48445077930508607
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.48387598419171207
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4809207549899699
+        },
+        {
+          "key": "nv-192-2022.p-9",
+          "score": 0.48010250808839583
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.a2-b2": 1
+      },
+      "latency_ms": 270.580890995916,
+      "usage": [
+        {
+          "reservation_id": "c0ddfcce66334b8c8965536fe386956c",
+          "prompt_tokens": 27,
+          "total_tokens": 27,
+          "cost_usd": "0.00000351",
+          "duration_ms": 241.41243900521658
+        }
+      ]
+    },
+    {
+      "id": "pressure-equipment-threshold",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-4",
+          "score": 0.6484436531682615
+        },
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.6231207914703861
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.6131474333633079
+        },
+        {
+          "key": "nv-192-2022.p-7",
+          "score": 0.5960953406547023
+        },
+        {
+          "key": "nv-192-2022.p-2",
+          "score": 0.5765179351411054
+        },
+        {
+          "key": "nv-192-2022.p-4-2",
+          "score": 0.5765070052334579
+        },
+        {
+          "key": "nv-192-2022.p-12",
+          "score": 0.5663161561545154
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.564383778568653
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-4": 1
+      },
+      "latency_ms": 257.60424899635836,
+      "usage": [
+        {
+          "reservation_id": "f496130033b84c2b980b5f5f1403092e",
+          "prompt_tokens": 33,
+          "total_tokens": 33,
+          "cost_usd": "0.00000429",
+          "duration_ms": 233.8942170026712
+        }
+      ]
+    },
+    {
+      "id": "small-pressure-vessel-exclusion",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-4",
+          "score": 0.5482595752145627
+        },
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.5374009869279144
+        },
+        {
+          "key": "nv-192-2022.p-2",
+          "score": 0.5090285371850434
+        },
+        {
+          "key": "nv-192-2022.a5",
+          "score": 0.5067341001784216
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.4921179461691711
+        },
+        {
+          "key": "nv-192-2022.p-4-2",
+          "score": 0.4872113500143931
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.4805270982606328
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.47960360177581973
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-4": 1
+      },
+      "latency_ms": 235.78161699697375,
+      "usage": [
+        {
+          "reservation_id": "c7724de25b9a447e98a24ba84774fc1e",
+          "prompt_tokens": 31,
+          "total_tokens": 31,
+          "cost_usd": "0.00000403",
+          "duration_ms": 203.4582979977131
+        }
+      ]
+    },
+    {
+      "id": "machine-follow-up-check",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-378-2001.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.6301427850378349
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.5596382526183687
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5370871097785825
+        },
+        {
+          "key": "nv-192-2022.a4",
+          "score": 0.5341753369473237
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.53325903624654
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.5328803469150712
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.5307656269859625
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.5278751447930751
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-378-2001.p-4": 1
+      },
+      "latency_ms": 274.2972710111644,
+      "usage": [
+        {
+          "reservation_id": "e0fdad1af4de4ddbb2a0334020e706cb",
+          "prompt_tokens": 42,
+          "total_tokens": 42,
+          "cost_usd": "0.00000546",
+          "duration_ms": 244.58665199927054
+        }
+      ]
+    },
+    {
+      "id": "conveyor-local-regulation-content",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-378-2001.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.5949216591554224
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.5718638289098864
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5652135501879175
+        },
+        {
+          "key": "nv-378-2001.a1",
+          "score": 0.5374775342253875
+        },
+        {
+          "key": "nv-193-2022.a3-b4",
+          "score": 0.5285366907956903
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5214451841403113
+        },
+        {
+          "key": "nv-193-2022.a3-b3",
+          "score": 0.513575448339832
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.5128914857662719
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-378-2001.a4": 1
+      },
+      "latency_ms": 269.67604299716186,
+      "usage": [
+        {
+          "reservation_id": "de56590040ed481a9819ef8a789f829e",
+          "prompt_tokens": 36,
+          "total_tokens": 36,
+          "cost_usd": "0.00000468",
+          "duration_ms": 239.02191400702577
+        }
+      ]
+    },
+    {
+      "id": "maintenance-energy-isolation",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-378-2001.p-3-2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-378-2001.p-3",
+          "score": 0.4666018768071173
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.4482083697872429
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.4470358200637595
+        },
+        {
+          "key": "nv-378-2001.p-3-2",
+          "score": 0.44646561265320084
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4403586749445061
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4354987832263404
+        },
+        {
+          "key": "nv-378-2001.p-2",
+          "score": 0.42646153720283597
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.423832381563509
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-378-2001.p-3-2": 4
+      },
+      "latency_ms": 230.8744320034748,
+      "usage": [
+        {
+          "reservation_id": "f99bd0aa3ea842eaa909d700b0e8f8fb",
+          "prompt_tokens": 28,
+          "total_tokens": 28,
+          "cost_usd": "0.00000364",
+          "duration_ms": 204.25053300277796
+        }
+      ]
+    },
+    {
+      "id": "electrical-and-crane-intervals",
+      "tags": [
+        "cs",
+        "confusable",
+        "multi-section"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4",
+        "nv-193-2022.a2-b2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5810966678750303
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.523231633417238
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.49008071839289735
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.46827936557398586
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.46675968847540483
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.46223685364974587
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4508409883451979
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.4442516928577468
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 2,
+        "nv-193-2022.a2-b2": 1
+      },
+      "latency_ms": 251.77057700057048,
+      "usage": [
+        {
+          "reservation_id": "eb9131063a5c473cbc5e430d743cccd3",
+          "prompt_tokens": 39,
+          "total_tokens": 39,
+          "cost_usd": "0.00000507",
+          "duration_ms": 223.9737690106267
+        }
+      ]
+    },
+    {
+      "id": "injected-administrative-interval",
+      "tags": [
+        "cs",
+        "injection-question"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5352667684990419
+        },
+        {
+          "key": "nv-190-2022.p-10",
+          "score": 0.4335763803943516
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.4219428993376805
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.42071186840640096
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.418835425081613
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.4139705913681625
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4100658380607956
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.40591938337743944
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 244.92690000624862,
+      "usage": [
+        {
+          "reservation_id": "bd80a63457764e94b10a5d2a77f03b4c",
+          "prompt_tokens": 58,
+          "total_tokens": 58,
+          "cost_usd": "0.00000754",
+          "duration_ms": 221.97871599928476
+        }
+      ]
+    },
+    {
+      "id": "electrical-revision-price",
+      "tags": [
+        "cs",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.4568881539652498
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.44838939620108753
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.438116759481865
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.40742724362156835
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.4039797651038227
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.39741391545134497
+        },
+        {
+          "key": "nv-190-2022.p-5",
+          "score": 0.3914596539831149
+        },
+        {
+          "key": "nv-190-2022.p-10",
+          "score": 0.3868265836490471
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 239.6008600044297,
+      "usage": [
+        {
+          "reservation_id": "651ea8f96a9a43a083f973e988f0ba9b",
+          "prompt_tokens": 22,
+          "total_tokens": 22,
+          "cost_usd": "0.00000286",
+          "duration_ms": 208.36836801026948
+        }
+      ]
+    },
+    {
+      "id": "missed-revision-penalty",
+      "tags": [
+        "en",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.36577184238230326
+        },
+        {
+          "key": "nv-190-2022.p-5",
+          "score": 0.3651434459297483
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.3461736461066417
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.33388695557906184
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.33030279375292015
+        },
+        {
+          "key": "nv-190-2022.p-6",
+          "score": 0.31590927580615297
+        },
+        {
+          "key": "nv-190-2022.p-10",
+          "score": 0.31495649189852715
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.3118533738393865
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 574.6723259944702,
+      "usage": [
+        {
+          "reservation_id": "58c9323dbe7a45588359776cd07fff27",
+          "prompt_tokens": 14,
+          "total_tokens": 14,
+          "cost_usd": "0.00000182",
+          "duration_ms": 543.7692800041987
+        }
+      ]
+    },
+    {
+      "id": "stationary-vessel-schedule",
+      "tags": [
+        "en",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.5919512103290703
+        },
+        {
+          "key": "nv-192-2022.a4",
+          "score": 0.5668184296671137
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.5558631320912825
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.519836991218153
+        },
+        {
+          "key": "nv-192-2022.p-12",
+          "score": 0.5010011769280797
+        },
+        {
+          "key": "nv-192-2022.a2-b2-part-2",
+          "score": 0.4851875620710883
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.47440593051543267
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.47413575453104295
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.a4": 2
+      },
+      "latency_ms": 502.8816569974879,
+      "usage": [
+        {
+          "reservation_id": "3c1ae49c15e34a9197e95cda2d6c0a86",
+          "prompt_tokens": 20,
+          "total_tokens": 20,
+          "cost_usd": "0.00000260",
+          "duration_ms": 476.3985539902933
+        }
+      ]
+    },
+    {
+      "id": "hot-environment-class",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.6524879198627893
+        },
+        {
+          "key": "nv-190-2022.p-3",
+          "score": 0.5009545621009869
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.4828674219421314
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.45248380328006527
+        },
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.4484543096332683
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.4468999630084619
+        },
+        {
+          "key": "nv-190-2022.p-1",
+          "score": 0.4388808516358827
+        },
+        {
+          "key": "nv-192-2022.p-3",
+          "score": 0.4257588803398285
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-4": 1
+      },
+      "latency_ms": 239.07769899233244,
+      "usage": [
+        {
+          "reservation_id": "a8f4073911b742ac94059f67b648a21a",
+          "prompt_tokens": 34,
+          "total_tokens": 34,
+          "cost_usd": "0.00000442",
+          "duration_ms": 215.82202799618244
+        }
+      ]
+    },
+    {
+      "id": "explosive-dust-class",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.6320737892746955
+        },
+        {
+          "key": "nv-190-2022.p-3",
+          "score": 0.5065761146996975
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.48815473379053664
+        },
+        {
+          "key": "nv-192-2022.p-3",
+          "score": 0.48742113205743637
+        },
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.48212666376620034
+        },
+        {
+          "key": "nv-193-2022.p-4",
+          "score": 0.44543697293061074
+        },
+        {
+          "key": "nv-190-2022.p-1",
+          "score": 0.433116455194884
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.432565785482385
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-4": 1
+      },
+      "latency_ms": 281.8144399934681,
+      "usage": [
+        {
+          "reservation_id": "1fd1170464164e0c89d361e831ad1f24",
+          "prompt_tokens": 38,
+          "total_tokens": 38,
+          "cost_usd": "0.00000494",
+          "duration_ms": 256.3608070049668
+        }
+      ]
+    },
+    {
+      "id": "large-venue-class-and-interval",
+      "tags": [
+        "cs",
+        "condition",
+        "multi-section"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4",
+        "nv-190-2022.p-4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5238536740798476
+        },
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.5132740444287653
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.48001970962173235
+        },
+        {
+          "key": "nv-190-2022.p-3",
+          "score": 0.4751197564997771
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.4703880113090404
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.4637813683364
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.4513192751946968
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.4399169386404215
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1,
+        "nv-190-2022.p-4": 2
+      },
+      "latency_ms": 285.9537949989317,
+      "usage": [
+        {
+          "reservation_id": "c0e231355f29474f9595b46c398dba18",
+          "prompt_tokens": 52,
+          "total_tokens": 52,
+          "cost_usd": "0.00000676",
+          "duration_ms": 261.7102010117378
+        }
+      ]
+    },
+    {
+      "id": "class-i-commissioning-certificate",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-6"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.6155871005909481
+        },
+        {
+          "key": "nv-190-2022.p-6",
+          "score": 0.6098025395955671
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.5900380440041062
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.5705782483669988
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.5601777655221457
+        },
+        {
+          "key": "nv-190-2022.p-5",
+          "score": 0.5506066909633613
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5418341549499849
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.536482470311554
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-6": 2
+      },
+      "latency_ms": 252.90754999150522,
+      "usage": [
+        {
+          "reservation_id": "cb7cff02100c4dbba5b4d7fa871bd4cd",
+          "prompt_tokens": 30,
+          "total_tokens": 30,
+          "cost_usd": "0.00000390",
+          "duration_ms": 223.18317600002047
+        }
+      ]
+    },
+    {
+      "id": "revision-after-protection-change",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-6"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.5366166485201458
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.509934000312435
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.48544563322994905
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.47531859597933324
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.462989862977106
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4373311085972159
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.43189210482086826
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.425393981788941
+        }
+      ],
+      "hit": false,
+      "ranks": {
+        "nv-190-2022.p-6": null
+      },
+      "latency_ms": 239.68979700293858,
+      "usage": [
+        {
+          "reservation_id": "14a5f542d158422b936c3cdab3fef608",
+          "prompt_tokens": 30,
+          "total_tokens": 30,
+          "cost_usd": "0.00000390",
+          "duration_ms": 211.27612100099213
+        }
+      ]
+    },
+    {
+      "id": "installation-handover-documents",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-6"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-6",
+          "score": 0.5460468465169089
+        },
+        {
+          "key": "nv-190-2022.p-5",
+          "score": 0.5099186139144621
+        },
+        {
+          "key": "nv-190-2022.p-10",
+          "score": 0.5013549240732602
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5006488457792262
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.48984290281491194
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.48593283681825794
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.4788023286503615
+        },
+        {
+          "key": "nv-193-2022.p-6",
+          "score": 0.4770765268719209
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-6": 1
+      },
+      "latency_ms": 280.2117340033874,
+      "usage": [
+        {
+          "reservation_id": "d957ce685580463ca27707945bec8d8f",
+          "prompt_tokens": 41,
+          "total_tokens": 41,
+          "cost_usd": "0.00000533",
+          "duration_ms": 249.83882300148252
+        }
+      ]
+    },
+    {
+      "id": "construction-site-interval",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5706644647568879
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.5542828673636072
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5463474294957879
+        },
+        {
+          "key": "nv-190-2022.a2",
+          "score": 0.5143516007604844
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.5128841710420834
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.5016291042805352
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.4805264617921693
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.47154497418949193
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 1
+      },
+      "latency_ms": 287.2160819970304,
+      "usage": [
+        {
+          "reservation_id": "d4ecee8ce89d48a3855b561e0e845b30",
+          "prompt_tokens": 29,
+          "total_tokens": 29,
+          "cost_usd": "0.00000377",
+          "duration_ms": 260.83703301264904
+        }
+      ]
+    },
+    {
+      "id": "temporary-equipment-switch-off",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.p-7"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-190-2022.p-3",
+          "score": 0.45364890166185845
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.4502905793488777
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.441643906849992
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.4257217022645885
+        },
+        {
+          "key": "nv-190-2022.p-11",
+          "score": 0.4001508007080158
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.399131305583902
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.39152236566572585
+        },
+        {
+          "key": "nv-378-2001.p-3",
+          "score": 0.39105891850437785
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.p-7": 2
+      },
+      "latency_ms": 231.3168120017508,
+      "usage": [
+        {
+          "reservation_id": "c98e9ad503574e068576a1f9d2be11d5",
+          "prompt_tokens": 36,
+          "total_tokens": 36,
+          "cost_usd": "0.00000468",
+          "duration_ms": 205.09157099877484
+        }
+      ]
+    },
+    {
+      "id": "steam-boiler-class",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-5"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.5534876969584981
+        },
+        {
+          "key": "nv-192-2022.p-21",
+          "score": 0.44794126813562934
+        },
+        {
+          "key": "nv-192-2022.p-23",
+          "score": 0.44297870585651244
+        },
+        {
+          "key": "nv-192-2022.p-10",
+          "score": 0.4319988492929727
+        },
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.4317512240324836
+        },
+        {
+          "key": "nv-192-2022.p-4",
+          "score": 0.42662169688709195
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.42522963440445183
+        },
+        {
+          "key": "nv-192-2022.a1-b1",
+          "score": 0.4197577478131478
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-5": 1
+      },
+      "latency_ms": 319.3327339977259,
+      "usage": [
+        {
+          "reservation_id": "7de4946b440a4e818a11a860d203976c",
+          "prompt_tokens": 30,
+          "total_tokens": 30,
+          "cost_usd": "0.00000390",
+          "duration_ms": 289.44630500336643
+        }
+      ]
+    },
+    {
+      "id": "pressure-vessel-class-i",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-5"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-5",
+          "score": 0.5546345689725446
+        },
+        {
+          "key": "nv-192-2022.p-4",
+          "score": 0.4961631553284149
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.475651077669934
+        },
+        {
+          "key": "nv-192-2022.a4",
+          "score": 0.468145765022004
+        },
+        {
+          "key": "nv-190-2022.p-4",
+          "score": 0.4578161630636036
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.45363979301999546
+        },
+        {
+          "key": "nv-192-2022.p-16",
+          "score": 0.451405768843162
+        },
+        {
+          "key": "nv-192-2022.p-12",
+          "score": 0.448251771502616
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-5": 1
+      },
+      "latency_ms": 266.6633609915152,
+      "usage": [
+        {
+          "reservation_id": "994deff1fc1c42119b201ab72c193047",
+          "prompt_tokens": 22,
+          "total_tokens": 22,
+          "cost_usd": "0.00000286",
+          "duration_ms": 237.7480350114638
+        }
+      ]
+    },
+    {
+      "id": "first-operating-revision",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-13"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.651211147846851
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.6323048412779309
+        },
+        {
+          "key": "nv-192-2022.p-12",
+          "score": 0.6111983148008918
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.5505572650012769
+        },
+        {
+          "key": "nv-192-2022.a4",
+          "score": 0.5394327489119277
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.5204932687320608
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.5183217754084075
+        },
+        {
+          "key": "nv-192-2022.p-10",
+          "score": 0.5036946819719856
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-13": 1
+      },
+      "latency_ms": 255.02296700142324,
+      "usage": [
+        {
+          "reservation_id": "41d8a0c811004808b58ddc54a46f71a3",
+          "prompt_tokens": 26,
+          "total_tokens": 26,
+          "cost_usd": "0.00000338",
+          "duration_ms": 221.36427299119532
+        }
+      ]
+    },
+    {
+      "id": "leak-test-after-internal-revision",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-15"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-15",
+          "score": 0.6756793354809894
+        },
+        {
+          "key": "nv-192-2022.p-16",
+          "score": 0.6586208359295783
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.6494675960503743
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.6372295369639974
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.6369723917937709
+        },
+        {
+          "key": "nv-192-2022.a2-b2-part-2",
+          "score": 0.6058992823960375
+        },
+        {
+          "key": "nv-192-2022.p-18",
+          "score": 0.5941310121907244
+        },
+        {
+          "key": "nv-192-2022.p-13",
+          "score": 0.5927626405792834
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-15": 1
+      },
+      "latency_ms": 237.7607189991977,
+      "usage": [
+        {
+          "reservation_id": "bff7ed4fa42e4edeb0b36b66c8fd6d81",
+          "prompt_tokens": 29,
+          "total_tokens": 29,
+          "cost_usd": "0.00000377",
+          "duration_ms": 208.3631370041985
+        }
+      ]
+    },
+    {
+      "id": "pressure-test-medium",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-16"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-16",
+          "score": 0.6806997522380083
+        },
+        {
+          "key": "nv-192-2022.p-15",
+          "score": 0.6031628167397095
+        },
+        {
+          "key": "nv-192-2022.a2",
+          "score": 0.5746265924354443
+        },
+        {
+          "key": "nv-192-2022.p-11",
+          "score": 0.5736029018534143
+        },
+        {
+          "key": "nv-192-2022.a2-b2-part-2",
+          "score": 0.5682699472714634
+        },
+        {
+          "key": "nv-192-2022.a2-b2",
+          "score": 0.5612256991304123
+        },
+        {
+          "key": "nv-192-2022.p-17",
+          "score": 0.5607930780832325
+        },
+        {
+          "key": "nv-192-2022.a1-b3",
+          "score": 0.5540624800744803
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-16": 1
+      },
+      "latency_ms": 268.8698599959025,
+      "usage": [
+        {
+          "reservation_id": "5481c26b69d74a6b99929474fed96e8e",
+          "prompt_tokens": 33,
+          "total_tokens": 33,
+          "cost_usd": "0.00000429",
+          "duration_ms": 245.14767399523407
+        }
+      ]
+    },
+    {
+      "id": "stoker-training-hours",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-23"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-23",
+          "score": 0.6558385583902469
+        },
+        {
+          "key": "nv-192-2022.p-21",
+          "score": 0.49206214348771665
+        },
+        {
+          "key": "nv-192-2022.p-22",
+          "score": 0.4695230815982707
+        },
+        {
+          "key": "nv-193-2022.a4",
+          "score": 0.4660954169827021
+        },
+        {
+          "key": "nv-192-2022.p-24",
+          "score": 0.44982831235484344
+        },
+        {
+          "key": "nv-193-2022.a4-part-3",
+          "score": 0.4478484201288201
+        },
+        {
+          "key": "nv-192-2022.a3-b4",
+          "score": 0.4436119948387717
+        },
+        {
+          "key": "nv-193-2022.a4-part-2",
+          "score": 0.4421266150561001
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-23": 1
+      },
+      "latency_ms": 285.9457790036686,
+      "usage": [
+        {
+          "reservation_id": "1bef1f6ce2ec422e97804f1d28124724",
+          "prompt_tokens": 42,
+          "total_tokens": 42,
+          "cost_usd": "0.00000546",
+          "duration_ms": 255.7558309927117
+        }
+      ]
+    },
+    {
+      "id": "pressure-vessel-operator",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-192-2022.p-24"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.p-24",
+          "score": 0.5898510028434265
+        },
+        {
+          "key": "nv-192-2022.a3-b2",
+          "score": 0.5475663878111275
+        },
+        {
+          "key": "nv-192-2022.p-6",
+          "score": 0.5180487251085013
+        },
+        {
+          "key": "nv-192-2022.a3-b4",
+          "score": 0.516866536758483
+        },
+        {
+          "key": "nv-192-2022.p-21",
+          "score": 0.5090778656384187
+        },
+        {
+          "key": "nv-192-2022.p-4",
+          "score": 0.5022365830995845
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.500511444533846
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.4989435599776962
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-192-2022.p-24": 1
+      },
+      "latency_ms": 274.15583400579635,
+      "usage": [
+        {
+          "reservation_id": "ffe84269a4064fb98c2b16c7fb877389",
+          "prompt_tokens": 22,
+          "total_tokens": 22,
+          "cost_usd": "0.00000286",
+          "duration_ms": 243.37814500904642
+        }
+      ]
+    },
+    {
+      "id": "forklift-not-reserved",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.p-3"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.p-3",
+          "score": 0.5972117594676243
+        },
+        {
+          "key": "nv-193-2022.a3-b4",
+          "score": 0.5666894735981698
+        },
+        {
+          "key": "nv-193-2022.p-4",
+          "score": 0.5617097096991449
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5392200972044918
+        },
+        {
+          "key": "nv-193-2022.a3-b1",
+          "score": 0.5318452279461033
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.5099142097471844
+        },
+        {
+          "key": "nv-193-2022.p-2",
+          "score": 0.507550204962341
+        },
+        {
+          "key": "nv-193-2022.a2",
+          "score": 0.5066649181120537
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.p-3": 1
+      },
+      "latency_ms": 267.22464298654813,
+      "usage": [
+        {
+          "reservation_id": "48b36a072d4a47d7b20768b4e0897701",
+          "prompt_tokens": 29,
+          "total_tokens": 29,
+          "cost_usd": "0.00000377",
+          "duration_ms": 231.9559199968353
+        }
+      ]
+    },
+    {
+      "id": "crane-extraordinary-test",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.p-8"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.576794416451654
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.5306098778710983
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.47546332916986056
+        },
+        {
+          "key": "nv-192-2022.p-14",
+          "score": 0.4709537194514911
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.4482847093367891
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.4459552845297455
+        },
+        {
+          "key": "nv-193-2022.a3",
+          "score": 0.4453745138891694
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.4445384300824249
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.p-8": 2
+      },
+      "latency_ms": 254.44641499780118,
+      "usage": [
+        {
+          "reservation_id": "528d8c69bdf54cbca2bebbb4c6d2d912",
+          "prompt_tokens": 23,
+          "total_tokens": 23,
+          "cost_usd": "0.00000299",
+          "duration_ms": 230.1196359912865
+        }
+      ]
+    },
+    {
+      "id": "old-tower-crane",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.a2-b2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.6366695216777234
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.5307548819395329
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.5142188851403033
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.511629843953872
+        },
+        {
+          "key": "nv-193-2022.a4-part-3",
+          "score": 0.5001928029369428
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.4914795434237229
+        },
+        {
+          "key": "nv-193-2022.a4",
+          "score": 0.487252342520083
+        },
+        {
+          "key": "nv-193-2022.a4-part-2",
+          "score": 0.47152600457884175
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.a2-b2": 1
+      },
+      "latency_ms": 294.9071569892112,
+      "usage": [
+        {
+          "reservation_id": "07c23b1645734efb90731dc965e3829e",
+          "prompt_tokens": 39,
+          "total_tokens": 39,
+          "cost_usd": "0.00000507",
+          "duration_ms": 263.68587599426974
+        }
+      ]
+    },
+    {
+      "id": "work-platform-checks",
+      "tags": [
+        "cs"
+      ],
+      "expected_section_keys": [
+        "nv-193-2022.a2-b2"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.6118018784146839
+        },
+        {
+          "key": "nv-193-2022.a2-b6",
+          "score": 0.5472068400585636
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.5268334978492901
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.5234538133628439
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5202311926252894
+        },
+        {
+          "key": "nv-193-2022.p-8",
+          "score": 0.5088841530325715
+        },
+        {
+          "key": "nv-193-2022.a3-b1",
+          "score": 0.5065938125782222
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.482736543440921
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-193-2022.a2-b2": 1
+      },
+      "latency_ms": 228.17084100097418,
+      "usage": [
+        {
+          "reservation_id": "2aab9d290ee447228159f5ff9fddb350",
+          "prompt_tokens": 31,
+          "total_tokens": 31,
+          "cost_usd": "0.00000403",
+          "duration_ms": 199.9314620043151
+        }
+      ]
+    },
+    {
+      "id": "emergency-stop-control",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "nv-378-2001.p-3"
+      ],
+      "retrieved": [
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.4676220589151755
+        },
+        {
+          "key": "nv-193-2022.a3",
+          "score": 0.46648823502510467
+        },
+        {
+          "key": "nv-378-2001.p-3",
+          "score": 0.45727011861602007
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-2",
+          "score": 0.45241808557445257
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.4511586759858108
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.4498531860794507
+        },
+        {
+          "key": "nv-193-2022.a3-b1",
+          "score": 0.44726782652748864
+        },
+        {
+          "key": "nv-378-2001.a1",
+          "score": 0.4442777472618297
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-378-2001.p-3": 3
+      },
+      "latency_ms": 245.65336298837792,
+      "usage": [
+        {
+          "reservation_id": "caa2b6eb9bcc41f0b254e46c10fdadbf",
+          "prompt_tokens": 25,
+          "total_tokens": 25,
+          "cost_usd": "0.00000325",
+          "duration_ms": 214.73045999300666
+        }
+      ]
+    },
+    {
+      "id": "conveyor-bearing-greasing",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.maintenance"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.7023596777289441
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.527564508280579
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5030702520029574
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.49286101567253926
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.4855046466949489
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.47732579233858
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3843436222683685
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.3279236430947712
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.maintenance": 1
+      },
+      "latency_ms": 317.1525429934263,
+      "usage": [
+        {
+          "reservation_id": "cc142095e4e04e6da1a1443d67a83fc6",
+          "prompt_tokens": 23,
+          "total_tokens": 23,
+          "cost_usd": "0.00000299",
+          "duration_ms": 278.53546899859793
+        }
+      ]
+    },
+    {
+      "id": "conveyor-inverter-wait",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.lockout"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5471156245054412
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.4319152621431748
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4019115756892493
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.4006475463443016
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.39602614141307646
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.39189364432302937
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.3618120362920197
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.3555132112782545
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.lockout": 1
+      },
+      "latency_ms": 308.48247099493165,
+      "usage": [
+        {
+          "reservation_id": "3787c37f07c3430fa06c2a7972cccf41",
+          "prompt_tokens": 35,
+          "total_tokens": 35,
+          "cost_usd": "0.00000455",
+          "duration_ms": 281.77693899488077
+        }
+      ]
+    },
+    {
+      "id": "conveyor-bolt-torque",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.maintenance"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.46951583875085323
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3946303007013273
+        },
+        {
+          "key": "nv-192-2022.a1-b1",
+          "score": 0.36880082564607725
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.36877603359860467
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.36261077864730773
+        },
+        {
+          "key": "nv-192-2022.p-15",
+          "score": 0.355863751997387
+        },
+        {
+          "key": "nv-192-2022.a1-b3",
+          "score": 0.3543129247791473
+        },
+        {
+          "key": "nv-192-2022.a1-b2",
+          "score": 0.35045164928947836
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.maintenance": 1
+      },
+      "latency_ms": 239.9602329969639,
+      "usage": [
+        {
+          "reservation_id": "41c48b604143451dbbeb9c474358af15",
+          "prompt_tokens": 25,
+          "total_tokens": 25,
+          "cost_usd": "0.00000325",
+          "duration_ms": 210.6133080087602
+        }
+      ]
+    },
+    {
+      "id": "conveyor-fault-f02",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.fault-codes"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.580716690171185
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4056339650527524
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.3526583961574987
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.34367076666536256
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.3434501761977805
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.34064751475317345
+        },
+        {
+          "key": "nv-192-2022.a1-b2-part-3",
+          "score": 0.33652681531568757
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3346992928277631
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.fault-codes": 1
+      },
+      "latency_ms": 243.531582003925,
+      "usage": [
+        {
+          "reservation_id": "c57478a5c17244e0803d55a657f0d929",
+          "prompt_tokens": 36,
+          "total_tokens": 36,
+          "cost_usd": "0.00000468",
+          "duration_ms": 215.22286300023552
+        }
+      ]
+    },
+    {
+      "id": "conveyor-electrical-revision-production",
+      "tags": [
+        "cs",
+        "condition",
+        "multi-section"
+      ],
+      "expected_section_keys": [
+        "nv-190-2022.a4",
+        "rad-pasoveho-dopravniku.inspections"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.6595707395256126
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.6160335006848356
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5574113691894037
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5425721898580781
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.5342248319659346
+        },
+        {
+          "key": "nv-190-2022.a4",
+          "score": 0.5310316745459462
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.515766725101172
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.4814511786540342
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "nv-190-2022.a4": 6,
+        "rad-pasoveho-dopravniku.inspections": 1
+      },
+      "latency_ms": 258.8332640007138,
+      "usage": [
+        {
+          "reservation_id": "c3978de7aa504c4e87c31770e40ab3a1",
+          "prompt_tokens": 43,
+          "total_tokens": 43,
+          "cost_usd": "0.00000559",
+          "duration_ms": 230.9095270029502
+        }
+      ]
+    },
+    {
+      "id": "conveyor-lockout-steps",
+      "tags": [
+        "cs",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.lockout"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.6615032878416874
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.5747806586909957
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5707111237066937
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.5259446348315432
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.5210421611339675
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.5207686457345815
+        },
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.47054033226448755
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.46383014057926186
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.lockout": 1
+      },
+      "latency_ms": 267.0208109921077,
+      "usage": [
+        {
+          "reservation_id": "9a6c35f0d4d64d1092a034686170a6c6",
+          "prompt_tokens": 19,
+          "total_tokens": 19,
+          "cost_usd": "0.00000247",
+          "duration_ms": 243.2952390081482
+        }
+      ]
+    },
+    {
+      "id": "conveyor-operator-training",
+      "tags": [
+        "en",
+        "condition"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.operators"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5652725487825908
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.4536455925109292
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.44918660803413135
+        },
+        {
+          "key": "nv-193-2022.p-12",
+          "score": 0.4296550348550553
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.42536616712000336
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.41495270055045247
+        },
+        {
+          "key": "nv-192-2022.p-24",
+          "score": 0.3865128712224155
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.37816246505064455
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.operators": 1
+      },
+      "latency_ms": 248.00794800103176,
+      "usage": [
+        {
+          "reservation_id": "c0ec5d39ac724fb4bc4e824022dc4758",
+          "prompt_tokens": 15,
+          "total_tokens": 15,
+          "cost_usd": "0.00000195",
+          "duration_ms": 224.8696979950182
+        }
+      ]
+    },
+    {
+      "id": "conveyor-spare-belt-price",
+      "tags": [
+        "cs",
+        "unanswerable"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.594913645924554
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.5025734575010431
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4890138931874195
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.4633668404529938
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.44494438884788856
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.44022691040673256
+        },
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.3586232151988583
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.32701112044653013
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 243.00922200200148,
+      "usage": [
+        {
+          "reservation_id": "0bde67df30414574aed39706aa1ddfd2",
+          "prompt_tokens": 23,
+          "total_tokens": 23,
+          "cost_usd": "0.00000299",
+          "duration_ms": 218.6352240096312
+        }
+      ]
+    },
+    {
+      "id": "conveyor-stopped-generic",
+      "tags": [
+        "cs",
+        "condition",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.lockout"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.47896899123816206
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.4250226037489993
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.4208013102163324
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.39260109319684866
+        },
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.3713651308275993
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.363171810638245
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.361459574168961
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.33970047053424907
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.lockout": 1
+      },
+      "latency_ms": 258.0481910117669,
+      "usage": [
+        {
+          "reservation_id": "a658451c4c184f77963ed0502e173fec",
+          "prompt_tokens": 18,
+          "total_tokens": 18,
+          "cost_usd": "0.00000234",
+          "duration_ms": 222.36981899186503
+        }
+      ]
+    },
+    {
+      "id": "conveyor-stopped-paraphrase",
+      "tags": [
+        "cs",
+        "condition",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.lockout"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4481762518202872
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.43549275310514507
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.4223768048867083
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.40090442111936914
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.37294347890094715
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3567008980673132
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.3504539326210696
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.3464755615445804
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.lockout": 1
+      },
+      "latency_ms": 228.18131899111904,
+      "usage": [
+        {
+          "reservation_id": "98d292edbb8a4200ab6c08a90af09761",
+          "prompt_tokens": 18,
+          "total_tokens": 18,
+          "cost_usd": "0.00000234",
+          "duration_ms": 198.28318900545128
+        }
+      ]
+    },
+    {
+      "id": "conveyor-fault-codes-overview",
+      "tags": [
+        "cs",
+        "confusable"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.fault-codes"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.6237793429128766
+        },
+        {
+          "key": "nv-193-2022.p-7",
+          "score": 0.4400785934947491
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.393141355745504
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.38973258189565246
+        },
+        {
+          "key": "nv-193-2022.a1",
+          "score": 0.3797976627230782
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.379153979251585
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.37278555375006284
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.37268853369737964
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.fault-codes": 1
+      },
+      "latency_ms": 229.92892800539266,
+      "usage": [
+        {
+          "reservation_id": "4f4bb62755a04aa692f15683a89e8e39",
+          "prompt_tokens": 39,
+          "total_tokens": 39,
+          "cost_usd": "0.00000507",
+          "duration_ms": 202.07972099888138
+        }
+      ]
+    },
+    {
+      "id": "operator-cleaning-safety",
+      "tags": [
+        "cs",
+        "condition",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.lockout"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.49833505842380876
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.4674795581823564
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.4546622387265157
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.4400426024113521
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.43709802513700746
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.4288533152040578
+        },
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.41845808656347977
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4161908276950718
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.lockout": 1
+      },
+      "latency_ms": 241.8762969900854,
+      "usage": [
+        {
+          "reservation_id": "d44b9eafb6cf413495be344ae2bd32bf",
+          "prompt_tokens": 19,
+          "total_tokens": 19,
+          "cost_usd": "0.00000247",
+          "duration_ms": 207.188533997396
+        }
+      ]
+    },
+    {
+      "id": "operator-fault-f01",
+      "tags": [
+        "cs",
+        "condition",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.fault-codes"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.5012109849656723
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.3016166625269131
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.30114172913443993
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.30005848273836705
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.29732023707324384
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.28955111707880066
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.2835856812572024
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.27463686923008
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.fault-codes": 1
+      },
+      "latency_ms": 315.88578700029757,
+      "usage": [
+        {
+          "reservation_id": "38c0b6e5a5a04da4ad80264d832dc027",
+          "prompt_tokens": 13,
+          "total_tokens": 13,
+          "cost_usd": "0.00000169",
+          "duration_ms": 288.20454599917866
+        }
+      ]
+    },
+    {
+      "id": "operator-belt-drifting",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.fault-codes"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.36846246654446446
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.36497675215297676
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.35895795033389194
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.3112611662921066
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.3092200919310598
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.28310624931252554
+        },
+        {
+          "key": "nv-378-2001.a2",
+          "score": 0.2827669001432194
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.27999107996587913
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.fault-codes": 2
+      },
+      "latency_ms": 256.24423699628096,
+      "usage": [
+        {
+          "reservation_id": "f30664fb32e141cb9a700349a56f0a07",
+          "prompt_tokens": 20,
+          "total_tokens": 20,
+          "cost_usd": "0.00000260",
+          "duration_ms": 230.76465600752272
+        }
+      ]
+    },
+    {
+      "id": "operator-before-shift",
+      "tags": [
+        "cs",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.operators"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.4294244389066708
+        },
+        {
+          "key": "nv-378-2001.a3",
+          "score": 0.4023063903677805
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.3972343621177729
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3907660833555318
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.37740215266620675
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.37613675665868596
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.37140468727829284
+        },
+        {
+          "key": "nv-192-2022.a2",
+          "score": 0.36488963153543885
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.operators": 6
+      },
+      "latency_ms": 235.47149400110357,
+      "usage": [
+        {
+          "reservation_id": "4d4ac4c3829c456db7e52e01c12fa8ee",
+          "prompt_tokens": 21,
+          "total_tokens": 21,
+          "cost_usd": "0.00000273",
+          "duration_ms": 213.1657349964371
+        }
+      ]
+    },
+    {
+      "id": "operator-electrical-repair",
+      "tags": [
+        "cs",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.operators"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5527142638570355
+        },
+        {
+          "key": "nv-190-2022.p-5",
+          "score": 0.5305218854758138
+        },
+        {
+          "key": "nv-190-2022.p-9",
+          "score": 0.5133377979389726
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.4936937471465733
+        },
+        {
+          "key": "nv-193-2022.p-11",
+          "score": 0.48787531236842113
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4851249640463047
+        },
+        {
+          "key": "nv-190-2022.p-7",
+          "score": 0.4626040623389988
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.46236147776118736
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.operators": 1
+      },
+      "latency_ms": 291.2701650056988,
+      "usage": [
+        {
+          "reservation_id": "6bed13473f4b48829627ab54358fa95f",
+          "prompt_tokens": 18,
+          "total_tokens": 18,
+          "cost_usd": "0.00000234",
+          "duration_ms": 265.638778990251
+        }
+      ]
+    },
+    {
+      "id": "operator-maintenance-schedule",
+      "tags": [
+        "cs",
+        "confusable",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.maintenance"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.6379267385020191
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.6042670953772116
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5730485914667105
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5513335399050084
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.5143508946939719
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.4620673286280792
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.42641420879727693
+        },
+        {
+          "key": "nv-378-2001.p-4",
+          "score": 0.3735766253542328
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.maintenance": 1
+      },
+      "latency_ms": 269.33112400001846,
+      "usage": [
+        {
+          "reservation_id": "cd6cc4f369214394b7635c2902c50f74",
+          "prompt_tokens": 18,
+          "total_tokens": 18,
+          "cost_usd": "0.00000234",
+          "duration_ms": 233.57053799554706
+        }
+      ]
+    },
+    {
+      "id": "operator-unknown-fault",
+      "tags": [
+        "cs",
+        "condition",
+        "confusable",
+        "vague"
+      ],
+      "expected_section_keys": [
+        "rad-pasoveho-dopravniku.fault-codes"
+      ],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.34741497440864166
+        },
+        {
+          "key": "nv-190-2022.a3",
+          "score": 0.31182686457260267
+        },
+        {
+          "key": "nv-190-2022.a5",
+          "score": 0.3049680873306898
+        },
+        {
+          "key": "nv-190-2022.a1",
+          "score": 0.28106495365693895
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.2776376776879423
+        },
+        {
+          "key": "nv-193-2022.a2",
+          "score": 0.2745680194618616
+        },
+        {
+          "key": "nv-190-2022.p-2",
+          "score": 0.2725901802721812
+        },
+        {
+          "key": "nv-193-2022.a3",
+          "score": 0.27229378228706297
+        }
+      ],
+      "hit": true,
+      "ranks": {
+        "rad-pasoveho-dopravniku.fault-codes": 1
+      },
+      "latency_ms": 259.3901979998918,
+      "usage": [
+        {
+          "reservation_id": "f771d00a604448ccbf20fb0ef0afcf8e",
+          "prompt_tokens": 16,
+          "total_tokens": 16,
+          "cost_usd": "0.00000208",
+          "duration_ms": 224.5824789861217
+        }
+      ]
+    },
+    {
+      "id": "operator-replace-belt",
+      "tags": [
+        "cs",
+        "unanswerable",
+        "vague"
+      ],
+      "expected_section_keys": [],
+      "retrieved": [
+        {
+          "key": "rad-pasoveho-dopravniku.maintenance",
+          "score": 0.6108330628085052
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.lockout",
+          "score": 0.5689148393620819
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.operators",
+          "score": 0.5222775529052917
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.scope",
+          "score": 0.512557482517217
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.inspections",
+          "score": 0.4802404983823264
+        },
+        {
+          "key": "rad-pasoveho-dopravniku.fault-codes",
+          "score": 0.4783761086450141
+        },
+        {
+          "key": "nv-193-2022.a2-b2",
+          "score": 0.3479393905529108
+        },
+        {
+          "key": "nv-378-2001.a4",
+          "score": 0.33618396547326745
+        }
+      ],
+      "hit": null,
+      "ranks": {},
+      "latency_ms": 226.36760699970182,
+      "usage": [
+        {
+          "reservation_id": "e8e9b28eb05c4c1b82f8edce5c5231d1",
+          "prompt_tokens": 15,
+          "total_tokens": 15,
+          "cost_usd": "0.00000195",
+          "duration_ms": 199.09610399918165
+        }
+      ]
+    }
+  ],
+  "metrics": {
+    "answerable_cases": 55,
+    "unanswerable_cases": 4,
+    "hit_cases": 54,
+    "expected_sections": 58,
+    "retrieved_expected_sections": 57,
+    "recall_at_k": 0.9818181818181818,
+    "section_recall_at_k": 0.9827586206896551,
+    "recall_at_5": 0.9454545454545454
+  },
+  "usage": {
+    "group_id": "retrieval-66ab3c60f60444dd889acb5f0870553f",
+    "prompt_tokens": 1734,
+    "total_tokens": 1734,
+    "cost_usd": "0.000252",
+    "cap_usd": "0.010000",
+    "remaining_usd": "0.009748",
+    "global_remaining_usd": "2.240905"
+  },
+  "gate": "PASS",
+  "gate_threshold": 0.9,
+  "error": null
+}

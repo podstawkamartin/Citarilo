@@ -81,75 +81,72 @@ otázka (EN/CS) → validace → rezervace rozpočtu
 - Podrobný návrh: [docs/architecture.md](docs/architecture.md), metodika
   evaluace: [docs/evaluation.md](docs/evaluation.md) (anglicky).
 
-## Výsledky (18. 11. 2026)
+## Výsledky (19. 11. 2026)
 
-Živé běhy proti OpenAI API s promptem v5 a 8 vyhledanými sekcemi; konfigurace,
-commit a hash korpusu jsou uložené v každém reportu
-([evals/results/2026-11-18](evals/results/2026-11-18)). Brány přijetí byly
-stanovené před laděním.
+Živé běhy proti OpenAI API s promptem v10 a 8 vyhledanými sekcemi na čistém
+commitu; konfigurace, commit a hash korpusu jsou uložené v každém reportu
+([evals/results/2026-11-19](evals/results/2026-11-19)). Brány přijetí byly
+stanovené před laděním. Každá sada má vývojovou část, na které se ladilo,
+a odloženou část spuštěnou jednou na konci.
 
-| Měřítko | Zákaznická podpora, vývoj (21) | Předpisy, vývoj (40) | Předpisy, odložené (10) | Řád dopravníku, vývoj + odložené (8 + 2) | Brána |
+| Měřítko | Zákaznická podpora, vývoj (29) | Zákaznická podpora, odložené (8) | Předpisy, vývoj (59) | Předpisy, odložené (15) | Brána |
 |---|---|---|---|---|---|
-| Recall@5 vyhledávání | 1,00 (17/17) | 0,96 (43/45), všech 48 vývojových otázek | – | (zahrnuto) | ≥ 0,9 |
-| Správně zodpovězené zodpověditelné otázky | 94,1 % (16/17) | 86,8 % (33/38) | 77,8 % (7/9) | 100 % (9/9) | ≥ 80 % |
-| Zodpovězené nezodpověditelné otázky | 0 ze 4 | 0 ze 2 | 0 z 1 | 0 z 1 | 0 |
-| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | – | – | 0 |
-| Latence p50 / max | 4,8 s / 8,7 s | 4,3 s / 8,3 s | 4,3 s / 5,4 s | 3,8 s / 5,3 s | – |
-| Cena za otázku | ≈ $0.0005 | ≈ $0.002 | ≈ $0.002 | ≈ $0.001 | – |
+| Recall@5 vyhledávání | 0,96 (23/24) | 1,00 (6/6) | 0,95 (52/55) | 0,85 (11/13) | ≥ 0,9 |
+| Správně zodpovězené zodpověditelné otázky | 95,8 % (23/24) | 100 % (6/6) | 83,6 % (46/55) | 84,6 % (11/13) | ≥ 80 % |
+| z toho obecné otázky | 7/7 | 2/2 | 7/9 | 2/2 | – |
+| Zodpovězené nezodpověditelné otázky | 0 z 5 | 0 ze 2 | 0 ze 4 | 0 ze 2 | 0 |
+| Úspěšné prompt injection | 0 ze 3 | 0 z 1 | 0 z 1 | – | 0 |
+| Latence p50 / max | 4,0 s / 8,1 s | 3,5 s / 4,3 s | 4,1 s / 10,5 s | 3,4 s / 5,1 s | – |
+| Cena za otázku | ≈ $0.0005 | ≈ $0.0005 | ≈ $0.0018 | ≈ $0.0017 | – |
+
+**Obecné otázky.** Každá sada obsahuje krátké, volně formulované otázky, jak je
+skutečně kladou zákazníci a obsluha, označené `vague`: „Chci něco vrátit, jak
+na to?“, „Kolik stojí doprava?“, „Pás stojí a nejede. Jak mám postupovat?“,
+„Svítí tam F01, co s tím?“, „Hlásí to chybu E12, co s tím?“. Na některé
+dokumenty odpověď nedávají („Jak vyměním pás na dopravníku?“) a systém je musí
+odmítnout.
 
 **Jak se hodnotilo.** Stav odpovědi, recall a sondy ověřovače jsou
 deterministické. Věcnou správnost (povinná fakta, zakázaná tvrzení, podpora
 každé citace) hodnotil offline nezávislý LLM hodnotitel z jiné rodiny modelů
-než model aplikace (`muse-wonder-1.0`). Jde o hodnocení modelem, ne o lidskou
+než model aplikace (Claude Sonnet). Jde o hodnocení modelem, ne o lidskou
 anotaci.
 
-**Co selhává.** Všech pět chyb na vývojové sadě předpisů a jedna ze dvou chyb
-na odložené sadě jsou zbytečná odmítnutí: ověřovač zamítne tvrzení, které
-citace podporuje, nebo správný závěr typu „800 kg nepřesahuje hranici
-1 000 kg“. Druhá chyba na odložené sadě odpovídá na otázku o přezkušování
-obsluhy tlakových nádob lhůtami revizí. U zákaznické podpory jedno tvrzení
-citovalo jen část své opory. Žádný běh neodpověděl na nezodpověditelnou otázku
-ani nenásledoval podstrčenou instrukci.
+**Co selhává.** Každá chyba je odmítnutí nebo neúplná odpověď; žádný běh
+neodpověděl na nezodpověditelnou otázku, nenásledoval podstrčenou instrukci ani
+neponechal nepodložené tvrzení. Na vývojové sadě předpisů je osm z devíti chyb
+zbytečné odmítnutí: tři odpovědi zamítl ověřovač a jednu deterministická
+kontrola, ačkoli hodnotitel všechna tvrzení uznal za podložená; dvakrát model
+nenašel podklady; dvakrát tvrzení přesáhlo své citace (krok zajištění, který
+necitovalo, „oprava“ tam, kde řád říká údržba) a ověřovač je správně zamítl.
+Devátá odpověď uvádí rozsah III. třídy parního kotle, ale neřekne, že kotel
+6 t/h patří do IV. třídy. Obě chyby na odložené sadě navazují na dva výpadky
+vyhledávání: oddíl o přezkušování obsluhy tlakových nádob a část pravidel
+revizí velkých kotlů se nedostaly mezi prvních pět. U zákaznické podpory jedna
+odpověď uvedla cenu zpětného štítku, ale ne to, že se odečte z vracené částky.
 
-**Ladění a odložené případy.** Sada předpisů se ladila na vývojových
-případech: převodník nově přidává k položkám výčtu jejich úvod, čímž odstranil
-nejčastější dřívější chybu (položka citovaná bez věty, která jí dává smysl).
-Varianta promptu s užšími odpověďmi nepomohla a byla vrácena. Odložené případy
-předpisů běžely jednou před touto změnou převodníku a jednou po ní; tabulka
-ukazuje druhý běh. Odložené případy zákaznické podpory (100 %, 4/4) naposledy
-běžely s promptem v4 7. 11. a znovu spuštěny nebyly, takže pozdější ladění
-neovlivnilo.
+**Ladění.** Obecné otázky se ladily na vývojové části, každá ve třech během.
+S promptem v9 systém otázku „Pás stojí a nejede“ odmítl třikrát ze tří
+a „Hlásí to chybu E12“ také třikrát ze tří; F01 selhal dvakrát ze tří, protože
+odpověď si vymyslela pořadí kroků. Prompt v10 zakazuje tvrzení, že něco
+v dokumentech chybí nebo není vyžadováno, pravidla pro neuvedené případy podává
+jako pravidla, bezpečnostní kroky uvádí po jednom na tvrzení a obecně popsaný
+problém bere jako dotaz na situace, které dokumenty rozlišují. Řád dopravníku
+nově u F01 výslovně uvádí pořadí kroků. Poté prošly všechny tři otázky a žádná
+nezodpověditelná kontrolní otázka nebyla zodpovězena. Finální běh přesto
+odmítl tři otázky obsluhy, které při ladění procházely, takže jednotlivé
+odpovědi na ně se mezi běhy liší.
 
-**Řád dopravníku.** Fiktivní řád pásového dopravníku přibyl do sady předpisů
-až po výše uvedených bězích. Jeho 10 otázek, z nichž jedna potřebuje řád
-i NV 190/2022, běželo samostatně přes `eval --case` a vyhledávání se znovu
-změřilo na všech 48 vývojových otázkách; jediný nový výpadek z prvních pěti je
-právě tato kombinovaná otázka, jejíž sekce nařízení je šestá a do odpovědi se
-dostane. Jednu větu řádu jsme po upozornění hodnotitele na nejednoznačnost
-přeformulovali a 10 otázek spustili znovu; tabulka ukazuje tento běh.
-
-**Ladění promptu po tabulkách (v6–v9).** Při ručním testování končily
-odmítnutím odpovědi na vícedílné otázky a otázky k poruchovým hlášením.
-Aktuální prompt (v9) žádá jeden krok, hlášení nebo fakt na tvrzení (nejvýše
-dvanáct tvrzení), postup určený pro konkrétní situaci podává jako podmínku
-(„Pokud se objeví hlášení F02, …“) a doloženou bezpečnostní podmínku uvádí jako
-samostatné tvrzení; řád dopravníku opakuje podmínku zajištění v každém kroku
-poruchového hlášení. Vágní otázku jako „Dopravník se zastavil, co mám dělat?“
-systém zatím většinou odmítne pro nedostatek podkladů: řád dává postupy jen
-podle hlášení, a širší prompt, který na ni odpovídal, zodpověděl i dvě
-nezodpověditelné otázky zákaznické podpory, takže se nepoužil. Tabulky výše
-jsou měřené s v5.
-
-**Sondy ověřovače.** Páry podloženého tvrzení a téměř správného tvrzení:
-u zákaznické podpory (24 sond) 0 chybných přijetí a 0 chybných zamítnutí;
-u předpisů (30 sond) 1 chybné přijetí a 1 chybné zamítnutí. Chybné přijetí
+**Sondy ověřovače.** Změřeno 18. 11. se stejným promptem ověřovače
+([evals/results/2026-11-18](evals/results/2026-11-18)). Páry podloženého
+tvrzení a téměř správného tvrzení: u zákaznické podpory (24 sond) 0 chybných
+přijetí a 0 chybných zamítnutí; u předpisů (30 sond a 4 samostatně spuštěné
+sondy k řádu dopravníku) 1 chybné přijetí a 1 chybné zamítnutí. Chybné přijetí
 označilo kotel IV. třídy za kotel I. třídy, ačkoli vlastní zdůvodnění uvádělo
-IV. třídu. Dřívější běhy sond této sady během ladění neměly žádné chybné
-přijetí a vždy jedno chybné zamítnutí. Dva později přidané páry k řádu
-dopravníku neměly ani jedno. Sondy měří samotný ověřovač; v celém pipeline
-nově deterministická kontrola vyžaduje, aby římské číslo třídy v tvrzení
-(„class I“, „IV. třídy“) bylo i v citacích, takže tvrzení jako toto chybné
-přijetí skončí odmítnutím.
+IV. třídu. Sondy měří samotný ověřovač; v celém pipeline deterministická
+kontrola navíc vyžaduje, aby římské číslo třídy v tvrzení („class I“,
+„IV. třídy“) bylo i v citacích, takže tvrzení jako toto chybné přijetí skončí
+odmítnutím.
 
 **Vektorové úložiště.** Offline benchmark přes produkční cesty kódu
 ([vector-store-bench.json](evals/results/2026-11-10/vector-store-bench.json))
@@ -158,12 +155,13 @@ sekcí. Qdrant v lokálním režimu porovnává dotaz s každým bodem, takže p
 5 000 sekcích trvá start 3,4 s a medián dotazu 34 ms; větší korpusy vyžadují
 Qdrant server.
 
-Vzorky jsou malé (64 zodpověditelných případů v obou sadách), takže čísla
+Vzorky jsou malé (98 zodpověditelných případů v obou sadách), takže čísla
 ukazují, že systém funguje a selhává bezpečně, ne statisticky přesnou
 chybovost. Latenci tvoří tři po sobě jdoucí volání poskytovatele (embedding,
-generování, ověření). Dřívější běhy s promptem v4 a 5 vyhledanými sekcemi jsou
-v [evals/results/2026-11-07](evals/results/2026-11-07) a
-[evals/results/2026-11-10](evals/results/2026-11-10).
+generování, ověření). Dřívější běhy jsou v
+[evals/results/2026-11-07](evals/results/2026-11-07),
+[evals/results/2026-11-10](evals/results/2026-11-10) a
+[evals/results/2026-11-18](evals/results/2026-11-18).
 
 ## Spuštění
 

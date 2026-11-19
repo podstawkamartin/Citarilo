@@ -13,8 +13,11 @@ uv run citarilo eval --probes --max-usd 0.05
 
 `--case ID` (repeatable) runs only those cases after the split filter; a probe id or pair id selects probes (a pair selects both), an unknown id exits 2, and a filtered report lists `case_ids` and adds `-cases` before `.json`.
 
-Answers default to the 21 `dev` cases. `--split heldout` explicitly selects the
-five reserved cases and prints a warning; use it once at the end, never for tuning.
+Answers default to the `dev` cases (29 for customer support, 59 for regulations).
+`--split heldout` explicitly selects the reserved cases (8 and 15) and prints a
+warning; use it once at the end, never for tuning. Cases tagged `vague` are short,
+loosely worded questions as users actually ask them; run them several times while
+tuning, because a single answer to them varies between runs.
 Dry runs do not read `.env`, create clients, load the index, open the ledger or
 send requests. Their worst-case cost uses the pipeline's reservation calculation,
 including UTF-8/schema/framing bounds and output limits. The answer bound uses
