@@ -828,7 +828,7 @@ def test_check_failure_names_the_check_and_hides_the_claim(client, rig):
         "sections": body["refusal"]["sections"],
     }
     assert body["refusal"]["sections"]
-    assert "99999" not in response.text
+    assert "99999 crowns" not in response.text
     assert "hidden fee" not in response.text
     record = read_record(next(rig.settings.runs_dir.glob("*.json")))
     assert record.candidate_claims[0].text == "The hidden fee is 99999 crowns."

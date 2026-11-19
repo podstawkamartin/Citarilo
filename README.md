@@ -17,10 +17,10 @@ citations and a second model call verifies that the cited sentences really
 support the claim. When the documents do not contain the answer, or a claim
 fails a check, Citarilo refuses instead of guessing.
 
-![A question is typed and sent; the verified answer appears with its claims linked to the cited sentences, and the selected sentence is highlighted in the source document.](docs/assets/citarilo-answer.gif)
+https://github.com/user-attachments/assets/f4e7aa88-a632-49b7-a7df-56d9a095ffe9
 
-It ships with two separate document sets, each standing for a different
-organisation and each with its own evaluation cases:
+It ships with two separate document sets of a company with an online shop
+and a packing line, each with its own evaluation cases:
 
 - **Customer support** (`data/trailsupply`): six sample documents of a fictional
   outdoor shop, TrailSupply (returns, warranty claims, shipping, payments,
